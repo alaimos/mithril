@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.alaimos.MITHrIL</groupId>
+        <artifactId>plugins</artifactId>
+        <version>3.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>FastCPUMath</artifactId>
+    <packaging>jar</packaging>
+    <name>Fast CPU Math Provider</name>
+
+    <properties>
+        <maven.compiler.source>19</maven.compiler.source>
+        <maven.compiler.target>19</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <plugin.id>fast-cpu-math</plugin.id>
+        <plugin.class>com.alaimos.MITHrIL.FastCPUMath.FastCPUMathPlugin</plugin.class>
+        <plugin.version>0.0.1</plugin.version>
+        <plugin.provider>alaimos</plugin.provider>
+        <plugin.dependencies />
+    </properties>
+
+</project>
