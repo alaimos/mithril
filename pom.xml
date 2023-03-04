@@ -36,6 +36,9 @@
         <deploy.disabled>true</deploy.disabled>
         <source.disabled>true</source.disabled>
         <pf4j.version>3.9.0</pf4j.version>
+        <slf4j.version>1.7.30</slf4j.version>
+        <log4j.version>2.20.0</log4j.version>
+        <org.jetbrains.annotations.version>24.0.1</org.jetbrains.annotations.version>
     </properties>
 
     <repositories>

@@ -21,7 +21,20 @@
         <plugin.class>com.alaimos.MITHrIL.FastCPUMath.FastCPUMathPlugin</plugin.class>
         <plugin.version>0.0.1</plugin.version>
         <plugin.provider>alaimos</plugin.provider>
-        <plugin.dependencies />
+        <plugin.dependencies/>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>pytorch-platform</artifactId>
+            <version>1.13.1-1.5.9-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>mkl-platform-redist</artifactId>
+            <version>2022.2-1.5.9-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 
 </project>
