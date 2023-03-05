@@ -39,6 +39,9 @@
         <slf4j.version>1.7.30</slf4j.version>
         <log4j.version>2.20.0</log4j.version>
         <org.jetbrains.annotations.version>24.0.1</org.jetbrains.annotations.version>
+        <commons.lang3.version>3.12.0</commons.lang3.version>
+        <junit-jupiter.version>5.9.2</junit-jupiter.version>
+        <args4j.version>2.33</args4j.version>
     </properties>
 
     <repositories>
