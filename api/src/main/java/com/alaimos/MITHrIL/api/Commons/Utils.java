@@ -57,7 +57,8 @@ public final class Utils {
      * @return the file object
      */
     public static @NotNull File getAppDir() {
-        File d = new File(System.getProperty("user.home"), ".mithril");
+        var homeDir = System.getProperty("com.alaimos.MITHrIL.home", System.getProperty("user.home"));
+        File d = new File(homeDir, ".mithril");
         if (!d.exists()) {
             if (!d.mkdir()) {
                 throw new RuntimeException("Unable to create mithril directory");

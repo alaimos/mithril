@@ -19,6 +19,7 @@ public class Main {
             var pluginManager = PluginManager.getInstance();
             pluginManager.loadPlugins();
             pluginManager.startPlugins();
+            Utils.getAppDir();
             Runtime.getRuntime().addShutdownHook(new Thread(pluginManager::stopPlugins));
         } catch (Throwable e) {
             log.error(e.getMessage(), e);
