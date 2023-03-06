@@ -1,0 +1,9 @@
+com.alaimos.MITHrIL.api.Math.PValue.Combiners.Stouffer
+com.alaimos.MITHrIL.api.Math.PValue.Combiners.Fisher
+com.alaimos.MITHrIL.api.Math.PValue.Combiners.Logit
+com.alaimos.MITHrIL.api.Math.PValue.Combiners.Mean
+com.alaimos.MITHrIL.api.Math.PValue.Combiners.ProductOfP
+com.alaimos.MITHrIL.api.Math.PValue.Combiners.SumOfP
+com.alaimos.MITHrIL.api.Math.PValue.Combiners.VoteCounting
+com.alaimos.MITHrIL.api.Math.PValue.Combiners.Wilkinson
+com.alaimos.MITHrIL.api.Math.PValue.Combiners.EmpiricalBrowns.EmpiricalBrownsMethod

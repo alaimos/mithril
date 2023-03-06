@@ -1,6 +1,6 @@
-package com.alaimos.MITHrIL.api.Math.PValue.EmpiricalBrowns;
+package com.alaimos.MITHrIL.api.Math.PValue.Combiners.EmpiricalBrowns;
 
-import com.alaimos.MITHrIL.api.Math.PValue.Interfaces.Combiner;
+import com.alaimos.MITHrIL.api.Math.PValue.Combiners.CombinerInterface;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.distribution.ChiSquaredDistribution;
 import org.jetbrains.annotations.NotNull;
@@ -11,7 +11,7 @@ import java.util.Arrays;
 /**
  * Empirical Brown's method
  */
-public class EmpiricalBrownsMethod implements Combiner {
+public class EmpiricalBrownsMethod implements CombinerInterface {
 
     private static DataMatrix defaultDataMatrix;
 
@@ -49,6 +49,11 @@ public class EmpiricalBrownsMethod implements Combiner {
             keepPValues[i] = pValues[keep.get(i)];
         }
         return Pair.of(keepFilter, keepPValues);
+    }
+
+    @Override
+    public String getName() {
+        return "empirical.browns";
     }
 
     /**

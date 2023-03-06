@@ -1,0 +1,6 @@
+com.alaimos.MITHrIL.api.Math.PValue.Adjusters.None
+com.alaimos.MITHrIL.api.Math.PValue.Adjusters.Bonferroni
+com.alaimos.MITHrIL.api.Math.PValue.Adjusters.Hochberg
+com.alaimos.MITHrIL.api.Math.PValue.Adjusters.Holm
+com.alaimos.MITHrIL.api.Math.PValue.Adjusters.BenjaminiYekutieli
+com.alaimos.MITHrIL.api.Math.PValue.Adjusters.BenjaminiHochberg

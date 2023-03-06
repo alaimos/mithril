@@ -1,4 +1,4 @@
-package com.alaimos.MITHrIL.api.Math.PValue.EmpiricalBrowns;
+package com.alaimos.MITHrIL.api.Math.PValue.Combiners.EmpiricalBrowns;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.math3.exception.OutOfRangeException;

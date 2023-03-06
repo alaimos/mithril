@@ -1,6 +1,6 @@
-package com.alaimos.MITHrIL.api.Math.PValue.EmpiricalBrowns;
+package com.alaimos.MITHrIL.api.Math.PValue.Combiners.EmpiricalBrowns;
 
-import com.alaimos.MITHrIL.api.Math.PValue.Combiners;
+import com.alaimos.MITHrIL.api.Math.PValue.CombinersOld;
 import org.apache.commons.math3.random.EmpiricalDistribution;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.Variance;
@@ -66,7 +66,7 @@ public class EmpiricalDistributionTransformation implements Function<double[], d
      */
     @Override
     public double[] apply(double[] data) {
-        if (Combiners.allEquals(data, 0.0)) return data.clone();
+        if (CombinersOld.allEquals(data, 0.0)) return data.clone();
         data = standardize(data);
         var distribution = ecdf(data);
         for (var i = 0; i < data.length; i++) {
