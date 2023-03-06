@@ -6,18 +6,20 @@ import java.io.OutputStream;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * @author Salvatore Alaimo, Ph.D.
- * @version 2.0.0.0
- * @since 06/01/2016
+ * Abstract class for data writers that compress data
  */
 public abstract class AbstractCompressedDataWriter<T> extends AbstractDataWriter<T> implements DataWriterInterface<T> {
 
-    protected OutputStream getOutputStream(boolean append) {
-        try {
-            return new GZIPOutputStream(new FileOutputStream(file));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    /**
+     * Get an output stream for the file
+     *
+     * @param append if true, the file will be appended
+     *               if false, the file will be overwritten
+     * @return an output stream
+     * @throws IOException if an error occurs
+     */
+    protected OutputStream getOutputStream(boolean append) throws IOException {
+        return new GZIPOutputStream(new FileOutputStream(file));
     }
 
 }

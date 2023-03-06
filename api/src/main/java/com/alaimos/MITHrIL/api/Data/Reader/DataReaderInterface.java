@@ -1,9 +1,12 @@
 package com.alaimos.MITHrIL.api.Data.Reader;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Common interface for classes that read data from a file
+ *
+ * @param <T> the type of data to read
  */
 public interface DataReaderInterface<T> {
 
@@ -34,8 +37,9 @@ public interface DataReaderInterface<T> {
      * Read data
      *
      * @return the result
+     * @throws IOException if something goes wrong
      */
-    T read();
+    T read() throws IOException;
 
 
     /**
@@ -43,8 +47,9 @@ public interface DataReaderInterface<T> {
      *
      * @param f the filename
      * @return the result
+     * @throws IOException if something goes wrong
      */
-    default T read(File f) {
+    default T read(File f) throws IOException {
         return setFile(f).read();
     }
 
@@ -53,8 +58,9 @@ public interface DataReaderInterface<T> {
      *
      * @param f the filename
      * @return the result
+     * @throws IOException if something goes wrong
      */
-    default T read(String f) {
+    default T read(String f) throws IOException {
         return setFile(f).read();
     }
 

@@ -1,29 +1,39 @@
 package com.alaimos.MITHrIL.api.Data.Writer;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.*;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
 /**
- * @author Salvatore Alaimo, Ph.D.
- * @version 2.0.0.0
- * @since 06/01/2016
+ * Abstract class for data writers
  */
 public abstract class AbstractDataWriter<T> implements DataWriterInterface<T> {
 
     protected File file;
 
-    protected OutputStream getOutputStream() {
+    /**
+     * Get the output stream for the file. If the file exists, it will be overwritten
+     *
+     * @return the output stream
+     * @throws IOException if an I/O error occurs
+     */
+    protected OutputStream getOutputStream() throws IOException {
         return getOutputStream(false);
     }
 
-    protected OutputStream getOutputStream(boolean append) {
-        try {
-            return new FileOutputStream(file, append);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    /**
+     * Get the output stream for the file
+     *
+     * @param append if true, the file will be appended
+     *               if false, the file will be overwritten
+     * @return the output stream
+     * @throws IOException if an I/O error occurs
+     */
+    protected OutputStream getOutputStream(boolean append) throws IOException {
+        return new FileOutputStream(file, append);
     }
 
     /**
@@ -105,7 +115,7 @@ public abstract class AbstractDataWriter<T> implements DataWriterInterface<T> {
      * @param separator a character separator
      * @return this object for a fluent interface
      */
-    protected AbstractDataWriter<T> writeArray(PrintStream ps, String[] array, String separator) {
+    protected AbstractDataWriter<T> writeArray(@NotNull PrintStream ps, String[] array, String separator) {
         ps.print(concatArray(array, separator));
         return this;
     }

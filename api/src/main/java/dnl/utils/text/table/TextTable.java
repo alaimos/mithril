@@ -14,7 +14,7 @@ import java.util.List;
 public class TextTable {
 
     protected TableModel tableModel;
-    protected List<SeparatorPolicy> separatorPolicies = new ArrayList<SeparatorPolicy>();
+    protected List<SeparatorPolicy> separatorPolicies = new ArrayList<>();
 
     protected boolean addRowNumbering;
 

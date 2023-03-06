@@ -10,6 +10,8 @@ import java.util.zip.GZIPInputStream;
 
 /**
  * Abstract class for data readers
+ *
+ * @param <T> the type of data to read
  */
 public abstract class AbstractDataReader<T> implements DataReaderInterface<T> {
 
@@ -18,6 +20,7 @@ public abstract class AbstractDataReader<T> implements DataReaderInterface<T> {
 
     /**
      * Set the filename where data are stored
+     *
      * @param f the filename (relative to the application directory)
      * @return this object
      */
@@ -29,6 +32,7 @@ public abstract class AbstractDataReader<T> implements DataReaderInterface<T> {
 
     /**
      * Set the file where data are stored
+     *
      * @param f the file object (absolute path)
      * @return this object
      */
@@ -40,6 +44,7 @@ public abstract class AbstractDataReader<T> implements DataReaderInterface<T> {
 
     /**
      * Get the absolute path of the file where data are stored
+     *
      * @return the filename
      */
     @Override
@@ -49,6 +54,7 @@ public abstract class AbstractDataReader<T> implements DataReaderInterface<T> {
 
     /**
      * Is the file gzipped?
+     *
      * @return true, if the file is gzipped
      */
     public boolean isGzipped() {
@@ -57,6 +63,7 @@ public abstract class AbstractDataReader<T> implements DataReaderInterface<T> {
 
     /**
      * Set if the file is gzipped
+     *
      * @param gzipped true, if the file is gzipped
      * @return this object
      */
@@ -67,32 +74,34 @@ public abstract class AbstractDataReader<T> implements DataReaderInterface<T> {
 
     /**
      * Get the input stream for the file
+     *
      * @return the input stream
+     * @throws IOException if something goes wrong
      */
-    protected InputStream getInputStream() {
-        try {
-            InputStream f = new FileInputStream(file);
-            if (isGzipped) {
-                f = new GZIPInputStream(f);
-            }
-            return f;
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
+    protected InputStream getInputStream() throws IOException {
+        InputStream f = new FileInputStream(file);
+        if (isGzipped) {
+            f = new GZIPInputStream(f);
         }
+        return f;
     }
 
     /**
      * Real implementation of the method that read data from the file
+     *
      * @return the result
+     * @throws IOException if something goes wrong
      */
-    protected abstract T realReader();
+    protected abstract T realReader() throws IOException;
 
     /**
      * Read data from the file
+     *
      * @return the result
+     * @throws IOException if something goes wrong
      */
     @Override
-    public T read() {
+    public T read() throws IOException {
         if (file == null || (!file.exists())) {
             throw new RuntimeException("Filename is not set or file does not exists.");
         }

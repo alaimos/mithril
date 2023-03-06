@@ -1,13 +1,14 @@
 package com.alaimos.MITHrIL.api.Data.Writer;
 
-import com.alaimos.Commons.Utils.Utils;
+import com.alaimos.MITHrIL.api.Commons.Utils;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
- * @author Salvatore Alaimo, Ph.D.
- * @version 2.0.0.0
- * @since 12/12/2015
+ * Interface for data writers
+ *
+ * @param <T> the type of data to write
  */
 public interface DataWriterInterface<T> {
 
@@ -19,7 +20,7 @@ public interface DataWriterInterface<T> {
     File getFile();
 
     /**
-     * Set the filename where data are stored
+     * Set the filename where data are stored (the file will be created in the application directory)
      *
      * @param f the filename
      * @return this object for a fluent interface
@@ -30,7 +31,7 @@ public interface DataWriterInterface<T> {
     }
 
     /**
-     * Set the filename where data are stored
+     * Set the filename where data are stored (the file will be created in any location)
      *
      * @param f the filename
      * @return this object for a fluent interface
@@ -42,8 +43,9 @@ public interface DataWriterInterface<T> {
      *
      * @param data the data that will be written into a file
      * @return this object for a fluent interface
+     * @throws IOException if an I/O error occurs
      */
-    DataWriterInterface<T> write(T data);
+    DataWriterInterface<T> write(T data) throws IOException;
 
     /**
      * Set filename and read data from it
@@ -51,8 +53,9 @@ public interface DataWriterInterface<T> {
      * @param f    the filename
      * @param data the data that will be written into a file
      * @return this object for a fluent interface
+     * @throws IOException if an I/O error occurs
      */
-    default DataWriterInterface<T> write(String f, T data) {
+    default DataWriterInterface<T> write(String f, T data) throws IOException {
         return setFile(f).write(data);
     }
 
@@ -62,8 +65,9 @@ public interface DataWriterInterface<T> {
      * @param f    the file
      * @param data the data that will be written into a file
      * @return this object for a fluent interface
+     * @throws IOException if an I/O error occurs
      */
-    default DataWriterInterface<T> write(File f, T data) {
+    default DataWriterInterface<T> write(File f, T data) throws IOException {
         return setFile(f).write(data);
     }
 

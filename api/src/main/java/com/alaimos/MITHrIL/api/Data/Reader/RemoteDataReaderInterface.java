@@ -1,10 +1,13 @@
 package com.alaimos.MITHrIL.api.Data.Reader;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.UUID;
 
 /**
  * Common interface for classes that read data from a file that can be downloaded from a remote server
+ *
+ * @param <T> the type of data to read
  */
 public interface RemoteDataReaderInterface<T> extends DataReaderInterface<T> {
 
@@ -49,21 +52,25 @@ public interface RemoteDataReaderInterface<T> extends DataReaderInterface<T> {
 
     /**
      * Set and read a URL
+     *
      * @param u the url
      * @return the result
+     * @throws IOException if something goes wrong
      */
     @Override
-    default T read(String u) {
+    default T read(String u) throws IOException {
         return setUrl(u).read();
     }
 
     /**
-     * Download an URL in a file and reads its content
+     * Download a URL in a file and reads its content
+     *
      * @param u the url
      * @param f the file
      * @return the result
+     * @throws IOException if something goes wrong
      */
-    default T read(String u, String f) {
+    default T read(String u, String f) throws IOException {
         return setUrl(u).setFile(f).read();
     }
 
