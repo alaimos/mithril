@@ -20,8 +20,8 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
     private final Object2IntMap<String> nodeIndex = new Object2IntOpenHashMap<>();
     private final Int2ObjectMap<Node> nodes = new Int2ObjectOpenHashMap<>();
     private final Object2IntMap<String> aliases = new Object2IntOpenHashMap<>();
-    private final Int2ObjectMap<Int2ObjectMap<Edge>> outEdges = new Int2ObjectOpenHashMap<>();
-    private final Int2ObjectMap<Int2ObjectMap<Edge>> inEdges = new Int2ObjectOpenHashMap<>();
+    private final Int2ObjectMap<Int2ObjectMap<Edge>> outgoingEdges = new Int2ObjectOpenHashMap<>();
+    private final Int2ObjectMap<Int2ObjectMap<Edge>> incomingEdges = new Int2ObjectOpenHashMap<>();
     private final List<String> endpoints = new ArrayList<>();
     private Integer hashCode = null;
 
@@ -30,26 +30,12 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
 
     @SuppressWarnings("unchecked")
     public Graph(@NotNull Graph g) {
-        // TODO: implement this
-//        g.nodes.forEach((k, v) -> nodes.put(k, (Node) v.clone()));
-//        g.outEdges.forEach((k, v) -> outEdges.put(k, new Int2ObjectOpenHashMap<>(v)));
-//        g.inEdges.forEach((k, v) -> inEdges.put(k, new Int2ObjectOpenHashMap<>(v)));
-//        g.nodeIndex.forEach((k, v) -> nodeIndex.put(k, v));
-//        g.aliases.forEach((k, v) -> aliases.put(k, v));
-//        clone.nodes = new HashMap<>();
-//        clone.outEdges = new HashMap<>();
-//        clone.inEdges = new HashMap<>();
-//        nodes.forEach((s, n) -> clone.addNode((Node) n.clone()));
-//        outEdges.forEach((s, edges) -> edges.forEach((e, edge) -> {
-//            Edge edgeC = (Edge) edge.clone();
-//            edgeC.setStart(clone.getNode(s)).setEnd(clone.getNode(e));
-//            clone.addEdge(edgeC);
-//        }));
-//        clone.endpoints = (ArrayList<String>) endpoints.clone();
-//        clone.weightComputation = this.weightComputation; //Weight computation in never cloned
-//        clone.owner = owner;
-//        return clone;
-
+        g.nodes.values().forEach(n -> addNode((Node) n.clone()));
+        g.outgoingEdges.values().stream().flatMap(m -> m.values().stream()).forEach(e -> {
+            Edge tmpEdge = (Edge) e.clone();
+            Edge clonedEdge = new Edge(getNode(e.source()), getNode(e.target()), tmpEdge.details());
+            addEdge(clonedEdge);
+        });
         endpoints.addAll(g.endpoints);
     }
 
@@ -61,8 +47,8 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
         var idx = n.hashCode();
         if (!nodes.containsKey(idx)) {
             nodes.put(idx, n);
-            outEdges.put(idx, new Int2ObjectOpenHashMap<>());
-            inEdges.put(idx, new Int2ObjectOpenHashMap<>());
+            outgoingEdges.put(idx, new Int2ObjectOpenHashMap<>());
+            incomingEdges.put(idx, new Int2ObjectOpenHashMap<>());
             var id = n.id();
             aliases.put(id, idx);
             aliases.put(n.name(), idx);
@@ -78,6 +64,14 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
         return nodes.get(nodeIndex.getInt(id));
     }
 
+    public Node getNode(int id) {
+        return nodes.get(id);
+    }
+
+    public Node getNode(@NotNull Node n) {
+        return nodes.get(n.hashCode());
+    }
+
     public Node findNode(String needle) {
         if (nodeIndex.containsKey(needle)) return nodes.get(nodeIndex.getInt(needle));
         if (aliases.containsKey(needle)) return nodes.get(aliases.getInt(needle));
@@ -89,10 +83,10 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
         var idx = n.hashCode();
         if (nodes.containsKey(idx)) {
             nodes.remove(idx);
-            outEdges.remove(idx);
-            inEdges.remove(idx);
-            outEdges.forEach((s, m) -> m.remove(idx));
-            inEdges.forEach((s, m) -> m.remove(idx));
+            outgoingEdges.remove(idx);
+            incomingEdges.remove(idx);
+            outgoingEdges.forEach((s, m) -> m.remove(idx));
+            incomingEdges.forEach((s, m) -> m.remove(idx));
             aliases.removeInt(n.id());
             aliases.removeInt(n.name());
             for (var a : n.aliases()) {
@@ -132,19 +126,19 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
     }
 
     public int inDegree(@NotNull Node n) {
-        return Optional.of(inEdges.get(n.hashCode())).map(Map::size).orElse(-1);
+        return Optional.of(incomingEdges.get(n.hashCode())).map(Map::size).orElse(-1);
     }
 
     public int outDegree(@NotNull Node n) {
-        return Optional.of(outEdges.get(n.hashCode())).map(Map::size).orElse(-1);
+        return Optional.of(outgoingEdges.get(n.hashCode())).map(Map::size).orElse(-1);
     }
 
     public Optional<Stream<Node>> ingoingNodesStream(@NotNull Node n) {
-        return Optional.of(inEdges.get(n.hashCode())).map(m -> m.values().stream().map(Edge::source));
+        return Optional.of(incomingEdges.get(n.hashCode())).map(m -> m.values().stream().map(Edge::source));
     }
 
     public Optional<Stream<Node>> outgoingNodesStream(@NotNull Node n) {
-        return Optional.of(outEdges.get(n.hashCode())).map(m -> m.values().stream().map(Edge::target));
+        return Optional.of(outgoingEdges.get(n.hashCode())).map(m -> m.values().stream().map(Edge::target));
     }
 
     public Int2ObjectMap<Node> nodes() {
@@ -155,7 +149,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
         return nodes.values().stream();
     }
 
-    public void addEdge(@NotNull Edge e, boolean merge, boolean usePriority) {
+    public void addEdge(@NotNull Edge e, boolean merge, boolean usePriority, boolean allowDuplicatedDetails) {
         if (!hasNode(e.source())) {
             addNode(e.source());
         }
@@ -165,24 +159,23 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
         if (!hasEdge(e)) {
             var s = e.source().hashCode();
             var t = e.target().hashCode();
-            outEdges.get(s).put(t, e);
-            inEdges.get(t).put(s, e);
+            outgoingEdges.get(s).put(t, e);
+            incomingEdges.get(t).put(s, e);
         } else {
             var existingEdge = getEdge(e.source(), e.target());
             if (merge && !existingEdge.equals(e)) {
-                // existingEdge.merge(e, usePriority); // TODO
-                // e.getDescriptions().stream().filter(d -> !edge.getDescriptions().contains(d)).forEachOrdered(edge::addDescription);
+                existingEdge.merge(e, usePriority, allowDuplicatedDetails);
             }
         }
         hashCode = null;
     }
 
-    public void addEdge(@NotNull Edge e, boolean usePriority) {
-        addEdge(e, true, usePriority);
+    public void addEdge(@NotNull Edge e, boolean usePriority, boolean allowDuplicatedDetails) {
+        addEdge(e, true, usePriority, allowDuplicatedDetails);
     }
 
     public void addEdge(@NotNull Edge e) {
-        addEdge(e, true, false);
+        addEdge(e, true, false, false);
     }
 
     public Edge getEdge(@NotNull Node start, @NotNull Node end) {
@@ -190,7 +183,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
     }
 
     public Edge getEdge(int start, int end) {
-        return outEdges.get(start).get(end);
+        return outgoingEdges.get(start).get(end);
     }
 
     public Edge getEdge(String startId, String endId) {
@@ -199,7 +192,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
     }
 
     public boolean hasEdge(@NotNull Edge e) {
-        return outEdges.containsKey(e.source().hashCode()) && outEdges.get(e.source().hashCode()).containsKey(e.target().hashCode());
+        return outgoingEdges.containsKey(e.source().hashCode()) && outgoingEdges.get(e.source().hashCode()).containsKey(e.target().hashCode());
     }
 
     public boolean hasEdge(@NotNull Node start, @NotNull Node end) {
@@ -212,11 +205,11 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
     }
 
     public Int2ObjectMap<Int2ObjectMap<Edge>> getEdges() {
-        return outEdges;
+        return outgoingEdges;
     }
 
     public Stream<Edge> getEdgesStream() {
-        return outEdges.values().stream().flatMap(e -> e.values().stream());
+        return outgoingEdges.values().stream().flatMap(e -> e.values().stream());
     }
 
     public int countNodes() {
@@ -224,7 +217,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
     }
 
     public int countEdges() {
-        return outEdges.values().stream().mapToInt(Int2ObjectMap::size).sum();
+        return outgoingEdges.values().stream().mapToInt(Int2ObjectMap::size).sum();
     }
 
     /**
@@ -270,7 +263,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
                 break;
             } else if (r == TraversalAction.CONTINUE) {
                 if (inDegree(ni) > 0) {
-                    for (var e : inEdges.get(ni.hashCode()).values()) {
+                    for (var e : incomingEdges.get(ni.hashCode()).values()) {
                         traversalGuide.push(e.source());
                     }
                 }
@@ -292,7 +285,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
                 break;
             } else if (r == TraversalAction.CONTINUE) {
                 if (outDegree(ni) > 0) {
-                    for (var e : outEdges.get(ni.hashCode()).values()) {
+                    for (var e : outgoingEdges.get(ni.hashCode()).values()) {
                         traversalGuide.push(e.target());
                     }
                 }
@@ -345,15 +338,15 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
                 countNodes() == g.countNodes() &&
                 countEdges() == g.countEdges() &&
                 Objects.equals(nodes, g.nodes) &&
-                Objects.equals(outEdges, g.outEdges) &&
-                Objects.equals(inEdges, g.inEdges) &&
+                Objects.equals(outgoingEdges, g.outgoingEdges) &&
+                Objects.equals(incomingEdges, g.incomingEdges) &&
                 Objects.equals(endpoints, g.endpoints);
     }
 
     @Override
     public int hashCode() {
         if (hashCode == null) {
-            hashCode = Objects.hash(nodes, outEdges, inEdges, endpoints);
+            hashCode = Objects.hash(nodes, outgoingEdges, incomingEdges, endpoints);
         }
         return hashCode;
     }
