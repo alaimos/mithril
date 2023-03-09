@@ -29,27 +29,38 @@ public class Repository implements Collection<Pathway>, Iterable<Pathway>, Clone
         r.forEach(p -> this.add((Pathway) p.clone()));
     }
 
-    //    @Override
-//    public RepositoryInterface addDecoys(long rngSeed) {
-//        Random r = new Random(rngSeed);
-//        HashMap<String, NodeInterface> idToGenes = new HashMap<>();
-//        ArrayList<String> allGenes = new ArrayList<>();
-//        this.pathways.forEach((s, p) -> {
-//            if (p.hasGraph()) {
-//                p.getGraph().forEach(n -> {
-//                    if (!idToGenes.containsKey(n.getId())) {
-//                        idToGenes.put(n.getId(), n);
-//                        allGenes.add(n.getId());
-//                    }
-//                });
-//            }
-//        });
-//        BatchDecoyBuilder builder = new BatchDecoyBuilder();
-//        builder.init().setParameter("repository", this).setParameter("allNodes", allGenes)
-//                .setParameter("idToNodes", idToGenes).setParameter("random", r).run();
-//        builder.getOutput().forEach((i, p) -> this.add(p));
-//        return this;
-//    }
+    /**
+     * Add decoy pathways to the repository
+     *
+     * @param rngSeed random number generator seed
+     */
+    public void addDecoys(long rngSeed) {
+        addDecoys(new Random(rngSeed), false);
+    }
+
+    /**
+     * Add decoy pathways to the repository
+     *
+     * @param rng      random number generator
+     * @param parallel true, if decoys should be built in parallel
+     */
+    public void addDecoys(Random rng, boolean parallel) {
+        Map<String, Node> idToGenes = new HashMap<>();
+        ArrayList<String> allGenes = new ArrayList<>();
+        this.pathways.values().stream()
+                .filter(Pathway::hasGraph)
+                .map(Pathway::graph)
+                .flatMap(g -> g.nodes().values().stream())
+                .forEach(n -> {
+                    var id = n.id();
+                    if (!idToGenes.containsKey(id)) {
+                        idToGenes.put(id, n);
+                        allGenes.add(id);
+                    }
+                });
+        DecoyBuilder.getInstance().buildAllDecoys(this, allGenes, idToGenes, rng, parallel);
+    }
+
     public boolean contains(@NotNull Pathway p) {
         return pathways.containsKey(p.id());
     }
