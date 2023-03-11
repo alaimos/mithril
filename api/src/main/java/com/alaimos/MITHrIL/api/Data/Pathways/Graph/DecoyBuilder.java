@@ -60,10 +60,10 @@ public class DecoyBuilder {
             oldToNew.put(oldId, newId);
             g.addNode(new Node(newId, oldId, idToNodes.get(newId).type(), Collections.emptyList()));
         }
-        g.getEdgesStream().forEach(e -> {
+        g.edgesStream().forEach(e -> {
             String start = oldToNew.get(e.source().id()), end = oldToNew.get(e.source().id());
             var clonedDetails = e.details().stream().map(e1 -> (EdgeDetail) e1.clone()).collect(Collectors.toList());
-            decoyGraph.addEdge(new Edge(decoyGraph.getNode(start), decoyGraph.getNode(end), clonedDetails));
+            decoyGraph.addEdge(new Edge(decoyGraph.node(start), decoyGraph.node(end), clonedDetails));
         });
         return decoyPathway;
     }

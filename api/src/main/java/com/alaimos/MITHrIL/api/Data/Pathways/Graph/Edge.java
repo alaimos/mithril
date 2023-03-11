@@ -70,7 +70,7 @@ public class Edge implements Cloneable, Serializable {
         return weight = weightComputationMethod.weight(this);
     }
 
-    public void merge(@NotNull Edge e, boolean usePriority, boolean allowDuplicatedDetails) {
+    public void mergeWith(@NotNull Edge e, boolean usePriority, boolean allowDuplicatedDetails) {
         // Add details from e to this edge
         e.details.stream().filter(d -> allowDuplicatedDetails || !details.contains(d)).forEach(d -> details.add(new EdgeDetail(d)));
         if (usePriority) { // if priority is used, keep only the details with the highest priority

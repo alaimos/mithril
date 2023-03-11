@@ -1,23 +1,31 @@
 package com.alaimos.MITHrIL.api.Data.Pathways.Graph;
 
+import it.unimi.dsi.fastutil.Pair;
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Graph implements Serializable, Cloneable, Iterable<Node> {
 
     @Serial
     private static final long serialVersionUID = -8825355851517533720L;
-    private final Object2IntMap<String> nodeIndex = new Object2IntOpenHashMap<>();
+    private final Object2IntMap<String> id2Hash = new Object2IntOpenHashMap<>();
     private final Int2ObjectMap<Node> nodes = new Int2ObjectOpenHashMap<>();
     private final Object2IntMap<String> aliases = new Object2IntOpenHashMap<>();
     private final Int2ObjectMap<Int2ObjectMap<Edge>> outgoingEdges = new Int2ObjectOpenHashMap<>();
@@ -33,7 +41,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
         g.nodes.values().forEach(n -> addNode((Node) n.clone()));
         g.outgoingEdges.values().stream().flatMap(m -> m.values().stream()).forEach(e -> {
             Edge tmpEdge = (Edge) e.clone();
-            Edge clonedEdge = new Edge(getNode(e.source()), getNode(e.target()), tmpEdge.details());
+            Edge clonedEdge = new Edge(node(e.source()), node(e.target()), tmpEdge.details());
             addEdge(clonedEdge);
         });
         endpoints.addAll(g.endpoints);
@@ -56,9 +64,18 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
             for (var a : n.aliases()) {
                 aliases.put(a, idx);
             }
-            nodeIndex.put(id, idx);
+            id2Hash.put(id, idx);
             hashCode = null;
         }
+    }
+
+    /**
+     * Add a collection of node objects to the graph
+     *
+     * @param nodes the collection of node objects
+     */
+    public void addNode(@NotNull Collection<? extends Node> nodes) {
+        nodes.forEach(this::addNode);
     }
 
     /**
@@ -67,8 +84,8 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      * @param id the id
      * @return the node object. Null if not found.
      */
-    public Node getNode(String id) {
-        return nodes.get(nodeIndex.getInt(id));
+    public Node node(String id) {
+        return nodes.get(id2Hash.getInt(id));
     }
 
     /**
@@ -77,7 +94,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      * @param hashCode the hash code
      * @return the node object. Null if not found.
      */
-    public Node getNode(int hashCode) {
+    public Node node(int hashCode) {
         return nodes.get(hashCode);
     }
 
@@ -87,7 +104,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      * @param n the reference node
      * @return the node object. Null if not found.
      */
-    public Node getNode(@NotNull Node n) {
+    public Node node(@NotNull Node n) {
         return nodes.get(n.hashCode());
     }
 
@@ -100,7 +117,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      * @return the node object. Null if not found.
      */
     public Node findNode(String needle) {
-        if (nodeIndex.containsKey(needle)) return nodes.get(nodeIndex.getInt(needle));
+        if (id2Hash.containsKey(needle)) return nodes.get(id2Hash.getInt(needle));
         if (aliases.containsKey(needle)) return nodes.get(aliases.getInt(needle));
         return null;
     }
@@ -125,7 +142,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
             for (var a : n.aliases()) {
                 aliases.removeInt(a);
             }
-            nodeIndex.removeInt(n.id());
+            id2Hash.removeInt(n.id());
             hashCode = null;
             return true;
         }
@@ -139,7 +156,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      * @return true if the node was removed, false otherwise
      */
     public boolean removeNode(String id) {
-        return removeNode(getNode(id));
+        return removeNode(node(id));
     }
 
     /**
@@ -169,7 +186,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      * @return true if the node is present, false otherwise
      */
     public boolean hasNode(String id) {
-        return nodes.containsKey(nodeIndex.getInt(id));
+        return nodes.containsKey(id2Hash.getInt(id));
     }
 
     /**
@@ -177,7 +194,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      *
      * @return a list of node ids
      */
-    public List<String> getEndpoints() {
+    public List<String> endpoints() {
         return endpoints;
     }
 
@@ -250,7 +267,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      *
      * @return a stream of nodes
      */
-    public Stream<Node> getNodesStream() {
+    public Stream<Node> nodesStream() {
         return nodes.values().stream();
     }
 
@@ -275,9 +292,9 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
             outgoingEdges.get(s).put(t, e);
             incomingEdges.get(t).put(s, e);
         } else {
-            var existingEdge = getEdge(e.source(), e.target());
+            var existingEdge = edge(e.source(), e.target());
             if (merge && !existingEdge.equals(e)) {
-                existingEdge.merge(e, usePriority, allowDuplicatedDetails);
+                existingEdge.mergeWith(e, usePriority, allowDuplicatedDetails);
             }
         }
         hashCode = null;
@@ -305,14 +322,25 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
     }
 
     /**
+     * Add a collection of edges to the graph merging all the details with the existing one,
+     * if already present in the graph.
+     * No priority is used, and duplicates are removed from the details.
+     *
+     * @param edges the edges to add
+     */
+    public void addEdge(@NotNull Collection<? extends Edge> edges) {
+        edges.forEach(this::addEdge);
+    }
+
+    /**
      * Get an edge from the graph by its start and end nodes.
      *
      * @param start the start node
      * @param end   the end node
      * @return the edge, or null if not present
      */
-    public Edge getEdge(@NotNull Node start, @NotNull Node end) {
-        return getEdge(start.hashCode(), end.hashCode());
+    public Edge edge(@NotNull Node start, @NotNull Node end) {
+        return edge(start.hashCode(), end.hashCode());
     }
 
     /**
@@ -322,7 +350,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      * @param endHashCode   the end node hash code
      * @return the edge, or null if not present
      */
-    public Edge getEdge(int startHashCode, int endHashCode) {
+    public Edge edge(int startHashCode, int endHashCode) {
         return outgoingEdges.get(startHashCode).get(endHashCode);
     }
 
@@ -333,9 +361,9 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      * @param endId   the end node id
      * @return the edge, or null if not present
      */
-    public Edge getEdge(String startId, String endId) {
+    public Edge edge(String startId, String endId) {
         if (!hasNode(startId) || !hasNode(endId)) return null;
-        return getEdge(nodeIndex.getInt(startId), nodeIndex.getInt(endId));
+        return edge(id2Hash.getInt(startId), id2Hash.getInt(endId));
     }
 
     /**
@@ -356,7 +384,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      * @return true if the edge is present, false otherwise
      */
     public boolean hasEdge(@NotNull Node start, @NotNull Node end) {
-        return getEdge(start, end) != null;
+        return edge(start, end) != null;
     }
 
     /**
@@ -368,7 +396,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      */
     public boolean hasEdge(String startId, String endId) {
         if (!hasNode(startId) || !hasNode(endId)) return false;
-        return getEdge(startId, endId) != null;
+        return edge(startId, endId) != null;
     }
 
     /**
@@ -378,7 +406,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      *
      * @return the map of edges
      */
-    public Int2ObjectMap<Int2ObjectMap<Edge>> getEdges() {
+    public Int2ObjectMap<Int2ObjectMap<Edge>> edges() {
         return outgoingEdges;
     }
 
@@ -387,7 +415,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      *
      * @return a stream of edges
      */
-    public Stream<Edge> getEdgesStream() {
+    public Stream<Edge> edgesStream() {
         return outgoingEdges.values().stream().flatMap(e -> e.values().stream());
     }
 
@@ -574,13 +602,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Graph g)) return false;
-        return hashCode() == g.hashCode() &&
-                countNodes() == g.countNodes() &&
-                countEdges() == g.countEdges() &&
-                Objects.equals(nodes, g.nodes) &&
-                Objects.equals(outgoingEdges, g.outgoingEdges) &&
-                Objects.equals(incomingEdges, g.incomingEdges) &&
-                Objects.equals(endpoints, g.endpoints);
+        return hashCode() == g.hashCode() && countNodes() == g.countNodes() && countEdges() == g.countEdges() && Objects.equals(nodes, g.nodes) && Objects.equals(outgoingEdges, g.outgoingEdges) && Objects.equals(incomingEdges, g.incomingEdges) && Objects.equals(endpoints, g.endpoints);
     }
 
     /**
@@ -597,14 +619,129 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
     }
 
     /**
+     * Create a bidirectional index between a contiguous sequence integers
+     * (1 to N, where N is the number of nodes) and node hash codes.
+     *
+     * @return A pair of maps, the first maps from index to hash code, the second from hash code to index
+     */
+    public Pair<Int2IntMap, Int2IntMap> index() {
+        var index2Hash = new Int2IntOpenHashMap();
+        var hash2Index = new Int2IntOpenHashMap();
+        int i = 0;
+        for (var n : nodes.values()) {
+            index2Hash.put(i, n.hashCode());
+            hash2Index.put(n.hashCode(), i);
+            i++;
+        }
+        return Pair.of(index2Hash, hash2Index);
+    }
+
+    /**
+     * Extend this graph with the nodes and edges of another graph.
+     * This is an iterative process, and it is different from the merge operation.
+     * First, all the edges with both source and target nodes in this graph are added.
+     * Then, until no more edges can be added, all the edges with at least one node in this graph are added.
+     * The process stops when the set of edges to be added is empty,
+     * or when the number of edges in the graph does not change.
+     *
+     * @param other The other graph
+     */
+    public void extendWith(@NotNull Graph other) {
+        var previousCountEdges = -1;
+        var currentCountEdges = countEdges();
+        var remainingEdges = other.edgesStream().filter(e -> {
+            if (nodes.containsKey(e.source().hashCode()) && nodes.containsKey(e.target().hashCode())) {
+                addEdge(e);
+                return false;
+            }
+            return true;
+        }).collect(Collectors.toSet());
+        while (previousCountEdges != currentCountEdges && !remainingEdges.isEmpty()) {
+            previousCountEdges = currentCountEdges;
+            var newRemainingEdges = new HashSet<Edge>();
+            for (var e : remainingEdges) {
+                var source = e.source();
+                var target = e.target();
+                if (nodes.containsKey(source.hashCode()) || nodes.containsKey(target.hashCode())) {
+                    if (!nodes.containsKey(source.hashCode())) {
+                        addNode(source);
+                    }
+                    if (!nodes.containsKey(target.hashCode())) {
+                        addNode(target);
+                    }
+                    addEdge(e);
+                    currentCountEdges++;
+                } else {
+                    newRemainingEdges.add(e);
+                }
+            }
+            remainingEdges = newRemainingEdges;
+        }
+    }
+
+    /**
+     * Given a set of patterns, create a predicate that returns false if a node matches at least one of the patterns.
+     * If the patterns are null or empty, the predicate always returns true.
+     *
+     * @param patterns The patterns
+     * @return The predicate
+     */
+    @Contract(pure = true)
+    private static @NotNull Predicate<Node> nodeFilteringPredicate(Pattern[] patterns) {
+        if (patterns == null || patterns.length == 0) return n -> true;
+        return n -> {
+            for (Pattern p : patterns) {
+                if (p.matcher(n.id()).matches()) {
+                    return false;
+                }
+            }
+            return true;
+        };
+    }
+
+    /**
+     * Merge this graph with another one.
+     * If a node is present in both graphs, the node is added only once.
+     * If an edge is present in both graphs, the two edges are merged keeping only details with maximal priority.
+     * Nodes are filtered using the user-defined filters.
+     * Priority filtering can be disabled.
+     *
+     * @param other           The other graph
+     * @param nodeFilters     The node filters
+     * @param disablePriority Disable priority filtering
+     * @return A list of pairs of node ids, each pair represents an edge that was added to the graph
+     */
+    public List<Pair<String, String>> mergeWith(@NotNull Graph other, @Nullable Pattern[] nodeFilters, boolean disablePriority) {
+        var addedEdges = new ArrayList<Pair<String, String>>();
+        var filteringPredicate = nodeFilteringPredicate(nodeFilters);
+        other.nodesStream()
+                .filter(filteringPredicate.or(Predicate.not(this::hasNode)))
+                .map(n -> (Node) n.clone())
+                .forEach(this::addNode);
+        other.edgesStream().forEach(e -> {
+            var source = e.source();
+            var target = e.target();
+            if (hasNode(source) && hasNode(target)) {
+                var edge = edge(source, target);
+                if (edge == null) {
+                    addEdge((Edge) e.clone());
+                } else {
+                    edge.mergeWith(e, disablePriority, true);
+                }
+                addedEdges.add(Pair.of(source.id(), target.id()));
+            }
+        });
+        setEndpoints(Stream.of(endpoints.stream(), other.endpoints.stream()).flatMap(Function.identity()).distinct().toList());
+        return addedEdges;
+    }
+
+    /**
      * The result of a traversal action, either continue, prune or stop.
      * Continue means that the traversal will continue to the adjacent nodes.
      * Prune means that the traversal will not continue to the adjacent nodes.
      * Stop means that the traversal will stop.
      */
     public enum TraversalAction {
-        CONTINUE,
-        PRUNE,
-        STOP
+        CONTINUE, PRUNE, STOP
     }
 }
