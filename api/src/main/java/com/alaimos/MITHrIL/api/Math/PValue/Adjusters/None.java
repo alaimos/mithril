@@ -10,7 +10,7 @@ import java.util.Arrays;
 public class None implements AdjusterInterface {
 
     @Override
-    public String getName() {
+    public String name() {
         return "none";
     }
 

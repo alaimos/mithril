@@ -12,7 +12,7 @@ import static com.alaimos.MITHrIL.api.Math.Vectors.*;
 public class Holm implements AdjusterInterface {
 
     @Override
-    public String getName() {
+    public String name() {
         return "holm";
     }
 

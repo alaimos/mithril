@@ -5,7 +5,6 @@ import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -25,11 +24,10 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
 
     @Serial
     private static final long serialVersionUID = -8825355851517533720L;
-    private final Object2IntMap<String> id2Hash = new Object2IntOpenHashMap<>();
-    private final Int2ObjectMap<Node> nodes = new Int2ObjectOpenHashMap<>();
-    private final Object2IntMap<String> aliases = new Object2IntOpenHashMap<>();
-    private final Int2ObjectMap<Int2ObjectMap<Edge>> outgoingEdges = new Int2ObjectOpenHashMap<>();
-    private final Int2ObjectMap<Int2ObjectMap<Edge>> incomingEdges = new Int2ObjectOpenHashMap<>();
+    private final Map<String, Node> nodes = new HashMap<>();
+    private final Map<String, String> aliases = new HashMap<>();
+    private final Map<String, Map<String, Edge>> outgoingEdges = new HashMap<>();
+    private final Map<String, Map<String, Edge>> incomingEdges = new HashMap<>();
     private final List<String> endpoints = new ArrayList<>();
     private Integer hashCode = null;
 
@@ -53,18 +51,16 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      * @param n the node object
      */
     public void addNode(@NotNull Node n) {
-        var idx = n.hashCode();
-        if (!nodes.containsKey(idx)) {
-            nodes.put(idx, n);
-            outgoingEdges.put(idx, new Int2ObjectOpenHashMap<>());
-            incomingEdges.put(idx, new Int2ObjectOpenHashMap<>());
-            var id = n.id();
-            aliases.put(id, idx);
-            aliases.put(n.name(), idx);
+        var id = n.id();
+        if (!nodes.containsKey(id)) {
+            nodes.put(id, n);
+            outgoingEdges.put(id, new HashMap<>());
+            incomingEdges.put(id, new HashMap<>());
+            aliases.put(id, id);
+            aliases.put(n.name(), id);
             for (var a : n.aliases()) {
-                aliases.put(a, idx);
+                aliases.put(a, id);
             }
-            id2Hash.put(id, idx);
             hashCode = null;
         }
     }
@@ -85,17 +81,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      * @return the node object. Null if not found.
      */
     public Node node(String id) {
-        return nodes.get(id2Hash.getInt(id));
-    }
-
-    /**
-     * Get a node by its hash code
-     *
-     * @param hashCode the hash code
-     * @return the node object. Null if not found.
-     */
-    public Node node(int hashCode) {
-        return nodes.get(hashCode);
+        return nodes.get(id);
     }
 
     /**
@@ -105,7 +91,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      * @return the node object. Null if not found.
      */
     public Node node(@NotNull Node n) {
-        return nodes.get(n.hashCode());
+        return nodes.get(n.id());
     }
 
     /**
@@ -117,8 +103,8 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      * @return the node object. Null if not found.
      */
     public Node findNode(String needle) {
-        if (id2Hash.containsKey(needle)) return nodes.get(id2Hash.getInt(needle));
-        if (aliases.containsKey(needle)) return nodes.get(aliases.getInt(needle));
+        if (nodes.containsKey(needle)) return nodes.get(needle);
+        if (aliases.containsKey(needle)) return nodes.get(aliases.get(needle));
         return null;
     }
 
@@ -130,19 +116,18 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      */
     public boolean removeNode(Node n) {
         if (n == null) return false;
-        var idx = n.hashCode();
-        if (nodes.containsKey(idx)) {
-            nodes.remove(idx);
-            outgoingEdges.remove(idx);
-            incomingEdges.remove(idx);
-            outgoingEdges.forEach((s, m) -> m.remove(idx));
-            incomingEdges.forEach((s, m) -> m.remove(idx));
-            aliases.removeInt(n.id());
-            aliases.removeInt(n.name());
+        var id = n.id();
+        if (nodes.containsKey(id)) {
+            nodes.remove(id);
+            outgoingEdges.remove(id);
+            incomingEdges.remove(id);
+            outgoingEdges.forEach((s, m) -> m.remove(id));
+            incomingEdges.forEach((s, m) -> m.remove(id));
+            aliases.remove(n.id());
+            aliases.remove(n.name());
             for (var a : n.aliases()) {
-                aliases.removeInt(a);
+                aliases.remove(a);
             }
-            id2Hash.removeInt(n.id());
             hashCode = null;
             return true;
         }
@@ -166,17 +151,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      * @return true if the node is present, false otherwise
      */
     public boolean hasNode(@NotNull Node n) {
-        return nodes.containsKey(n.hashCode());
-    }
-
-    /**
-     * Check if a node is present in the graph
-     *
-     * @param hashCode the hash code of the node
-     * @return true if the node is present, false otherwise
-     */
-    public boolean hasNode(int hashCode) {
-        return nodes.containsKey(hashCode);
+        return nodes.containsKey(n.id());
     }
 
     /**
@@ -186,7 +161,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      * @return true if the node is present, false otherwise
      */
     public boolean hasNode(String id) {
-        return nodes.containsKey(id2Hash.getInt(id));
+        return nodes.containsKey(id);
     }
 
     /**
@@ -216,7 +191,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      * @return the in-degree of the node
      */
     public int inDegree(@NotNull Node n) {
-        return Optional.of(incomingEdges.get(n.hashCode())).map(Map::size).orElse(-1);
+        return Optional.of(incomingEdges.get(n.id())).map(Map::size).orElse(-1);
     }
 
     /**
@@ -226,7 +201,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      * @return the out-degree of the node
      */
     public int outDegree(@NotNull Node n) {
-        return Optional.of(outgoingEdges.get(n.hashCode())).map(Map::size).orElse(-1);
+        return Optional.of(outgoingEdges.get(n.id())).map(Map::size).orElse(-1);
     }
 
     /**
@@ -237,7 +212,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      * @return an Optional object containing the stream of edges
      */
     public Optional<Stream<Node>> ingoingNodesStream(@NotNull Node n) {
-        return Optional.of(incomingEdges.get(n.hashCode())).map(m -> m.values().stream().map(Edge::source));
+        return Optional.of(incomingEdges.get(n.id())).map(m -> m.values().stream().map(Edge::source));
     }
 
     /**
@@ -248,7 +223,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      * @return an Optional object containing the stream of edges
      */
     public Optional<Stream<Node>> outgoingNodesStream(@NotNull Node n) {
-        return Optional.of(outgoingEdges.get(n.hashCode())).map(m -> m.values().stream().map(Edge::target));
+        return Optional.of(outgoingEdges.get(n.id())).map(m -> m.values().stream().map(Edge::target));
     }
 
     /**
@@ -258,7 +233,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      *
      * @return a map of nodes
      */
-    public Int2ObjectMap<Node> nodes() {
+    public Map<String, Node> nodes() {
         return nodes;
     }
 
@@ -287,8 +262,8 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
             addNode(e.target());
         }
         if (!hasEdge(e)) {
-            var s = e.source().hashCode();
-            var t = e.target().hashCode();
+            var s = e.source().id();
+            var t = e.target().id();
             outgoingEdges.get(s).put(t, e);
             incomingEdges.get(t).put(s, e);
         } else {
@@ -340,19 +315,9 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      * @return the edge, or null if not present
      */
     public Edge edge(@NotNull Node start, @NotNull Node end) {
-        return edge(start.hashCode(), end.hashCode());
+        return edge(start.id(), end.id());
     }
 
-    /**
-     * Get an edge from the graph by its start and end nodes.
-     *
-     * @param startHashCode the start node hash code
-     * @param endHashCode   the end node hash code
-     * @return the edge, or null if not present
-     */
-    public Edge edge(int startHashCode, int endHashCode) {
-        return outgoingEdges.get(startHashCode).get(endHashCode);
-    }
 
     /**
      * Get an edge from the graph by its start and end nodes.
@@ -363,7 +328,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      */
     public Edge edge(String startId, String endId) {
         if (!hasNode(startId) || !hasNode(endId)) return null;
-        return edge(id2Hash.getInt(startId), id2Hash.getInt(endId));
+        return outgoingEdges.getOrDefault(startId, Map.of()).get(endId);
     }
 
     /**
@@ -373,7 +338,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      * @return true if the edge is present, false otherwise
      */
     public boolean hasEdge(@NotNull Edge e) {
-        return outgoingEdges.containsKey(e.source().hashCode()) && outgoingEdges.get(e.source().hashCode()).containsKey(e.target().hashCode());
+        return hasEdge(e.source(), e.target());
     }
 
     /**
@@ -384,7 +349,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      * @return true if the edge is present, false otherwise
      */
     public boolean hasEdge(@NotNull Node start, @NotNull Node end) {
-        return edge(start, end) != null;
+        return edge(start.id(), end.id()) != null;
     }
 
     /**
@@ -395,7 +360,6 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      * @return true if the edge is present, false otherwise
      */
     public boolean hasEdge(String startId, String endId) {
-        if (!hasNode(startId) || !hasNode(endId)) return false;
         return edge(startId, endId) != null;
     }
 
@@ -406,7 +370,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      *
      * @return the map of edges
      */
-    public Int2ObjectMap<Int2ObjectMap<Edge>> edges() {
+    public Map<String, Map<String, Edge>> edges() {
         return outgoingEdges;
     }
 
@@ -434,7 +398,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      * @return the number of edges
      */
     public int countEdges() {
-        return outgoingEdges.values().stream().mapToInt(Int2ObjectMap::size).sum();
+        return outgoingEdges.values().stream().mapToInt(Map::size).sum();
     }
 
     /**
@@ -486,7 +450,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
                 break;
             } else if (r == TraversalAction.CONTINUE) {
                 if (inDegree(ni) > 0) {
-                    for (var e : incomingEdges.get(ni.hashCode()).values()) {
+                    for (var e : incomingEdges.get(ni.id()).values()) {
                         traversalGuide.push(e.source());
                     }
                 }
@@ -521,7 +485,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
                 break;
             } else if (r == TraversalAction.CONTINUE) {
                 if (outDegree(ni) > 0) {
-                    for (var e : outgoingEdges.get(ni.hashCode()).values()) {
+                    for (var e : outgoingEdges.get(ni.id()).values()) {
                         traversalGuide.push(e.target());
                     }
                 }
@@ -602,7 +566,13 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Graph g)) return false;
-        return hashCode() == g.hashCode() && countNodes() == g.countNodes() && countEdges() == g.countEdges() && Objects.equals(nodes, g.nodes) && Objects.equals(outgoingEdges, g.outgoingEdges) && Objects.equals(incomingEdges, g.incomingEdges) && Objects.equals(endpoints, g.endpoints);
+        return hashCode() == g.hashCode() &&
+                countNodes() == g.countNodes() &&
+                countEdges() == g.countEdges() &&
+                Objects.equals(nodes, g.nodes) &&
+                Objects.equals(outgoingEdges, g.outgoingEdges) &&
+                Objects.equals(incomingEdges, g.incomingEdges) &&
+                Objects.equals(endpoints, g.endpoints);
     }
 
     /**
@@ -624,13 +594,13 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      *
      * @return A pair of maps, the first maps from index to hash code, the second from hash code to index
      */
-    public Pair<Int2IntMap, Int2IntMap> index() {
-        var index2Hash = new Int2IntOpenHashMap();
-        var hash2Index = new Int2IntOpenHashMap();
+    public Pair<Int2ObjectMap<String>, Object2IntOpenHashMap<String>> index() {
+        var index2Hash = new Int2ObjectOpenHashMap<String>();
+        var hash2Index = new Object2IntOpenHashMap<String>();
         int i = 0;
         for (var n : nodes.values()) {
-            index2Hash.put(i, n.hashCode());
-            hash2Index.put(n.hashCode(), i);
+            index2Hash.put(i, n.id());
+            hash2Index.put(n.id(), i);
             i++;
         }
         return Pair.of(index2Hash, hash2Index);
@@ -650,7 +620,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
         var previousCountEdges = -1;
         var currentCountEdges = countEdges();
         var remainingEdges = other.edgesStream().filter(e -> {
-            if (nodes.containsKey(e.source().hashCode()) && nodes.containsKey(e.target().hashCode())) {
+            if (hasEdge(e)) {
                 addEdge(e);
                 return false;
             }
@@ -662,11 +632,11 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
             for (var e : remainingEdges) {
                 var source = e.source();
                 var target = e.target();
-                if (nodes.containsKey(source.hashCode()) || nodes.containsKey(target.hashCode())) {
-                    if (!nodes.containsKey(source.hashCode())) {
+                if (nodes.containsKey(source.id()) || nodes.containsKey(target.id())) {
+                    if (!nodes.containsKey(source.id())) {
                         addNode(source);
                     }
-                    if (!nodes.containsKey(target.hashCode())) {
+                    if (!nodes.containsKey(target.id())) {
                         addNode(target);
                     }
                     addEdge(e);

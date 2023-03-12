@@ -11,7 +11,7 @@ public class Wilkinson implements CombinerInterface {
     private int r = 1;
 
     @Override
-    public String getName() {
+    public String name() {
         return "wilkinson";
     }
 

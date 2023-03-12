@@ -19,7 +19,7 @@ public class DecoyBuilder {
      * @return true, if the pathway is a decoy
      */
     public static boolean isDecoy(@NotNull Pathway p) {
-        return p.id().endsWith("-decoy");
+        return p.hasCategory("decoy-pathway");
     }
 
     /**
@@ -29,7 +29,7 @@ public class DecoyBuilder {
      * @return list of decoy pathways
      */
     public static List<String> listDecoysWithinRepository(@NotNull Repository r) {
-        return r.stream().filter(DecoyBuilder::isDecoy).map(Pathway::id).toList();
+        return r.getPathwayIdsByCategory("decoy-pathway");
     }
 
     public static DecoyBuilder getInstance() {
@@ -45,8 +45,10 @@ public class DecoyBuilder {
      */
     public Pathway buildSingleDecoy(@NotNull Pathway p, @NotNull List<String> allNodes, @NotNull Map<String, Node> idToNodes, @NotNull Random rng) {
         var g = p.graph();
+        var decoyCategories = new ArrayList<>(p.categories());
+        decoyCategories.add("decoy-pathway");
         var decoyGraph = new Graph();
-        var decoyPathway = new Pathway(p.id() + "-decoy", p.name() + " - Decoy", decoyGraph, p.categories());
+        var decoyPathway = new Pathway(p.id() + "-decoy", p.name() + " - Decoy", decoyGraph, decoyCategories);
         var oldToNew = new HashMap<String, String>();
         var used = new HashSet<String>();
         for (var n : g.nodes().values()) {
@@ -58,10 +60,10 @@ public class DecoyBuilder {
                 }
             }
             oldToNew.put(oldId, newId);
-            g.addNode(new Node(newId, oldId, idToNodes.get(newId).type(), Collections.emptyList()));
+            decoyGraph.addNode(new Node(newId, oldId, idToNodes.get(newId).type(), Collections.emptyList()));
         }
         g.edgesStream().forEach(e -> {
-            String start = oldToNew.get(e.source().id()), end = oldToNew.get(e.source().id());
+            String start = oldToNew.get(e.source().id()), end = oldToNew.get(e.target().id());
             var clonedDetails = e.details().stream().map(e1 -> (EdgeDetail) e1.clone()).collect(Collectors.toList());
             decoyGraph.addEdge(new Edge(decoyGraph.node(start), decoyGraph.node(end), clonedDetails));
         });

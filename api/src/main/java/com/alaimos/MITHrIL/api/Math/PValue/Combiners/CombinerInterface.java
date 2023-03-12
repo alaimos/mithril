@@ -72,7 +72,7 @@ public interface CombinerInterface extends ExtensionPoint {
      *
      * @return the name of the combiner
      */
-    default String getName() {
+    default String name() {
         return "unknown";
     }
 

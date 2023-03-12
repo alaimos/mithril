@@ -8,7 +8,7 @@ import java.util.stream.DoubleStream;
 public class Fisher implements CombinerInterface {
 
     @Override
-    public String getName() {
+    public String name() {
         return "fisher";
     }
 

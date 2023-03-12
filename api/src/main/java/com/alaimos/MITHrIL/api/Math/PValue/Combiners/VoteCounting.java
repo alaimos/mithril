@@ -12,7 +12,7 @@ public class VoteCounting implements CombinerInterface {
     private double max = 0.5;
 
     @Override
-    public String getName() {
+    public String name() {
         return "vote.counting";
     }
 

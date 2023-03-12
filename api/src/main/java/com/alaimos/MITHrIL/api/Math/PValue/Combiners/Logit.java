@@ -8,7 +8,7 @@ import java.util.stream.DoubleStream;
 public class Logit implements CombinerInterface {
 
     @Override
-    public String getName() {
+    public String name() {
         return "logit";
     }
 

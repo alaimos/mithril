@@ -439,6 +439,10 @@ public class Repository implements Collection<Pathway>, Iterable<Pathway>, Clone
                 r.excludedPathways.stream().map(this::get).filter(Objects::nonNull).forEach(selectedPathways::remove);
             }
         }
+        var decoys = DecoyBuilder.listDecoysWithinRepository(this);
+        if (decoys != null && decoys.size() > 0) {
+            selectedPathways.removeIf(p -> decoys.contains(p.id()));
+        }
         return selectedPathways;
     }
 
@@ -524,4 +528,11 @@ public class Repository implements Collection<Pathway>, Iterable<Pathway>, Clone
         }
     }
 
+    @Override
+    public String toString() {
+        return "Repository{" +
+                "pathways=" + pathways +
+                ", virtualPathways=" + virtualPathways +
+                '}';
+    }
 }

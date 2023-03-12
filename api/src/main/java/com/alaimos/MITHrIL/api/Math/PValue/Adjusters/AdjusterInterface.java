@@ -13,7 +13,7 @@ public interface AdjusterInterface extends ExtensionPoint {
      *
      * @return the name of the adjuster
      */
-    default String getName() {
+    default String name() {
         return "unknown";
     }
 

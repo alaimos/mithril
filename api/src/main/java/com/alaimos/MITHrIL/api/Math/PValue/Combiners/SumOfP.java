@@ -9,7 +9,7 @@ import java.util.stream.IntStream;
 public class SumOfP implements CombinerInterface {
 
     @Override
-    public String getName() {
+    public String name() {
         return "sum.of.p";
     }
 

@@ -52,7 +52,7 @@ public class EmpiricalBrownsMethod implements CombinerInterface {
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return "empirical.browns";
     }
 

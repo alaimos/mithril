@@ -5,7 +5,7 @@ import java.util.Arrays;
 public class ProductOfP implements CombinerInterface {
 
     @Override
-    public String getName() {
+    public String name() {
         return "product.of.p";
     }
 

@@ -72,7 +72,6 @@ class GraphTest {
     void node() {
         assertEquals(node1, graph.node("n1"));
         assertEquals(node2, graph.node(node2));
-        assertEquals(node1, graph.node(node1.hashCode()));
     }
 
     @Test
@@ -179,7 +178,7 @@ class GraphTest {
         var index = graph.index();
         assertEquals(4, index.left().size());
         assertEquals(4, index.right().size());
-        assertEquals(node1.hashCode(), index.left().get(index.right().get(node1.hashCode())));
+        assertEquals(node1.id(), index.left().get(index.right().getInt(node1.id())));
     }
 
     @Test
