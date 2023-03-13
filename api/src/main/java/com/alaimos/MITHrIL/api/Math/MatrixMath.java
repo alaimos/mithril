@@ -7,11 +7,8 @@ import java.io.Serializable;
 /**
  * This interface defines the methods that a matrix math implementation must implement.
  * A class that implements this interface should be able to perform serialization and deserialization to save the base matrix.
- *
- * @param <M> the matrix type
- * @param <V> the vector type
  */
-public interface MatrixMath<M, V> extends ExtensionPoint, Serializable {
+public interface MatrixMath extends ExtensionPoint, Serializable {
 
     /**
      * Get the name of the matrix math implementation
@@ -30,7 +27,7 @@ public interface MatrixMath<M, V> extends ExtensionPoint, Serializable {
      * @param rows   the number of rows
      * @param cols   the number of columns
      */
-    void setStoredMatrix(M matrix, int rows, int cols);
+    void setStoredMatrix(double[][] matrix, int rows, int cols);
 
     /**
      * Set the maximum number of threads to use for the operations.
@@ -58,7 +55,7 @@ public interface MatrixMath<M, V> extends ExtensionPoint, Serializable {
      * @param cols   the number of columns
      * @return the inverted matrix
      */
-    M invert(M matrix, int rows, int cols);
+    double[][] invert(double[][] matrix, int rows, int cols);
 
     /**
      * Pre-multiply the base matrix by another matrix and return the result.
@@ -68,7 +65,7 @@ public interface MatrixMath<M, V> extends ExtensionPoint, Serializable {
      * @param cols   the number of columns
      * @return the result of the multiplication
      */
-    M preMultiply(M matrix, int rows, int cols);
+    double[][] preMultiply(double[][] matrix, int rows, int cols);
 
     /**
      * Pre-multiply the base matrix by a vector and return the result.
@@ -76,7 +73,7 @@ public interface MatrixMath<M, V> extends ExtensionPoint, Serializable {
      * @param vector the vector to multiply
      * @return the result of the multiplication
      */
-    V preMultiply(V vector);
+    double[] preMultiply(double[] vector);
 
     /**
      * Post-multiply the base matrix by another matrix and return the result.
@@ -86,7 +83,7 @@ public interface MatrixMath<M, V> extends ExtensionPoint, Serializable {
      * @param cols   the number of columns
      * @return the result of the multiplication
      */
-    M postMultiply(M matrix, int rows, int cols);
+    double[][] postMultiply(double[][] matrix, int rows, int cols);
 
     /**
      * Post-multiply the base matrix by a vector and return the result.
@@ -94,107 +91,6 @@ public interface MatrixMath<M, V> extends ExtensionPoint, Serializable {
      * @param vector the vector to multiply
      * @return the result of the multiplication
      */
-    V postMultiply(V vector);
+    double[] postMultiply(double[] vector);
 
-    /**
-     * Convert an array of double values to a vector.
-     *
-     * @param values the values
-     * @return the vector
-     */
-    V buildVector(double... values);
-
-    /**
-     * Convert an iterable of vector elements to a vector.
-     *
-     * @param size   the size of the vector
-     * @param values the values
-     * @return the vector
-     */
-    V buildVector(int size, Iterable<VectorElement> values);
-
-    /**
-     * Use a generator to build a vector.
-     *
-     * @param size      the size of the vector
-     * @param generator the generator
-     * @return the vector
-     */
-    V buildVector(int size, VectorElementGenerator generator);
-
-    /**
-     * Convert an array of MatrixElement to a matrix.
-     *
-     * @param rows     the number of rows
-     * @param cols     the number of columns
-     * @param elements the elements
-     * @return the matrix
-     */
-    M buildMatrix(int rows, int cols, MatrixElement... elements);
-
-    /**
-     * Convert an iterable of MatrixElement to a matrix.
-     *
-     * @param rows     the number of rows
-     * @param cols     the number of columns
-     * @param elements the elements
-     * @return the matrix
-     */
-    M buildMatrix(int rows, int cols, Iterable<MatrixElement> elements);
-
-    /**
-     * Use a generator to build a matrix.
-     *
-     * @param rows      the number of rows
-     * @param cols      the number of columns
-     * @param generator the generator
-     * @return the matrix
-     */
-    M buildMatrix(int rows, int cols, MatrixElementGenerator generator);
-
-    /**
-     * A lightweight record to store a matrix element.
-     * Used to build a new matrix from a list of elements.
-     * Note that no check is performed on the values of i and j.
-     *
-     * @param i the row index
-     * @param j the column index
-     * @param v the value
-     */
-    record MatrixElement(int i, int j, double v) {
-        @Override
-        public String toString() {
-            return "<" + i + ", " + j + ", " + v + '>';
-        }
-    }
-
-    /**
-     * A functional interface to generate matrix elements.
-     */
-    @FunctionalInterface
-    interface MatrixElementGenerator {
-        double apply(int i, int j);
-    }
-
-    /**
-     * A lightweight record to store a vector element.
-     * Note that no check is performed on the value of i.
-     *
-     * @param i the index
-     * @param v the value
-     */
-    record VectorElement(int i, double v) {
-        @Override
-        public String toString() {
-            return "<" + i + ", " + v + '>';
-        }
-    }
-
-    /**
-     * A functional interface to generate vector elements.
-     */
-    @FunctionalInterface
-    interface VectorElementGenerator {
-        double apply(int i);
-    }
 }
