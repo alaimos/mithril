@@ -16,7 +16,7 @@ public interface RemoteDataReaderInterface<T> extends DataReaderInterface<T> {
      *
      * @return the url
      */
-    String getUrl();
+    String url();
 
     /**
      * Set the url where data can be found
@@ -24,14 +24,14 @@ public interface RemoteDataReaderInterface<T> extends DataReaderInterface<T> {
      * @param url the url
      * @return this object
      */
-    RemoteDataReaderInterface<T> setUrl(String url);
+    RemoteDataReaderInterface<T> url(String url);
 
     /**
      * Is the local file temporary, or is it cached for a certain time?
      *
      * @return true, if the local file is cached
      */
-    boolean isPersisted();
+    boolean persisted();
 
     /**
      * Set if the local file is temporary or should be cached for a certain time
@@ -39,15 +39,13 @@ public interface RemoteDataReaderInterface<T> extends DataReaderInterface<T> {
      * @param persisted true, if the local file should be cached
      * @return this object
      */
-    RemoteDataReaderInterface<T> setPersisted(boolean persisted);
+    RemoteDataReaderInterface<T> persisted(boolean persisted);
 
     /**
      * Set a temporary filename
-     *
-     * @return this object
      */
-    default DataReaderInterface<T> setFile() {
-        return setPersisted(false).setFile("tmp_" + new Date().getTime() + "_" + UUID.randomUUID());
+    default void temporaryFile() {
+        persisted(false).file("tmp_" + new Date().getTime() + "_" + UUID.randomUUID());
     }
 
     /**
@@ -59,7 +57,7 @@ public interface RemoteDataReaderInterface<T> extends DataReaderInterface<T> {
      */
     @Override
     default T read(String u) throws IOException {
-        return setUrl(u).read();
+        return url(u).read();
     }
 
     /**
@@ -71,7 +69,7 @@ public interface RemoteDataReaderInterface<T> extends DataReaderInterface<T> {
      * @throws IOException if something goes wrong
      */
     default T read(String u, String f) throws IOException {
-        return setUrl(u).setFile(f).read();
+        return url(u).file(f).read();
     }
 
 }

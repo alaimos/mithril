@@ -30,8 +30,8 @@ public class BinaryReader<E extends Serializable> extends AbstractDataReader<E> 
      * @return this object for method chaining
      */
     @Override
-    public BinaryReader<E> setFile(String f) {
-        super.setFile(f);
+    public BinaryReader<E> file(String f) {
+        super.file(f);
         isGzipped = true;
         return this;
     }
@@ -42,8 +42,8 @@ public class BinaryReader<E extends Serializable> extends AbstractDataReader<E> 
      * @return this object for method chaining
      */
     @Override
-    public BinaryReader<E> setFile(File f) {
-        super.setFile(f);
+    public BinaryReader<E> file(File f) {
+        super.file(f);
         isGzipped = true;
         return this;
     }

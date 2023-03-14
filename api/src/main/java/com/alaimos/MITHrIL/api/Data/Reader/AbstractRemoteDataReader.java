@@ -18,7 +18,7 @@ public abstract class AbstractRemoteDataReader<T> extends AbstractDataReader<T> 
     protected boolean persisted = true;
 
     static {
-        setMaxTimeCache(Long.parseLong(System.getProperty("com.alaimos.MITHrIL.maxTimeCache", "86400")));
+        maxCacheTime(Long.parseLong(System.getProperty("com.alaimos.MITHrIL.maxTimeCache", "86400")));
     }
 
     /**
@@ -26,7 +26,7 @@ public abstract class AbstractRemoteDataReader<T> extends AbstractDataReader<T> 
      *
      * @return the maximum time in seconds
      */
-    public static long getMaxTimeCache() {
+    public static long maxCacheTime() {
         return maxTimeCache;
     }
 
@@ -35,7 +35,7 @@ public abstract class AbstractRemoteDataReader<T> extends AbstractDataReader<T> 
      *
      * @param maxTimeCache the maximum time in seconds
      */
-    public static void setMaxTimeCache(long maxTimeCache) {
+    public static void maxCacheTime(long maxTimeCache) {
         AbstractRemoteDataReader.maxTimeCache = maxTimeCache;
         AbstractRemoteDataReader.limit = new Date().getTime() - maxTimeCache * 1000;
     }
@@ -46,7 +46,7 @@ public abstract class AbstractRemoteDataReader<T> extends AbstractDataReader<T> 
      * @return the url
      */
     @Override
-    public String getUrl() {
+    public String url() {
         return this.url;
     }
 
@@ -57,7 +57,7 @@ public abstract class AbstractRemoteDataReader<T> extends AbstractDataReader<T> 
      * @return this object
      */
     @Override
-    public RemoteDataReaderInterface<T> setUrl(String url) {
+    public RemoteDataReaderInterface<T> url(String url) {
         this.url = url;
         return this;
     }
@@ -68,7 +68,7 @@ public abstract class AbstractRemoteDataReader<T> extends AbstractDataReader<T> 
      * @return true, if the local file is cached
      */
     @Override
-    public boolean isPersisted() {
+    public boolean persisted() {
         return this.persisted;
     }
 
@@ -79,7 +79,7 @@ public abstract class AbstractRemoteDataReader<T> extends AbstractDataReader<T> 
      * @return this object
      */
     @Override
-    public RemoteDataReaderInterface<T> setPersisted(boolean persisted) {
+    public RemoteDataReaderInterface<T> persisted(boolean persisted) {
         this.persisted = persisted;
         return this;
     }
@@ -92,7 +92,7 @@ public abstract class AbstractRemoteDataReader<T> extends AbstractDataReader<T> 
      */
     @Override
     public T read() throws IOException {
-        if (file == null) this.setFile();
+        if (file == null) this.temporaryFile();
         if (!file.exists() || !persisted || (file.lastModified() < limit)) {
             if (url == null || url.isEmpty()) {
                 throw new IOException("URL is empty!");

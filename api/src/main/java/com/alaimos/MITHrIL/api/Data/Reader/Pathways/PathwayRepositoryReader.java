@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-public class RemoteRepositoryReader extends AbstractRemoteDataReader<Repository> {
+public class PathwayRepositoryReader extends AbstractRemoteDataReader<Repository> {
 
     private static final String SEPARATOR = "\t";
     private static final String LIST_SEPARATOR = ";";
@@ -27,14 +27,14 @@ public class RemoteRepositoryReader extends AbstractRemoteDataReader<Repository>
     private static final String ENDPOINTS_HEADER = "# Endpoints";
     private final HashMap<String, Node> allNodes = new HashMap<>();
 
-    public RemoteRepositoryReader(String url) {
-        setPersisted(true).setUrl(url);
+    public PathwayRepositoryReader(String url) {
+        persisted(true).url(url);
     }
 
     @Override
-    public RemoteDataReaderInterface<Repository> setUrl(String url) {
-        super.setUrl(url);
-        setFile("pathway-repository-" + IOUtils.getName(url));
+    public RemoteDataReaderInterface<Repository> url(String url) {
+        super.url(url);
+        file("pathway-repository-" + IOUtils.getName(url));
         return this;
     }
 
@@ -101,7 +101,7 @@ public class RemoteRepositoryReader extends AbstractRemoteDataReader<Repository>
     }
 
     @Override
-    protected Repository realReader() {
+    protected Repository realReader() throws IOException {
         Repository result = new Repository();
         try (BufferedReader r = new BufferedReader(new InputStreamReader(getInputStream()))) {
             String line;
@@ -139,8 +139,6 @@ public class RemoteRepositoryReader extends AbstractRemoteDataReader<Repository>
                     }
                 }
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
         }
         return result;
     }

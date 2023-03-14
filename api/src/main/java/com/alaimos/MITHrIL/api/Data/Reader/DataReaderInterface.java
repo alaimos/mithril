@@ -15,7 +15,7 @@ public interface DataReaderInterface<T> {
      *
      * @return the filename
      */
-    String getFile();
+    String file();
 
     /**
      * Set the filename where data are stored
@@ -23,7 +23,7 @@ public interface DataReaderInterface<T> {
      * @param f the filename
      * @return this object
      */
-    DataReaderInterface<T> setFile(String f);
+    DataReaderInterface<T> file(String f);
 
     /**
      * Set the file where data are stored
@@ -31,7 +31,7 @@ public interface DataReaderInterface<T> {
      * @param f the filename
      * @return this object
      */
-    DataReaderInterface<T> setFile(File f);
+    DataReaderInterface<T> file(File f);
 
     /**
      * Read data
@@ -50,7 +50,7 @@ public interface DataReaderInterface<T> {
      * @throws IOException if something goes wrong
      */
     default T read(File f) throws IOException {
-        return setFile(f).read();
+        return file(f).read();
     }
 
     /**
@@ -61,7 +61,7 @@ public interface DataReaderInterface<T> {
      * @throws IOException if something goes wrong
      */
     default T read(String f) throws IOException {
-        return setFile(f).read();
+        return file(f).read();
     }
 
 }

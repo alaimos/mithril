@@ -25,7 +25,7 @@ public abstract class AbstractDataReader<T> implements DataReaderInterface<T> {
      * @return this object
      */
     @Override
-    public AbstractDataReader<T> setFile(String f) {
+    public AbstractDataReader<T> file(String f) {
         file = new File(Utils.getAppDir(), f);
         return this;
     }
@@ -37,7 +37,7 @@ public abstract class AbstractDataReader<T> implements DataReaderInterface<T> {
      * @return this object
      */
     @Override
-    public AbstractDataReader<T> setFile(File f) {
+    public AbstractDataReader<T> file(File f) {
         file = f;
         return this;
     }
@@ -48,7 +48,7 @@ public abstract class AbstractDataReader<T> implements DataReaderInterface<T> {
      * @return the filename
      */
     @Override
-    public String getFile() {
+    public String file() {
         return file.getAbsolutePath();
     }
 
@@ -103,7 +103,7 @@ public abstract class AbstractDataReader<T> implements DataReaderInterface<T> {
     @Override
     public T read() throws IOException {
         if (file == null || (!file.exists())) {
-            throw new RuntimeException("Filename is not set or file does not exists.");
+            throw new IOException("Filename is not set or file does not exists.");
         }
         return realReader();
     }
