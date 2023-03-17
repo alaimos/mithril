@@ -25,7 +25,7 @@ public class EdgeTypeRepository extends TextFileRecordRepository<EdgeType> {
     protected void init() {
         File f = getFileObject();
         if (!f.exists()) {
-            Utils.download(Constants.COMMONS_EDGE_TYPE, f);
+            Utils.download(Constants.INSTANCE.get("commons_edge_type"), f);
         }
     }
 

@@ -3,7 +3,7 @@ package com.alaimos.MITHrIL.api.CommandLine.Interfaces;
 /**
  * Options interface
  */
-public interface Options {
+public interface OptionsInterface {
 
     /**
      * Checks if the help has been requested

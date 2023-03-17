@@ -7,11 +7,7 @@ import org.pf4j.PluginFactory;
 
 public class PluginManager extends DefaultPluginManager {
 
-    private static final PluginManager INSTANCE = new PluginManager();
-
-    public static PluginManager getInstance() {
-        return INSTANCE;
-    }
+    public static final PluginManager INSTANCE = new PluginManager();
 
     private PluginManager() {
         super();

@@ -25,7 +25,7 @@ public class NodeTypeRepository extends TextFileRecordRepository<NodeType> {
     protected void init() {
         File f = getFileObject();
         if (!f.exists()) {
-            Utils.download(Constants.COMMONS_NODE_TYPE, f);
+            Utils.download(Constants.INSTANCE.get("commons_node_type"), f);
         }
     }
 

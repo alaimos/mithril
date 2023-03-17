@@ -1,12 +1,12 @@
 package com.alaimos.MITHrIL.api.CommandLine;
 
-import com.alaimos.MITHrIL.api.CommandLine.Interfaces.Options;
+import com.alaimos.MITHrIL.api.CommandLine.Interfaces.OptionsInterface;
 import org.kohsuke.args4j.Option;
 
 /**
  * Default implementation of getHelp method for Options class
  */
-public abstract class AbstractOptions implements Options {
+public abstract class AbstractOptions implements OptionsInterface {
 
     @Option(name = "-h", aliases = {"--help"}, usage = "Print this message", help = true)
     protected boolean help = false;

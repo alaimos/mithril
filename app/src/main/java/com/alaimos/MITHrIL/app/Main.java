@@ -2,6 +2,7 @@ package com.alaimos.MITHrIL.app;
 
 
 import com.alaimos.MITHrIL.api.Commons.Utils;
+import com.alaimos.MITHrIL.app.CommandLine.ServiceRunner;
 import com.alaimos.MITHrIL.app.Plugins.PluginManager;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -14,10 +15,10 @@ public class Main {
     public static void main(String[] args) {
         try {
             printLogo();
-            var pluginManager = PluginManager.getInstance();
+            var pluginManager = PluginManager.INSTANCE;
             pluginManager.loadPlugins();
             pluginManager.startPlugins();
-            Utils.getAppDir();
+            new ServiceRunner("MITHrIL2.jar", args).run();
             Runtime.getRuntime().addShutdownHook(new Thread(pluginManager::stopPlugins));
         } catch (Throwable e) {
             log.error(e.getMessage(), e);

@@ -1,34 +1,28 @@
 package com.alaimos.MITHrIL.app.CommandLine;
 
-import com.alaimos.MITHrIL.api.CommandLine.InputParametersException;
-import com.alaimos.MITHrIL.api.CommandLine.Interfaces.Service;
+import com.alaimos.MITHrIL.api.CommandLine.Interfaces.ServiceInterface;
+import com.alaimos.MITHrIL.app.Plugins.PluginManager;
 import dnl.utils.text.table.TextTable;
-import org.kohsuke.args4j.CmdLineException;
+import org.jetbrains.annotations.NotNull;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.OptionHandlerFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.ServiceLoader;
 
-/**
- * This class runs command line services
- *
- * @author Salvatore Alaimo, Ph.D.
- * @version 2.0.0.0
- * @since 05/01/2016
- */
 public class ServiceRunner implements Runnable {
 
-    private String executable;
+    private static final Logger log = LoggerFactory.getLogger(ServiceRunner.class);
 
-    private String[] args;
+    private final String executable;
 
-    private ServiceLoader<Service> loader;
+    private final String[] args;
 
-    private HashMap<String, Service> services = new HashMap<>();
+    private final HashMap<String, ServiceInterface> services = new HashMap<>();
 
     /**
      * Create the service runner
@@ -38,7 +32,6 @@ public class ServiceRunner implements Runnable {
     public ServiceRunner(String executable, String[] args) {
         this.executable = executable;
         this.args = args;
-        loader = ServiceLoader.load(Service.class);
         fillServicesMap();
     }
 
@@ -46,7 +39,7 @@ public class ServiceRunner implements Runnable {
      * Gets the list of all available services
      */
     private void fillServicesMap() {
-        loader.forEach(s -> {
+        PluginManager.INSTANCE.getExtensions(ServiceInterface.class).forEach(s -> {
             if (services.containsKey(s.getShortName())) {
                 throw new RuntimeException("Duplicated service name: " + s.getShortName());
             }
@@ -54,7 +47,7 @@ public class ServiceRunner implements Runnable {
         });
     }
 
-    private void printMainUsage(PrintStream out) {
+    private void printMainUsage(@NotNull PrintStream out) {
         out.println("java -jar " + executable + " [serviceName] arguments...\n\nAvailable services:\n");
         var columns = new String[]{"Name", "Description"};
         var data = services.values().stream().map(s -> new String[]{s.getShortName(), s.getDescription()}).toArray(String[][]::new);
@@ -62,7 +55,7 @@ public class ServiceRunner implements Runnable {
         new TextTable(columns, data).printTable(out, 3);
     }
 
-    private void printServiceUsage(PrintStream out, String serviceName, CmdLineParser parser) {
+    private void printServiceUsage(@NotNull PrintStream out, String serviceName, @NotNull CmdLineParser parser) {
         out.println("java -jar " + executable + " " + serviceName + " [options...] arguments...");
         parser.printUsage(out);
         out.println();
@@ -72,12 +65,12 @@ public class ServiceRunner implements Runnable {
     @Override
     public void run() {
         if (args.length == 0) {
-            printMainUsage(System.out);
+            printMainUsage(System.err);
             System.exit(1);
         } else {
             var serviceName = args[0];
             if (!services.containsKey(serviceName)) {
-                System.err.println("Unrecognized service: " + serviceName);
+                log.error("Unrecognized service: " + serviceName);
                 printMainUsage(System.err);
                 System.exit(2);
             } else {
@@ -90,13 +83,13 @@ public class ServiceRunner implements Runnable {
                 try {
                     parser.parseArgument(others);
                     if (service.getOptions().getHelp()) {
-                        printServiceUsage(System.out, serviceName, parser);
+                        printServiceUsage(System.err, serviceName, parser);
                         System.exit(1);
                     }
                     service.run();
                     System.exit(0);
-                } catch (CmdLineException | InputParametersException e) {
-                    System.err.println(e.getMessage());
+                } catch (Throwable e) {
+                    log.error("Error while running service " + serviceName, e);
                     printServiceUsage(System.err, serviceName, parser);
                     System.exit(3);
                 }

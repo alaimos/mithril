@@ -5,12 +5,12 @@ import org.pf4j.ExtensionPoint;
 /**
  * A command line service
  */
-public interface Service extends Runnable, ExtensionPoint {
+public interface ServiceInterface extends Runnable, ExtensionPoint {
 
     String getShortName();
 
     String getDescription();
 
-    Options getOptions();
+    OptionsInterface getOptions();
 
 }

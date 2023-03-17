@@ -14,7 +14,7 @@ public class RemoteVersionReader extends AbstractRemoteDataReader<String> {
 
     private void init() {
         setGzipped(false);
-        persisted(true).url(Constants.MITHRIL_VERSION_URL).file(Constants.MITHRIL_VERSION_FILE);
+        persisted(true).url(Constants.INSTANCE.get("mithril_version_url")).file(Constants.INSTANCE.get("mithril_version_file"));
     }
 
     @Override

@@ -447,6 +447,20 @@ public class Repository implements Collection<Pathway>, Iterable<Pathway>, Clone
     }
 
     /**
+     * Extend all pathways contained in this repository with the nodes and edges of another graph.
+     * This is an iterative process, and it is different from the metapathway build operation.
+     * First, all the edges with both source and target nodes in this graph are added.
+     * Then, until no more edges can be added, all the edges with at least one node in this graph are added.
+     * The process stops when the set of edges to be added is empty,
+     * or when the number of edges in the graph does not change.
+     *
+     * @param other The other graph
+     */
+    public void extendWith(@NotNull Graph other) {
+        pathways.forEach((s, p) -> p.graph().extendWith(other));
+    }
+
+    /**
      * Build a metapathway from the repository
      *
      * @param filters                pathway filters

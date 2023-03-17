@@ -25,7 +25,7 @@ public class EdgeSubtypeRepository extends TextFileRecordRepository<EdgeSubtype>
     protected void init() {
         File f = getFileObject();
         if (!f.exists()) {
-            Utils.download(Constants.COMMONS_EDGE_SUBTYPE, f);
+            Utils.download(Constants.INSTANCE.get("commons_edge_subtype"), f);
         }
     }
 
