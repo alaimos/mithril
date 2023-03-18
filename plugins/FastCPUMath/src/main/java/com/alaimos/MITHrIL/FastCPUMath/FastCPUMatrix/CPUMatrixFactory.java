@@ -1,25 +1,32 @@
-package com.alaimos.MITHrIL.api.Math;
+package com.alaimos.MITHrIL.FastCPUMath.FastCPUMatrix;
 
-import org.pf4j.ExtensionPoint;
+import com.alaimos.MITHrIL.api.Math.MatrixFactoryInterface;
+import com.alaimos.MITHrIL.api.Math.MatrixInterface;
+import org.pf4j.Extension;
 
-public interface MatrixFactory<E extends MatrixInterface<E>> extends ExtensionPoint {
+@Extension
+public class CPUMatrixFactory implements MatrixFactoryInterface<CPUMatrix> {
 
     /**
      * Get the name of the matrix implementation
      *
      * @return the name
      */
-    String name();
+    @Override
+    public String name() {
+        return "fast-cpu";
+    }
 
     /**
      * Set the maximum number of threads to use for the operations.
-     * This operation is not guaranteed to be supported by all implementations.
-     * Some implementations may ignore this setting.
-     * Refer to the documentation of the implementation you are using.
+     * The operation is SUPPORTED by this implementation, but it is not guaranteed to be respected by the underlying library.
      *
      * @param maxThreads the maximum number of threads
      */
-    void setMaxThreads(int maxThreads);
+    @Override
+    public void setMaxThreads(int maxThreads) {
+        // do nothing
+    }
 
     /**
      * Create a new matrix from a 2D array
@@ -27,7 +34,10 @@ public interface MatrixFactory<E extends MatrixInterface<E>> extends ExtensionPo
      * @param matrix the 2D array (array of rows that is the first index is the row number)
      * @return a new matrix
      */
-    E of(double[][] matrix);
+    @Override
+    public CPUMatrix of(double[][] matrix) {
+        return new CPUMatrix(matrix);
+    }
 
     /**
      * Create a new matrix from a 1D array.
@@ -40,7 +50,10 @@ public interface MatrixFactory<E extends MatrixInterface<E>> extends ExtensionPo
      * @param columns the number of columns
      * @return a new matrix
      */
-    E of(double[] matrix, int rows, int columns);
+    @Override
+    public CPUMatrix of(double[] matrix, int rows, int columns) {
+        return new CPUMatrix(matrix, rows, columns);
+    }
 
     /**
      * Create a new matrix from a 2D array.
@@ -49,7 +62,10 @@ public interface MatrixFactory<E extends MatrixInterface<E>> extends ExtensionPo
      * @param direction the direction of the array (ROW: the array stores the matrix by rows, COLUMN: the array stores the matrix by columns)
      * @return a new matrix
      */
-    E of(double[][] matrix, MatrixInterface.Direction direction);
+    @Override
+    public CPUMatrix of(double[][] matrix, MatrixInterface.Direction direction) {
+        return new CPUMatrix(matrix, direction);
+    }
 
     /**
      * Create a new matrix from a matrix of another type.
@@ -59,6 +75,8 @@ public interface MatrixFactory<E extends MatrixInterface<E>> extends ExtensionPo
      * @param matrix the matrix to convert
      * @return a new matrix
      */
-    E of(MatrixInterface<?> matrix);
-
+    @Override
+    public CPUMatrix of(MatrixInterface<?> matrix) {
+        return new CPUMatrix(matrix);
+    }
 }

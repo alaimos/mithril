@@ -1,14 +1,14 @@
 package com.alaimos.MITHrIL.api.Math;
 
+import java.io.Closeable;
 import java.io.Serializable;
-import java.util.function.Function;
 
 /**
  * This interface defines the interface of a nearly immutable matrix with some common operations.
  * The matrix is nearly immutable because it is possible to invert or transpose it in place to save memory.
  * A class that implements this interface should be able to perform serialization and deserialization to save the status.
  */
-public interface MatrixInterface<E extends MatrixInterface<?>> extends Serializable {
+public interface MatrixInterface<E extends MatrixInterface<?>> extends Closeable, Serializable {
 
     /**
      * Transpose the matrix
@@ -111,32 +111,18 @@ public interface MatrixInterface<E extends MatrixInterface<?>> extends Serializa
     int columns();
 
     /**
-     * Apply a function to the matrix.
-     * The function is applied to each row or column of the matrix depending on the direction.
-     * The function receives a double array and returns a double array.
+     * Get the raw matrix as a 2D array
      *
-     * @param function  the function
-     * @param direction the direction
-     * @return a new matrix
+     * @return the raw matrix
      */
-    E apply(Function<double[], double[]> function, Direction direction);
+    double[][] raw2D();
 
     /**
-     * Apply a function to each element of the matrix.
-     * The function receives the value of the element, the row and the column indexes.
+     * Get the raw matrix as a 1D array
      *
-     * @param function the function
-     * @return a new matrix
+     * @return the raw matrix
      */
-    E apply(ElementwiseFunction function);
-
-    /**
-     * Interface for a function that receives a double value, the row and the column indexes and returns a double value.
-     */
-    @FunctionalInterface
-    interface ElementwiseFunction {
-        double apply(double v, int i, int j);
-    }
+    double[] raw1D();
 
     /**
      * Enum for the direction of the function application

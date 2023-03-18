@@ -2,6 +2,7 @@ package com.alaimos.MITHrIL.app;
 
 
 import com.alaimos.MITHrIL.api.Commons.Utils;
+import com.alaimos.MITHrIL.api.Math.MatrixFactoryInterface;
 import com.alaimos.MITHrIL.app.CommandLine.ServiceRunner;
 import com.alaimos.MITHrIL.app.Plugins.PluginManager;
 import org.apache.commons.lang3.StringUtils;
@@ -18,8 +19,8 @@ public class Main {
             var pluginManager = PluginManager.INSTANCE;
             pluginManager.loadPlugins();
             pluginManager.startPlugins();
-            new ServiceRunner("MITHrIL2.jar", args).run();
             Runtime.getRuntime().addShutdownHook(new Thread(pluginManager::stopPlugins));
+            new ServiceRunner("MITHrIL2.jar", args).run();
         } catch (Throwable e) {
             log.error(e.getMessage(), e);
             if (log.isDebugEnabled()) {

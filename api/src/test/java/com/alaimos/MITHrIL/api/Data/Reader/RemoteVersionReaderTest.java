@@ -13,7 +13,7 @@ class RemoteVersionReaderTest {
     @Test
     void read() throws IOException {
         var reader = new RemoteVersionReader();
-        var version = reader.read(Constants.INSTANCE.get("mithril_version_file"));
+        var version = reader.read();
         assertNotNull(version);
         assertTrue(version.matches("\\d+\\.\\d+\\.\\d+(\\.\\d+)?(-SNAPSHOT)?"));
     }
