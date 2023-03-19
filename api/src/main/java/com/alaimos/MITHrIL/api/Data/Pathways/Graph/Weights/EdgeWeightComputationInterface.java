@@ -7,7 +7,7 @@ import org.pf4j.ExtensionPoint;
  * Compute the weight of an edge
  */
 @FunctionalInterface
-public interface WeightComputationInterface extends ExtensionPoint {
+public interface EdgeWeightComputationInterface extends ExtensionPoint {
 
     default String name() {
         return "unknown";

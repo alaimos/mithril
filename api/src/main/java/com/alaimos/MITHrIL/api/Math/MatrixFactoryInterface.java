@@ -2,6 +2,8 @@ package com.alaimos.MITHrIL.api.Math;
 
 import org.pf4j.ExtensionPoint;
 
+import java.io.IOException;
+
 public interface MatrixFactoryInterface<E extends MatrixInterface<E>> extends ExtensionPoint {
 
     /**

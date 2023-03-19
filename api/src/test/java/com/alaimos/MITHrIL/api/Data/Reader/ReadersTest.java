@@ -1,5 +1,6 @@
-package com.alaimos.MITHrIL.api.Data.Reader.Pathways;
+package com.alaimos.MITHrIL.api.Data.Reader;
 
+import com.alaimos.MITHrIL.api.Data.Reader.Pathways.SpeciesDatabaseReader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

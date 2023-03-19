@@ -1,6 +1,6 @@
 package com.alaimos.MITHrIL.api.Data.Pathways.Graph;
 
-import com.alaimos.MITHrIL.api.Data.Pathways.Graph.Weights.DefaultWeightComputationMethod;
+import com.alaimos.MITHrIL.api.Data.Pathways.Graph.Weights.DefaultEdgeWeightComputationMethod;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,7 @@ class EdgeTest {
         edge1 = new Edge(node1, node2, new EdgeDetail("pprel", "activation"));
         edge2 = new Edge(node1, node2, new EdgeDetail("pprel", "activation"));
         edge3 = new Edge(node1, node3, List.of(new EdgeDetail("pprel", "missing_interaction"), new EdgeDetail("pprel", "inhibition")));
-        Edge.setWeightComputationMethod(new DefaultWeightComputationMethod());
+        Edge.setWeightComputationMethod(new DefaultEdgeWeightComputationMethod());
     }
 
     @DisplayName("Test edge fields")

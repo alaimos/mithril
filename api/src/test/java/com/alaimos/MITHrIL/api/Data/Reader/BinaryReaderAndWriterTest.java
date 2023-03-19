@@ -1,4 +1,4 @@
-package com.alaimos.MITHrIL.api.Data;
+package com.alaimos.MITHrIL.api.Data.Reader;
 
 import com.alaimos.MITHrIL.api.Commons.Utils;
 import com.alaimos.MITHrIL.api.Data.Reader.BinaryReader;

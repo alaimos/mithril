@@ -10,16 +10,17 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serial;
+import java.util.Arrays;
+import java.util.Objects;
 
-import static org.bytedeco.pytorch.global.torch.dtype;
-import static org.bytedeco.pytorch.global.torch.zeros;
+import static org.bytedeco.pytorch.global.torch.*;
 
 public class CPUMatrix implements MatrixInterface<CPUMatrix> {
 
     @Serial
     private static final long serialVersionUID = -8761988017888622755L;
 
-    private transient Tensor internalMatrix;
+    private transient Tensor tensor;
 
     private transient DoublePointer pointer = null;
 
@@ -30,7 +31,9 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
     private int columns;
 
     private CPUMatrix(Tensor matrix, int rows, int columns) {
-        internalMatrix = matrix;
+        tensor = matrix;
+        this.rows = rows;
+        this.columns = columns;
     }
 
     public CPUMatrix(double[][] matrix) {
@@ -53,28 +56,20 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
     }
 
     public CPUMatrix(double[] matrix, int rows, int columns) {
-        internalMatrix = tensorFromArray(matrix, new long[]{rows, columns});
+        tensor = tensorFromArray(matrix, new long[]{rows, columns});
         this.rows = rows;
         this.columns = columns;
     }
 
     public CPUMatrix(@NotNull MatrixInterface<?> matrix) {
         if (matrix instanceof CPUMatrix dm) {
-            internalMatrix = dm.internalMatrix;
+            tensor = dm.tensor;
             rows = dm.rows;
             columns = dm.columns;
         } else {
-            internalMatrix = tensorFromArray(matrix.raw1D(), new long[]{matrix.rows(), matrix.columns()});
+            tensor = tensorFromArray(matrix.raw1D(), new long[]{matrix.rows(), matrix.columns()});
             rows = matrix.rows();
             columns = matrix.columns();
-        }
-    }
-
-    private void readData() {
-        if (pointer == null) {
-            pointer = internalMatrix.data_ptr_double();
-            data = new double[rows * columns];
-            pointer.get(data);
         }
     }
 
@@ -85,7 +80,9 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
      */
     @Override
     public CPUMatrix transpose() {
-        return new CPUMatrix(internalMatrix.t(), columns, rows);
+        try (var tmp = tensor.t()) {
+            return new CPUMatrix(tmp.contiguous(), columns, rows);
+        }
     }
 
     /**
@@ -93,17 +90,12 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
      */
     @Override
     public void transposeInPlace() {
-        if (pointer != null) {
-            data = null;
-            pointer.close();
-            pointer = null;
+        closePointer();
+        try (var tmp = tensor.t()) {
+            tensor.close();
+            tensor = tmp.contiguous();
         }
-        var oldInternal = internalMatrix;
-        var tmp = rows;
-        internalMatrix = internalMatrix.t();
-        oldInternal.close();
-        rows = columns;
-        columns = tmp;
+        swapSize();
     }
 
     /**
@@ -114,7 +106,7 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
      */
     @Override
     public CPUMatrix invert() {
-        return new CPUMatrix(internalMatrix.pinverse(), rows, columns);
+        return new CPUMatrix(tensor.pinverse(), columns, rows);
     }
 
     /**
@@ -123,14 +115,12 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
      */
     @Override
     public void invertInPlace() {
-        if (pointer != null) {
-            data = null;
-            pointer.close();
-            pointer = null;
-        }
-        var oldInternal = internalMatrix;
-        internalMatrix = internalMatrix.pinverse();
+        closePointer();
+        var oldInternal = tensor;
+        tensor = tensor.pinverse();
         oldInternal.close();
+        // The pseudo-inverse of an m-by-n rectangular matrix is an n-by-m matrix
+        swapSize();
     }
 
     /**
@@ -144,7 +134,7 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
     public CPUMatrix preMultiply(MatrixInterface<?> matrix) {
         if (matrix instanceof CPUMatrix dm) {
             var rows = dm.rows();
-            return new CPUMatrix(dm.internalMatrix.matmul(internalMatrix), rows, columns);
+            return new CPUMatrix(dm.tensor.matmul(tensor), rows, columns);
         } else {
             return new CPUMatrix(matrix).preMultiply(this);
         }
@@ -160,7 +150,7 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
     @Override
     public double[] preMultiply(double[] vector) {
         try (var vectorTensor = tensorFromArray(vector, new long[]{1, vector.length});
-             var result = vectorTensor.matmul(internalMatrix)) {
+             var result = vectorTensor.matmul(tensor)) {
             return tensorToArray(result);
         }
     }
@@ -176,7 +166,7 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
     public CPUMatrix postMultiply(MatrixInterface<?> matrix) {
         if (matrix instanceof CPUMatrix dm) {
             var columns = dm.columns();
-            return new CPUMatrix(internalMatrix.matmul(dm.internalMatrix), rows, columns);
+            return new CPUMatrix(tensor.matmul(dm.tensor), rows, columns);
         } else {
             return this.postMultiply(new CPUMatrix(matrix));
         }
@@ -191,7 +181,7 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
     @Override
     public double[] postMultiply(double[] vector) {
         try (var vectorTensor = tensorFromArray(vector, new long[]{vector.length, 1});
-             var result = internalMatrix.matmul(vectorTensor)) {
+             var result = tensor.matmul(vectorTensor)) {
             return tensorToArray(result);
         }
     }
@@ -205,7 +195,7 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
      */
     @Override
     public double val(int i, int j) {
-        readData();
+        openPointer();
         return data[i * columns + j];
     }
 
@@ -217,7 +207,7 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
      */
     @Override
     public double[] row(int i) {
-        readData();
+        openPointer();
         var row = new double[columns];
         System.arraycopy(data, i * columns, row, 0, columns);
         return row;
@@ -231,7 +221,7 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
      */
     @Override
     public double[] column(int j) {
-        readData();
+        openPointer();
         var column = new double[rows];
         for (var i = 0; i < rows; i++) {
             column[i] = data[i * columns + j];
@@ -266,6 +256,7 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
      */
     @Override
     public double[][] raw2D() {
+        openPointer();
         var dataMatrix = new double[rows][columns];
         for (var i = 0; i < rows; i++) {
             System.arraycopy(data, i * columns, dataMatrix[i], 0, columns);
@@ -279,24 +270,22 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
      * @return the raw matrix
      */
     public double[] raw1D() {
-        readData();
+        openPointer();
         return data;
     }
 
-    @Serial
-    private void writeObject(@NotNull ObjectOutputStream oos) throws IOException {
-        oos.defaultWriteObject();
-        oos.writeObject(this.raw1D());
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o instanceof MatrixInterface<?> mi)
+            return rows() == mi.rows() && columns() == mi.columns() && Arrays.equals(raw1D(), mi.raw1D());
+        return false;
     }
 
-    @Serial
-    private void readObject(@NotNull ObjectInputStream ois) throws ClassNotFoundException, IOException {
-        ois.defaultReadObject();
-        double[] raw = (double[]) ois.readObject();
-        internalMatrix = zeros(new long[]{rows, columns}, dtype(torch.ScalarType.Double));
-        try (var ptr = internalMatrix.data_ptr_double()) {
-            ptr.put(raw);
-        }
+    @Override
+    public int hashCode() {
+        Object tmp = raw1D();
+        return Objects.hash(tmp, rows(), columns());
     }
 
     /**
@@ -304,12 +293,21 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
      */
     @Override
     public void close() {
-        if (pointer != null) {
-            data = null;
-            pointer.close();
-            pointer = null;
-        }
-        internalMatrix.close();
+        closePointer();
+        tensor.close();
+    }
+
+    @Serial
+    private void writeObject(@NotNull ObjectOutputStream oos) throws IOException {
+        oos.defaultWriteObject();
+        oos.writeObject(raw1D());
+    }
+
+    @Serial
+    private void readObject(@NotNull ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        double[] raw = (double[]) ois.readObject();
+        tensor = tensorFromArray(raw, new long[]{rows, columns});
     }
 
     private static double @NotNull [] vectorFromMatrixByRow(double @NotNull [] @NotNull [] matrix) {
@@ -350,4 +348,35 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
         return array;
     }
 
+    /**
+     * Open a pointer to the underlying pytorch tensor and preload the data into a double array
+     */
+    private void openPointer() {
+        if (pointer == null) {
+            pointer = tensor.data_ptr_double();
+            data = new double[rows * columns];
+            pointer.get(data);
+        }
+    }
+
+    /**
+     * Close the pointer to the underlying pytorch tensor and free the double array
+     */
+    private void closePointer() {
+        if (pointer != null) {
+            data = null;
+            pointer.close();
+            pointer = null;
+        }
+    }
+
+    /**
+     * Swap the size of the matrix if needed
+     */
+    private void swapSize() {
+        if (rows == columns) return;
+        var tmp = rows;
+        rows = columns;
+        columns = tmp;
+    }
 }

@@ -216,6 +216,16 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
     }
 
     /**
+     * Returns a collection of edges ingoing in a node.
+     *
+     * @param n the node
+     * @return a collection of edges
+     */
+    public Collection<Edge> ingoingEdges(@NotNull Node n) {
+        return incomingEdges.getOrDefault(n.id(), Collections.emptyMap()).values();
+    }
+
+    /**
      * Create a stream of all the edges outgoing from a node.
      * The stream is wrapped in an Optional object to avoid NullPointerExceptions.
      *
@@ -224,6 +234,16 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      */
     public Optional<Stream<Node>> outgoingNodesStream(@NotNull Node n) {
         return Optional.of(outgoingEdges.get(n.id())).map(m -> m.values().stream().map(Edge::target));
+    }
+
+    /**
+     * Returns a collection of edges outgoing from a node.
+     *
+     * @param n the node
+     * @return a collection of edges
+     */
+    public Collection<Edge> outgoingEdges(@NotNull Node n) {
+        return outgoingEdges.getOrDefault(n.id(), Collections.emptyMap()).values();
     }
 
     /**
@@ -590,20 +610,20 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
 
     /**
      * Create a bidirectional index between a contiguous sequence integers
-     * (1 to N, where N is the number of nodes) and node hash codes.
+     * (1 to N, where N is the number of nodes) and node ids.
      *
-     * @return A pair of maps, the first maps from index to hash code, the second from hash code to index
+     * @return A pair of maps, the first maps from index to id, the second from id to index
      */
     public Pair<Int2ObjectMap<String>, Object2IntOpenHashMap<String>> index() {
-        var index2Hash = new Int2ObjectOpenHashMap<String>();
-        var hash2Index = new Object2IntOpenHashMap<String>();
+        var index2Id = new Int2ObjectOpenHashMap<String>();
+        var id2Index = new Object2IntOpenHashMap<String>();
         int i = 0;
         for (var n : nodes.values()) {
-            index2Hash.put(i, n.id());
-            hash2Index.put(n.id(), i);
+            index2Id.put(i, n.id());
+            id2Index.put(n.id(), i);
             i++;
         }
-        return Pair.of(index2Hash, hash2Index);
+        return Pair.of(index2Id, id2Index);
     }
 
     /**

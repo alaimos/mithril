@@ -3,7 +3,7 @@ package com.alaimos.MITHrIL.api.Data.Pathways.Graph.Weights;
 import com.alaimos.MITHrIL.api.Data.Pathways.Graph.Edge;
 import org.jetbrains.annotations.NotNull;
 
-public class DefaultWeightComputationMethod implements WeightComputationInterface {
+public class DefaultEdgeWeightComputationMethod implements EdgeWeightComputationInterface {
     @Override
     public String name() {
         return "default";

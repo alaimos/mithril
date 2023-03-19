@@ -7,6 +7,8 @@ import org.ojalgo.matrix.decomposition.QR;
 import org.ojalgo.matrix.decomposition.SingularValue;
 
 import java.io.*;
+import java.util.Arrays;
+import java.util.Objects;
 
 public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
 
@@ -225,7 +227,37 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
 //     * @return the raw matrix
 //     */
     public double[] raw1D() {
-        return internalMatrix.toRawCopy1D();
+        var rows = rows();
+        var columns = columns();
+        var receiver = new double[rows * columns];
+        var tmpMatrix = raw2D();
+        for (int i = 0; i < rows; i++) {
+            System.arraycopy(tmpMatrix[i], 0, receiver, i * columns, columns);
+        }
+        return receiver;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o instanceof MatrixInterface<?> mi)
+            return rows() == mi.rows() && columns() == mi.columns() && Arrays.equals(raw1D(), mi.raw1D());
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        Object tmp = raw1D();
+        return Objects.hash(tmp, rows(), columns());
+    }
+
+    /**
+     * Releases all resources associated with this matrix.
+     * For this implementation, it is not necessary to call this method.
+     */
+    @Override
+    public void close() {
+        internalMatrix = null;
     }
 
     @Serial
@@ -241,12 +273,4 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
         internalMatrix = Primitive64Matrix.FACTORY.rows(raw);
     }
 
-    /**
-     * Releases all resources associated with this matrix.
-     * For this implementation, it is not necessary to call this method.
-     */
-    @Override
-    public void close() {
-        internalMatrix = null;
-    }
 }

@@ -1,6 +1,6 @@
 package com.alaimos.MITHrIL.api.Data.Pathways.Graph;
 
-import com.alaimos.MITHrIL.api.Data.Pathways.Graph.Weights.WeightComputationInterface;
+import com.alaimos.MITHrIL.api.Data.Pathways.Graph.Weights.EdgeWeightComputationInterface;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serial;
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  */
 public class Edge implements Cloneable, Serializable {
 
-    private static WeightComputationInterface weightComputationMethod = null;
+    private static EdgeWeightComputationInterface weightComputationMethod = null;
     @Serial
     private static final long serialVersionUID = 6045908408087788911L;
     private final Node source;
@@ -58,7 +58,7 @@ public class Edge implements Cloneable, Serializable {
         return (this.details.size() > 1);
     }
 
-    public static void setWeightComputationMethod(WeightComputationInterface w) {
+    public static void setWeightComputationMethod(EdgeWeightComputationInterface w) {
         weightComputationMethod = w;
     }
 

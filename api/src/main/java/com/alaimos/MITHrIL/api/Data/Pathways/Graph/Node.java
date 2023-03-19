@@ -1,5 +1,6 @@
 package com.alaimos.MITHrIL.api.Data.Pathways.Graph;
 
+import com.alaimos.MITHrIL.api.Data.Pathways.Graph.Weights.NodeWeightComputationInterface;
 import com.alaimos.MITHrIL.api.Data.Pathways.Types.NodeType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -13,12 +14,14 @@ import java.util.Objects;
  */
 public class Node implements Comparable<Node>, Cloneable, Serializable {
 
+    private static NodeWeightComputationInterface weightComputationMethod = null;
     @Serial
     private static final long serialVersionUID = 9051335523535138069L;
     private final String id;
     private final String name;
     private final List<String> aliases;
     private transient NodeType type;
+    private transient double weight = Double.NaN;
 
     @SuppressWarnings("CopyConstructorMissesField")
     @Contract(pure = true)
@@ -51,6 +54,15 @@ public class Node implements Comparable<Node>, Cloneable, Serializable {
      */
     public Node(String id, String name, String type, List<String> aliases) {
         this(id, name, NodeType.fromString(type), aliases);
+    }
+
+    /**
+     * Set the weight computation method
+     *
+     * @param w the method
+     */
+    public static void setWeightComputationMethod(NodeWeightComputationInterface w) {
+        weightComputationMethod = w;
     }
 
     /**
@@ -87,6 +99,19 @@ public class Node implements Comparable<Node>, Cloneable, Serializable {
      */
     public NodeType type() {
         return this.type;
+    }
+
+    /**
+     * Compute the weight of this node
+     *
+     * @return the weight
+     */
+    public double weight() {
+        if (weightComputationMethod == null) {
+            throw new RuntimeException("Weight computation procedure is not set.");
+        }
+        if (!Double.isNaN(weight)) return weight;
+        return weight = weightComputationMethod.weight(this);
     }
 
     /**
