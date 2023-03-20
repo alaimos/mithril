@@ -2,7 +2,6 @@ package com.alaimos.MITHrIL.app;
 
 
 import com.alaimos.MITHrIL.api.Commons.Utils;
-import com.alaimos.MITHrIL.api.Math.MatrixFactoryInterface;
 import com.alaimos.MITHrIL.app.CommandLine.ServiceRunner;
 import com.alaimos.MITHrIL.app.Plugins.PluginManager;
 import org.apache.commons.lang3.StringUtils;
