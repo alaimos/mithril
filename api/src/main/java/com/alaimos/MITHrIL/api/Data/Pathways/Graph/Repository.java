@@ -1,6 +1,9 @@
 package com.alaimos.MITHrIL.api.Data.Pathways.Graph;
 
 import it.unimi.dsi.fastutil.Pair;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -176,28 +179,28 @@ public class Repository implements Collection<Pathway>, Iterable<Pathway>, Clone
      *
      * @return a set of virtual pathway ids
      */
-    public Set<String> getVirtualPathways() {
-        return virtualPathways.keySet();
+    public Collection<VirtualPathway> virtualPathways() {
+        return virtualPathways.values();
     }
 
     /**
      * Check if a virtual pathway is contained in the repository
      *
-     * @param virtualPathwayId virtual pathway id
+     * @param id virtual pathway id
      * @return true if the virtual pathway is contained in the repository
      */
-    public boolean hasVirtualPathway(String virtualPathwayId) {
-        return virtualPathways.containsKey(virtualPathwayId);
+    public boolean hasVirtualPathway(String id) {
+        return virtualPathways.containsKey(id);
     }
 
     /**
      * Get a virtual pathway by its id
      *
-     * @param virtualPathwayId virtual pathway id
+     * @param id virtual pathway id
      * @return the virtual pathway or null if it is not contained in the repository
      */
-    public VirtualPathway getVirtualPathway(String virtualPathwayId) {
-        return virtualPathways.get(virtualPathwayId);
+    public VirtualPathway virtualPathway(String id) {
+        return virtualPathways.get(id);
     }
 
     /**
@@ -411,6 +414,28 @@ public class Repository implements Collection<Pathway>, Iterable<Pathway>, Clone
     @Override
     public int hashCode() {
         return Objects.hash(pathways, virtualPathways);
+    }
+
+    /**
+     * Create a bidirectional index between a contiguous sequence integers
+     * (1 to N, where N is the total number of virtual pathways) and pathway ids.
+     * This method works only for a metapathway repository.
+     *
+     * @return A pair of maps, the first maps from index to id, the second from id to index
+     */
+    public Pair<Int2ObjectMap<String>, Object2IntOpenHashMap<String>> indexMetapathway() {
+        if (defaultPathway == null || !defaultPathway.equals("metapathway")) {
+            return null;
+        }
+        var index2Id = new Int2ObjectOpenHashMap<String>();
+        var id2Index = new Object2IntOpenHashMap<String>();
+        int i = 0;
+        for (var p : this.virtualPathways.values()) {
+            index2Id.put(i, p.id());
+            id2Index.put(p.id(), i);
+            i++;
+        }
+        return Pair.of(index2Id, id2Index);
     }
 
     /**

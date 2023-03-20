@@ -130,9 +130,9 @@ class RepositoryTest {
         assertTrue(ep.contains("n6"));
         assertTrue(ep.contains("n8"));
         assertFalse(ep.contains("n44"));
-        assertNotNull(metapathwayRepository.getVirtualPathway("p1"));
+        assertNotNull(metapathwayRepository.virtualPathway("p1"));
         var mp = metapathwayRepository.get().graph();
-        var nodes = metapathwayRepository.getVirtualPathway("p1").nodes();
+        var nodes = metapathwayRepository.virtualPathway("p1").nodes();
         assertEquals(4, nodes.size());
         assertTrue(nodes.contains(mp.node("n1")));
         assertTrue(nodes.contains(mp.node("n2")));

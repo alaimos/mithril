@@ -1,21 +1,21 @@
 package com.alaimos.MITHrIL.app.Data.Writer;
 
 import com.alaimos.MITHrIL.api.Commons.IOUtils;
-import com.alaimos.MITHrIL.api.Data.Pathways.Graph.Pathway;
+import com.alaimos.MITHrIL.api.Data.Pathways.Graph.Repository;
 import com.alaimos.MITHrIL.api.Data.Writer.BinaryWriter;
 import com.alaimos.MITHrIL.api.Data.Writer.DataWriterInterface;
-import com.alaimos.MITHrIL.app.Data.Records.PathwayMatrix;
+import com.alaimos.MITHrIL.app.Data.Records.RepositoryMatrix;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
 
-public class PathwayMatrixWriter implements DataWriterInterface<PathwayMatrix> {
+public class RepositoryMatrixWriter implements DataWriterInterface<RepositoryMatrix> {
 
-    private final BinaryWriter<PathwayMatrix> writer = new BinaryWriter<>();
+    private final BinaryWriter<RepositoryMatrix> writer = new BinaryWriter<>();
 
-    public PathwayMatrixWriter(@NotNull Pathway p) {
-        writer.file(IOUtils.sanitizeFilename("pathway-matrix-" + p.id() + "-" + p.hashCode() + ".bin"));
+    public RepositoryMatrixWriter(@NotNull Repository r) {
+        writer.file(IOUtils.sanitizeFilename("repository-matrix-" + r.hashCode() + ".bin"));
     }
 
     /**
@@ -35,7 +35,7 @@ public class PathwayMatrixWriter implements DataWriterInterface<PathwayMatrix> {
      * @return this object for a fluent interface
      */
     @Override
-    public DataWriterInterface<PathwayMatrix> file(File f) {
+    public DataWriterInterface<RepositoryMatrix> file(File f) {
         return this;
     }
 
@@ -47,7 +47,7 @@ public class PathwayMatrixWriter implements DataWriterInterface<PathwayMatrix> {
      * @throws IOException if an I/O error occurs
      */
     @Override
-    public DataWriterInterface<PathwayMatrix> write(PathwayMatrix data) throws IOException {
+    public DataWriterInterface<RepositoryMatrix> write(RepositoryMatrix data) throws IOException {
         writer.write(data);
         return this;
     }

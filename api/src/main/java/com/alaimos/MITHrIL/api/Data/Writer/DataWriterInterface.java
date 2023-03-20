@@ -17,7 +17,7 @@ public interface DataWriterInterface<T> {
      *
      * @return the file
      */
-    File getFile();
+    File file();
 
     /**
      * Set the filename where data are stored (the file will be created in the application directory)
@@ -25,8 +25,8 @@ public interface DataWriterInterface<T> {
      * @param f the filename
      * @return this object for a fluent interface
      */
-    default DataWriterInterface<T> setFile(String f) {
-        setFile(new File(Utils.getAppDir(), f));
+    default DataWriterInterface<T> file(String f) {
+        file(new File(Utils.getAppDir(), f));
         return this;
     }
 
@@ -36,7 +36,7 @@ public interface DataWriterInterface<T> {
      * @param f the filename
      * @return this object for a fluent interface
      */
-    DataWriterInterface<T> setFile(File f);
+    DataWriterInterface<T> file(File f);
 
     /**
      * Write data
@@ -52,11 +52,10 @@ public interface DataWriterInterface<T> {
      *
      * @param f    the filename
      * @param data the data that will be written into a file
-     * @return this object for a fluent interface
      * @throws IOException if an I/O error occurs
      */
-    default DataWriterInterface<T> write(String f, T data) throws IOException {
-        return setFile(f).write(data);
+    default void write(String f, T data) throws IOException {
+        file(f).write(data);
     }
 
     /**
@@ -68,7 +67,7 @@ public interface DataWriterInterface<T> {
      * @throws IOException if an I/O error occurs
      */
     default DataWriterInterface<T> write(File f, T data) throws IOException {
-        return setFile(f).write(data);
+        return file(f).write(data);
     }
 
 }

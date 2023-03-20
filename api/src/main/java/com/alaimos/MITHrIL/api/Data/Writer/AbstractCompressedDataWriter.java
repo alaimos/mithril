@@ -18,7 +18,7 @@ public abstract class AbstractCompressedDataWriter<T> extends AbstractDataWriter
      * @return an output stream
      * @throws IOException if an error occurs
      */
-    protected OutputStream getOutputStream(boolean append) throws IOException {
+    protected OutputStream outputStream(boolean append) throws IOException {
         return new GZIPOutputStream(new FileOutputStream(file));
     }
 

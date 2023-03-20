@@ -5,25 +5,27 @@ import com.alaimos.MITHrIL.api.Data.Pathways.Graph.Graph;
 import com.alaimos.MITHrIL.api.Data.Pathways.Graph.Node;
 import com.alaimos.MITHrIL.api.Data.Pathways.Graph.Pathway;
 import com.alaimos.MITHrIL.api.Math.MatrixFactoryInterface;
-import com.alaimos.MITHrIL.api.Math.MatrixInterface;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import com.alaimos.MITHrIL.app.Data.Records.PathwayMatrix;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.Serial;
-import java.io.Serializable;
+public class PathwayMatrixBuilder {
 
-public class PathwayMatrixBuilder<E extends MatrixInterface<E>> {
-
-    private final MatrixFactoryInterface<E> factory;
+    private final MatrixFactoryInterface<?> factory;
     private final Object2DoubleMap<Node> absoluteWeights = new Object2DoubleOpenHashMap<>();
 
-    public PathwayMatrixBuilder(MatrixFactoryInterface<E> factory) {
+    public PathwayMatrixBuilder(MatrixFactoryInterface<?> factory) {
         this.factory = factory;
     }
 
+    /**
+     * Compute the normalization weight for a column of the matrix
+     *
+     * @param g a graph
+     * @param u a node corresponding to a column of the matrix
+     * @return the normalization weight
+     */
     private double absoluteTotalWeight(Graph g, Node u) {
         if (absoluteWeights.containsKey(u)) return absoluteWeights.getDouble(u);
         double weight = 0.0;
@@ -45,11 +47,12 @@ public class PathwayMatrixBuilder<E extends MatrixInterface<E>> {
      * @param p a pathway
      * @return a pair containing the matrix and a pair containing the indexes of nodes and the reverse map
      */
-    public BuilderResult<E> build(@NotNull Pathway p) {
-        var indexes = p.graph().index();
-        var id2index = indexes.right();
-        var n = id2index.size();
+    public PathwayMatrix build(@NotNull Pathway p) {
+        absoluteWeights.clear();
         var g = p.graph();
+        var indexes = g.index();
+        var id2Index = indexes.right();
+        var n = id2Index.size();
         var data = new double[n * n];
         Edge e;
         double wT;
@@ -58,8 +61,8 @@ public class PathwayMatrixBuilder<E extends MatrixInterface<E>> {
             wT = absoluteTotalWeight(g, g.node(e1.getKey()));
             for (var e2 : e1.getValue().entrySet()) {
                 e = e2.getValue();
-                u = id2index.getInt(e.source().id());
-                v = id2index.getInt(e.target().id());
+                u = id2Index.getInt(e.source().id());
+                v = id2Index.getInt(e.target().id());
                 i = v * n + u;
                 data[i] = -e.weight() / wT;
                 if (!Double.isFinite(data[i])) {
@@ -71,13 +74,7 @@ public class PathwayMatrixBuilder<E extends MatrixInterface<E>> {
             data[i * n + i] = 1.0;
         }
         var matrix = factory.of(data, n, n);
-        return new BuilderResult<>(matrix, indexes.left(), id2index);
-    }
-
-    public record BuilderResult<E extends MatrixInterface<E>>(E matrix, Int2ObjectMap<String> index2id,
-                                                              Object2IntOpenHashMap<String> id2index) implements Serializable {
-        @Serial
-        private static final long serialVersionUID = -5989518583031549995L;
+        return PathwayMatrix.of(p, matrix, indexes.left(), id2Index);
     }
 
 }

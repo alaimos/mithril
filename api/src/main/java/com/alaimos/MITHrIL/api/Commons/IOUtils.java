@@ -2,20 +2,6 @@ package com.alaimos.MITHrIL.api.Commons;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.lang.reflect.Array;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.regex.Pattern;
 
 public final class IOUtils {
 
@@ -35,7 +21,7 @@ public final class IOUtils {
      * The position of the last forward or backslash is returned.
      * The output will be the same irrespective of the machine that the code is running on.
      *
-     * @param filename  the filename to find the last path separator in, null returns -1
+     * @param filename the filename to find the last path separator in, null returns -1
      * @return the index of the last separator character, or -1 if there
      * is no such character
      */
@@ -58,7 +44,7 @@ public final class IOUtils {
      * a/b/c/    --> ""
      * The output will be the same irrespective of the machine that the code is running on.
      *
-     * @param filename  the filename to query, null returns null
+     * @param filename the filename to query, null returns null
      * @return the name of the file without the path, or an empty string if none exists
      */
     public static String getName(String filename) {
@@ -67,6 +53,19 @@ public final class IOUtils {
         }
         int index = indexOfLastSeparator(filename);
         return filename.substring(index + 1);
+    }
+
+    /**
+     * Sanitize a filename by replacing all non-allowed characters with a dash.
+     * The allowed characters are: a-z, A-Z, 0-9, dot, dash and underscore.
+     * This method should be used only for filenames, not for paths.
+     *
+     * @param filename the filename to sanitize
+     * @return the sanitized filename
+     */
+    @Contract(pure = true)
+    public static @NotNull String sanitizeFilename(@NotNull String filename) {
+        return filename.replaceAll("[^a-zA-Z0-9._-]", "-");
     }
 
 

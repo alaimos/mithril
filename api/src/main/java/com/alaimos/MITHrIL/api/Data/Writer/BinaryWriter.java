@@ -20,7 +20,7 @@ public class BinaryWriter<E extends Serializable> extends AbstractDataWriter<E> 
      */
     @Override
     public DataWriterInterface<E> write(E data) throws IOException {
-        try (ObjectOutputStream os = new ObjectOutputStream(new GZIPOutputStream(getOutputStream()))) {
+        try (ObjectOutputStream os = new ObjectOutputStream(new GZIPOutputStream(outputStream()))) {
             os.writeObject(data);
         }
         return this;

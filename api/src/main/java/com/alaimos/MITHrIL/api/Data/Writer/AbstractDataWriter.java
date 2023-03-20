@@ -20,8 +20,8 @@ public abstract class AbstractDataWriter<T> implements DataWriterInterface<T> {
      * @return the output stream
      * @throws IOException if an I/O error occurs
      */
-    protected OutputStream getOutputStream() throws IOException {
-        return getOutputStream(false);
+    protected OutputStream outputStream() throws IOException {
+        return outputStream(false);
     }
 
     /**
@@ -32,7 +32,7 @@ public abstract class AbstractDataWriter<T> implements DataWriterInterface<T> {
      * @return the output stream
      * @throws IOException if an I/O error occurs
      */
-    protected OutputStream getOutputStream(boolean append) throws IOException {
+    protected OutputStream outputStream(boolean append) throws IOException {
         return new FileOutputStream(file, append);
     }
 
@@ -126,7 +126,7 @@ public abstract class AbstractDataWriter<T> implements DataWriterInterface<T> {
      * @return the filename
      */
     @Override
-    public File getFile() {
+    public File file() {
         return file;
     }
 
@@ -137,7 +137,7 @@ public abstract class AbstractDataWriter<T> implements DataWriterInterface<T> {
      * @return this object
      */
     @Override
-    public DataWriterInterface<T> setFile(File f) {
+    public DataWriterInterface<T> file(File f) {
         this.file = f;
         return this;
     }
