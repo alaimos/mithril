@@ -1,10 +1,11 @@
 package com.alaimos.MITHrIL.api.Math;
 
+import com.alaimos.MITHrIL.api.CommandLine.Extensions.ExtensionInterface;
 import org.pf4j.ExtensionPoint;
 
 import java.io.IOException;
 
-public interface MatrixFactoryInterface<E extends MatrixInterface<E>> extends ExtensionPoint {
+public interface MatrixFactoryInterface<E extends MatrixInterface<E>> extends ExtensionInterface {
 
     /**
      * Get the name of the matrix implementation

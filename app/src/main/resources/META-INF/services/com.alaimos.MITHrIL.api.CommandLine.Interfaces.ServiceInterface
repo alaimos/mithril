@@ -1,2 +1,4 @@
 com.alaimos.MITHrIL.app.CommandLine.Services.VersioningService
 com.alaimos.MITHrIL.app.CommandLine.Services.OrganismsService
+com.alaimos.MITHrIL.app.CommandLine.Services.ExtensionsService
+com.alaimos.MITHrIL.app.CommandLine.Services.DisplayCategoriesService

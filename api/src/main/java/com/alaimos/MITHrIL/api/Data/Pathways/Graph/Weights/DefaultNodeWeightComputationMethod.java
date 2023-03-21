@@ -9,6 +9,10 @@ public class DefaultNodeWeightComputationMethod implements NodeWeightComputation
         return "default";
     }
 
+    public String description() {
+        return "Default node weight computation method";
+    }
+
     @Override
     public double weight(@NotNull Node n) {
         return n.type().sign();

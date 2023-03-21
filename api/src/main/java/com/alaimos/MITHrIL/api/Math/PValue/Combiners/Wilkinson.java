@@ -15,6 +15,11 @@ public class Wilkinson implements CombinerInterface {
         return "wilkinson";
     }
 
+    @Override
+    public String description() {
+        return "Wilkinson's method";
+    }
+
     public int getR() {
         return r;
     }

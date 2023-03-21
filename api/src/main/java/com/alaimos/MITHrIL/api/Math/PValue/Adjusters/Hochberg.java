@@ -16,6 +16,11 @@ public class Hochberg implements AdjusterInterface {
         return "hochberg";
     }
 
+    @Override
+    public String description() {
+        return "Hochberg (1988) method";
+    }
+
     /**
      * Given a set of p-values, returns p-values adjusted using the Hochberg (1988) method
      *

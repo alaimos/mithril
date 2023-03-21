@@ -16,6 +16,11 @@ public class Holm implements AdjusterInterface {
         return "holm";
     }
 
+    @Override
+    public String description() {
+        return "Holm (1979) method";
+    }
+
     /**
      * Given a set of p-values, returns p-values adjusted using the Holm (1979) method
      *

@@ -1,6 +1,7 @@
 package com.alaimos.MITHrIL.app;
 
 
+import com.alaimos.MITHrIL.api.CommandLine.Extensions.ExtensionManager;
 import com.alaimos.MITHrIL.api.Commons.Utils;
 import com.alaimos.MITHrIL.app.CommandLine.ServiceRunner;
 import com.alaimos.MITHrIL.app.Plugins.PluginManager;
@@ -19,6 +20,7 @@ public class Main {
             pluginManager.loadPlugins();
             pluginManager.startPlugins();
             Runtime.getRuntime().addShutdownHook(new Thread(pluginManager::stopPlugins));
+            ExtensionManager.setDefaultPluginManager(pluginManager);
             new ServiceRunner("MITHrIL2.jar", args).run();
         } catch (Throwable e) {
             log.error(e.getMessage(), e);

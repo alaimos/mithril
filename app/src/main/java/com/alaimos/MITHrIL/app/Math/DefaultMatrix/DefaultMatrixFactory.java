@@ -16,6 +16,11 @@ public class DefaultMatrixFactory implements MatrixFactoryInterface<DefaultMatri
         return "default";
     }
 
+    @Override
+    public String description() {
+        return "The default matrix implementation which uses ojAlgo library for a pure Java-based matrix implementation";
+    }
+
     /**
      * Set the maximum number of threads to use for the operations.
      * The operation is SUPPORTED by this implementation, but it is not guaranteed to be respected by the underlying library.

@@ -17,6 +17,11 @@ public class CPUMatrixFactory implements MatrixFactoryInterface<CPUMatrix> {
         return "fast-cpu";
     }
 
+    @Override
+    public String description() {
+        return "A fast CPU matrix implementation based on the pytorch library. It is not always supported (for example on M1 macs), but it is faster than the default implementation based on the ojAlgo library.";
+    }
+
     /**
      * Set the maximum number of threads to use for the operations.
      * The operation is SUPPORTED by this implementation, but it is not guaranteed to be respected by the underlying library.

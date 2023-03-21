@@ -14,6 +14,11 @@ public class None implements AdjusterInterface {
         return "none";
     }
 
+    @Override
+    public String description() {
+        return "No adjustment";
+    }
+
     /**
      * Given a set of p-values, returns p-values adjusted using Benjamini & Yekutieli (2001) method
      *

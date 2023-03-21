@@ -12,6 +12,11 @@ public class Fisher implements CombinerInterface {
         return "fisher";
     }
 
+    @Override
+    public String description() {
+        return "Fisher's method";
+    }
+
     /**
      * Combine p-values by Fisher's method, that is the sum of logs method
      *

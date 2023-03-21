@@ -16,6 +16,11 @@ public class BenjaminiYekutieli implements AdjusterInterface {
         return "benjamini.yekutieli";
     }
 
+    @Override
+    public String description() {
+        return "Benjamini & Yekutieli (2001) method";
+    }
+
     /**
      * Given a set of p-values, returns p-values adjusted using Benjamini & Yekutieli (2001) method
      *

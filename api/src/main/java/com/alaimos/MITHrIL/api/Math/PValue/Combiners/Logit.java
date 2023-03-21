@@ -12,6 +12,11 @@ public class Logit implements CombinerInterface {
         return "logit";
     }
 
+    @Override
+    public String description() {
+        return "Logit method";
+    }
+
     /**
      * Combine p-values using logit method
      *

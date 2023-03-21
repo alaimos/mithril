@@ -14,6 +14,11 @@ public class Bonferroni implements AdjusterInterface {
         return "bonferroni";
     }
 
+    @Override
+    public String description() {
+        return "Bonferroni method";
+    }
+
     /**
      * Given a set of p-values, returns p-values adjusted using the Bonferroni method
      *

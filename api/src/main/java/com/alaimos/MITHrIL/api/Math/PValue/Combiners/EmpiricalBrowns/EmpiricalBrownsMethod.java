@@ -56,6 +56,11 @@ public class EmpiricalBrownsMethod implements CombinerInterface {
         return "empirical.browns";
     }
 
+    @Override
+    public String description() {
+        return "Empirical Brown's method";
+    }
+
     /**
      * Combine p-values using the empirical Brown's method
      *

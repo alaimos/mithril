@@ -1,5 +1,6 @@
 package com.alaimos.MITHrIL.api.Math.PValue.Combiners;
 
+import com.alaimos.MITHrIL.api.CommandLine.Extensions.ExtensionInterface;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.pf4j.ExtensionPoint;
@@ -13,7 +14,7 @@ import java.util.stream.IntStream;
  * A function which combines input p-values
  */
 @FunctionalInterface
-public interface CombinerInterface extends ExtensionPoint {
+public interface CombinerInterface extends ExtensionInterface {
 
     /**
      * Checks if all p-values have the same value

@@ -13,6 +13,11 @@ public class SumOfP implements CombinerInterface {
         return "sum.of.p";
     }
 
+    @Override
+    public String description() {
+        return "Sum of p-values method";
+    }
+
     /**
      * Combine p-values using the sum p method
      *

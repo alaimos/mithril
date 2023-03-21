@@ -16,6 +16,11 @@ public class BenjaminiHochberg implements AdjusterInterface {
         return "benjamini.hochberg";
     }
 
+    @Override
+    public String description() {
+        return "Benjamini & Hochberg (1995) method";
+    }
+
     /**
      * Given a set of p-values, returns p-values adjusted using the Benjamini & Hochberg (1995) method
      *

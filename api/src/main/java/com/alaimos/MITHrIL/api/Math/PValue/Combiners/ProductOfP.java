@@ -9,6 +9,11 @@ public class ProductOfP implements CombinerInterface {
         return "product.of.p";
     }
 
+    @Override
+    public String description() {
+        return "Product of p-values method";
+    }
+
     /**
      * Combine p-values using the product of p method
      *

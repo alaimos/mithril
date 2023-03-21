@@ -12,6 +12,11 @@ public class Mean implements CombinerInterface {
         return "mean";
     }
 
+    @Override
+    public String description() {
+        return "Mean of p-values method";
+    }
+
     /**
      * Combine p-values by the mean p method
      *

@@ -16,6 +16,11 @@ public class VoteCounting implements CombinerInterface {
         return "vote.counting";
     }
 
+    @Override
+    public String description() {
+        return "Vote Counting method";
+    }
+
     public double getMin() {
         return min;
     }
@@ -35,7 +40,7 @@ public class VoteCounting implements CombinerInterface {
     }
 
     /**
-     * Combine p-values using Wilkinson's method
+     * Combine p-values using Vote Counting method
      *
      * @param pValues some p-values
      * @return a combined p-value

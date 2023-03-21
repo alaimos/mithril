@@ -12,6 +12,11 @@ public class Stouffer implements CombinerInterface {
         return "stouffer";
     }
 
+    @Override
+    public String description() {
+        return "Stouffer's method";
+    }
+
     /**
      * Combine p-values by Stouffer's method, that is the sum of z method
      *

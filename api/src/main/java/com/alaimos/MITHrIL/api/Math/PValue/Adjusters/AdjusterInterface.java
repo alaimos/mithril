@@ -1,12 +1,13 @@
 package com.alaimos.MITHrIL.api.Math.PValue.Adjusters;
 
+import com.alaimos.MITHrIL.api.CommandLine.Extensions.ExtensionInterface;
 import org.pf4j.ExtensionPoint;
 
 /**
  * A function which adjusts p-values on multiple hypotheses
  */
 @FunctionalInterface
-public interface AdjusterInterface extends ExtensionPoint {
+public interface AdjusterInterface extends ExtensionInterface {
 
     /**
      * Returns the name of the adjuster

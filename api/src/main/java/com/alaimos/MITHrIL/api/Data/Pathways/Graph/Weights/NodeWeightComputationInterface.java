@@ -1,5 +1,6 @@
 package com.alaimos.MITHrIL.api.Data.Pathways.Graph.Weights;
 
+import com.alaimos.MITHrIL.api.CommandLine.Extensions.ExtensionInterface;
 import com.alaimos.MITHrIL.api.Data.Pathways.Graph.Node;
 import org.pf4j.ExtensionPoint;
 
@@ -7,7 +8,7 @@ import org.pf4j.ExtensionPoint;
  * Compute the weight of a node
  */
 @FunctionalInterface
-public interface NodeWeightComputationInterface extends ExtensionPoint {
+public interface NodeWeightComputationInterface extends ExtensionInterface {
 
     default String name() {
         return "unknown";

@@ -9,6 +9,10 @@ public class DefaultEdgeWeightComputationMethod implements EdgeWeightComputation
         return "default";
     }
 
+    public String description() {
+        return "Default edge weight computation method";
+    }
+
     @Override
     public double weight(@NotNull Edge e) {
         if (!e.isMultiEdge()) {
