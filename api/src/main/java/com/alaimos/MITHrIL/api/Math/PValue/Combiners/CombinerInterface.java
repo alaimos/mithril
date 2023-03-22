@@ -1,9 +1,9 @@
 package com.alaimos.MITHrIL.api.Math.PValue.Combiners;
 
 import com.alaimos.MITHrIL.api.CommandLine.Extensions.ExtensionInterface;
+import com.alaimos.MITHrIL.api.Commons.Utils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.pf4j.ExtensionPoint;
 
 import java.util.Arrays;
 import java.util.function.DoublePredicate;
@@ -74,7 +74,7 @@ public interface CombinerInterface extends ExtensionInterface {
      * @return the name of the combiner
      */
     default String name() {
-        return "unknown";
+        return Utils.camelCaseToDotCase(getClass().getSimpleName());
     }
 
     /**

@@ -165,4 +165,13 @@ public final class Utils {
         }
     }
 
+    /**
+     * Converts a camel case string (i.e.: HelloWorld) to a dot case string (i.e.: hello.world)
+     * @param s the string
+     * @return the converted string
+     */
+    public static @NotNull String camelCaseToDotCase(@NotNull String s) {
+        return s.replaceAll("([a-z])([A-Z])", "$1.$2").toLowerCase();
+    }
+
 }

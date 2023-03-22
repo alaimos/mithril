@@ -6,7 +6,10 @@ import org.ojalgo.matrix.Primitive64Matrix;
 import org.ojalgo.matrix.decomposition.QR;
 import org.ojalgo.matrix.decomposition.SingularValue;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serial;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -235,6 +238,26 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
             System.arraycopy(tmpMatrix[i], 0, receiver, i * columns, columns);
         }
         return receiver;
+    }
+
+    @Override
+    public double[] applyFunction(VectorToScalarFunction function, Direction direction) {
+        var result = new double[direction == Direction.ROW ? rows() : columns()];
+        for (var i = 0; i < result.length; i++) {
+            result[i] = function.apply(direction == Direction.ROW ? row(i) : column(i), i);
+        }
+        return result;
+    }
+
+    @Override
+    public MatrixInterface<?> applyFunction(ElementwiseFunction function) {
+        double[][] result = new double[rows()][columns()];
+        for (var i = 0; i < rows(); i++) {
+            for (var j = 0; j < columns(); j++) {
+                result[i][j] = function.apply(val(i, j), i, j);
+            }
+        }
+        return new DefaultMatrix(result);
     }
 
     @Override

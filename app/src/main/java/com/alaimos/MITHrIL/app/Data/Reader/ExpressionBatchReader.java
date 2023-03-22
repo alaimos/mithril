@@ -2,6 +2,7 @@ package com.alaimos.MITHrIL.app.Data.Reader;
 
 import com.alaimos.MITHrIL.api.Commons.IOUtils;
 import com.alaimos.MITHrIL.api.Data.Reader.AbstractDataReader;
+import com.alaimos.MITHrIL.app.Data.Records.ExpressionInput;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
@@ -11,12 +12,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Read a batched MITHrIL input file as a map of experiments-gene-expression values
  */
-public class ExpressionBatchReader extends AbstractDataReader<Map<String, Object2DoubleMap<String>>> {
+public class ExpressionBatchReader extends AbstractDataReader<Map<String, ExpressionInput>> {
 
     public ExpressionBatchReader() {
     }
@@ -28,9 +31,10 @@ public class ExpressionBatchReader extends AbstractDataReader<Map<String, Object
     }
 
     @Override
-    protected Map<String, Object2DoubleMap<String>> realReader() throws IOException {
+    protected Map<String, ExpressionInput> realReader() throws IOException {
         var map = new Int2ObjectOpenHashMap<String>();
-        var result = new HashMap<String, Object2DoubleMap<String>>();
+        var nodesSet = new HashSet<String>();
+        var expressions = new HashMap<String, Object2DoubleMap<String>>();
         try (var r = new BufferedReader(new InputStreamReader(getInputStream()))) {
             var line = r.readLine();
             if (line == null) throw new RuntimeException("Invalid input file: file is empty");
@@ -39,7 +43,7 @@ public class ExpressionBatchReader extends AbstractDataReader<Map<String, Object
                 s[i] = IOUtils.sanitizeFilename(s[i]).trim();
                 if (s[i].isEmpty()) throw new RuntimeException("Invalid input file: empty experiment name found");
                 map.put((i + 1), s[i]);
-                result.put(s[i], new Object2DoubleOpenHashMap<>());
+                expressions.put(s[i], new Object2DoubleOpenHashMap<>());
             }
             var nextLinesSize = map.size() + 1;
             double value;
@@ -50,6 +54,7 @@ public class ExpressionBatchReader extends AbstractDataReader<Map<String, Object
                 if (s.length < nextLinesSize) continue;
                 var node = s[0].trim();
                 if (node.isEmpty()) continue;
+                nodesSet.add(node);
                 for (var i = 1; i < s.length; i++) {
                     s[i] = s[i].trim();
                     value = 0.0;
@@ -61,10 +66,11 @@ public class ExpressionBatchReader extends AbstractDataReader<Map<String, Object
                         }
                         if (Double.isNaN(value)) value = 0.0;
                     }
-                    result.get(map.get(i)).put(node, value);
+                    expressions.get(map.get(i)).put(node, value);
                 }
             }
         }
-        return result;
+        var nodes = nodesSet.toArray(new String[0]);
+        return expressions.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> new ExpressionInput(nodes, e.getValue())));
     }
 }

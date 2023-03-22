@@ -1,18 +1,19 @@
 package com.alaimos.MITHrIL.app.Data.Reader;
 
 import com.alaimos.MITHrIL.api.Data.Reader.AbstractDataReader;
-import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
+import com.alaimos.MITHrIL.app.Data.Records.ExpressionInput;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.HashSet;
 
 /**
  * Read MITHrIL input file as a map of gene-expression values
  */
-public class ExpressionMapReader extends AbstractDataReader<Object2DoubleMap<String>> {
+public class ExpressionMapReader extends AbstractDataReader<ExpressionInput> {
 
     public ExpressionMapReader() {
     }
@@ -24,8 +25,9 @@ public class ExpressionMapReader extends AbstractDataReader<Object2DoubleMap<Str
     }
 
     @Override
-    protected Object2DoubleMap<String> realReader() throws IOException {
-        var result = new Object2DoubleOpenHashMap<String>();
+    protected ExpressionInput realReader() throws IOException {
+        var expressionMap = new Object2DoubleOpenHashMap<String>();
+        var nodes = new HashSet<String>();
         try (var r = new BufferedReader(new InputStreamReader(getInputStream()))) {
             String line;
             String[] s;
@@ -36,6 +38,7 @@ public class ExpressionMapReader extends AbstractDataReader<Object2DoubleMap<Str
                 if (s.length < 1) continue;
                 String node = s[0].trim();
                 if (node.isEmpty()) continue;
+                nodes.add(node);
                 var value = 0.0;
                 if (s.length >= 2 && !s[1].equalsIgnoreCase("null") && !s[1].equalsIgnoreCase("na")) {
                     try {
@@ -45,9 +48,9 @@ public class ExpressionMapReader extends AbstractDataReader<Object2DoubleMap<Str
                     }
                     if (Double.isNaN(value)) value = 0.0;
                 }
-                result.put(node, value);
+                if (value != 0.0) expressionMap.put(node, value);
             }
         }
-        return result;
+        return new ExpressionInput(nodes.toArray(new String[0]), expressionMap);
     }
 }

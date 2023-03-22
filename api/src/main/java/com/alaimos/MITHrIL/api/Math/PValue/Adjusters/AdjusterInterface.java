@@ -1,6 +1,7 @@
 package com.alaimos.MITHrIL.api.Math.PValue.Adjusters;
 
 import com.alaimos.MITHrIL.api.CommandLine.Extensions.ExtensionInterface;
+import com.alaimos.MITHrIL.api.Commons.Utils;
 import org.pf4j.ExtensionPoint;
 
 /**
@@ -15,7 +16,7 @@ public interface AdjusterInterface extends ExtensionInterface {
      * @return the name of the adjuster
      */
     default String name() {
-        return "unknown";
+        return Utils.camelCaseToDotCase(getClass().getSimpleName());
     }
 
     /**

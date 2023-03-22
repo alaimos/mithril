@@ -13,7 +13,8 @@ import java.io.Serial;
 import java.util.Arrays;
 import java.util.Objects;
 
-import static org.bytedeco.pytorch.global.torch.*;
+import static org.bytedeco.pytorch.global.torch.dtype;
+import static org.bytedeco.pytorch.global.torch.zeros;
 
 public class CPUMatrix implements MatrixInterface<CPUMatrix> {
 
@@ -269,9 +270,30 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
      *
      * @return the raw matrix
      */
+    @Override
     public double[] raw1D() {
         openPointer();
         return data;
+    }
+
+    @Override
+    public double[] applyFunction(VectorToScalarFunction function, Direction direction) {
+        var result = new double[direction == Direction.ROW ? rows : columns];
+        for (var i = 0; i < result.length; i++) {
+            result[i] = function.apply(direction == Direction.ROW ? row(i) : column(i), i);
+        }
+        return result;
+    }
+
+    @Override
+    public MatrixInterface<?> applyFunction(ElementwiseFunction function) {
+        double[] result = new double[rows * columns];
+        for (var i = 0; i < rows; i++) {
+            for (var j = 0; j < columns; j++) {
+                result[i * columns + j] = function.apply(val(i, j), i, j);
+            }
+        }
+        return new CPUMatrix(result, rows, columns);
     }
 
     @Override

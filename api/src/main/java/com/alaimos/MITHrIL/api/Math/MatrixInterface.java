@@ -2,6 +2,7 @@ package com.alaimos.MITHrIL.api.Math;
 
 import java.io.Closeable;
 import java.io.Serializable;
+import java.util.function.Function;
 
 /**
  * This interface defines the interface of a nearly immutable matrix with some common operations.
@@ -123,6 +124,20 @@ public interface MatrixInterface<E extends MatrixInterface<?>> extends Closeable
      * @return the raw matrix
      */
     double[] raw1D();
+
+    double[] applyFunction(VectorToScalarFunction function, Direction direction);
+
+    MatrixInterface<?> applyFunction(ElementwiseFunction function);
+
+    @FunctionalInterface
+    interface ElementwiseFunction {
+        double apply(double value, int i, int j);
+    }
+
+    @FunctionalInterface
+    interface VectorToScalarFunction {
+        double apply(double[] vector, int index);
+    }
 
     /**
      * Enum for the direction of the function application
