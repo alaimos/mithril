@@ -120,7 +120,10 @@ public class Repository implements Collection<Pathway>, Iterable<Pathway>, Clone
      * @return a list of pathways
      */
     public List<Pathway> getPathwaysByCategory(@NotNull List<String> category) {
-        return category.stream().flatMap(c -> getPathwaysByCategory(c).stream()).distinct().collect(Collectors.toList());
+        return category.stream()
+                       .flatMap(c -> getPathwaysByCategory(c).stream())
+                       .distinct()
+                       .collect(Collectors.toList());
     }
 
     /**
@@ -140,7 +143,10 @@ public class Repository implements Collection<Pathway>, Iterable<Pathway>, Clone
      * @return a list of pathway ids
      */
     public List<String> getPathwayIdsByCategory(@NotNull List<String> category) {
-        return category.stream().flatMap(c -> getPathwayIdsByCategory(c).stream()).distinct().collect(Collectors.toList());
+        return category.stream()
+                       .flatMap(c -> getPathwayIdsByCategory(c).stream())
+                       .distinct()
+                       .collect(Collectors.toList());
     }
 
     /**
@@ -150,7 +156,11 @@ public class Repository implements Collection<Pathway>, Iterable<Pathway>, Clone
      * @return a list of pathways
      */
     public List<String> getPathwaysByNodeId(String nodeId) {
-        return pathways.values().stream().filter(pathway -> pathway.graph().hasNode(nodeId)).map(Pathway::id).collect(Collectors.toList());
+        return pathways.values()
+                       .stream()
+                       .filter(pathway -> pathway.graph().hasNode(nodeId))
+                       .map(Pathway::id)
+                       .collect(Collectors.toList());
     }
 
     /**
@@ -294,8 +304,8 @@ public class Repository implements Collection<Pathway>, Iterable<Pathway>, Clone
     /**
      * Get an array of all pathways in the repository
      *
-     * @param a   the array into which the elements of this collection are to be stored, if it is big enough;
-     *            otherwise, a new array of the same runtime type is allocated for this purpose.
+     * @param a   the array into which the elements of this collection are to be stored, if it is big enough; otherwise,
+     *            a new array of the same runtime type is allocated for this purpose.
      * @param <T> the type of the array to contain the collection
      * @return an array of all pathways in the repository
      */
@@ -417,9 +427,8 @@ public class Repository implements Collection<Pathway>, Iterable<Pathway>, Clone
     }
 
     /**
-     * Create a bidirectional index between a contiguous sequence integers
-     * (1 to N, where N is the total number of virtual pathways) and pathway ids.
-     * This method works only for a metapathway repository.
+     * Create a bidirectional index between a contiguous sequence integers (1 to N, where N is the total number of
+     * virtual pathways) and pathway ids. This method works only for a metapathway repository.
      *
      * @return A pair of maps, the first maps from index to id, the second from id to index
      */
@@ -472,12 +481,11 @@ public class Repository implements Collection<Pathway>, Iterable<Pathway>, Clone
     }
 
     /**
-     * Extend all pathways contained in this repository with the nodes and edges of another graph.
-     * This is an iterative process, and it is different from the metapathway build operation.
-     * First, all the edges with both source and target nodes in this graph are added.
-     * Then, until no more edges can be added, all the edges with at least one node in this graph are added.
-     * The process stops when the set of edges to be added is empty,
-     * or when the number of edges in the graph does not change.
+     * Extend all pathways contained in this repository with the nodes and edges of another graph. This is an iterative
+     * process, and it is different from the metapathway build operation. First, all the edges with both source and
+     * target nodes in this graph are added. Then, until no more edges can be added, all the edges with at least one
+     * node in this graph are added. The process stops when the set of edges to be added is empty, or when the number of
+     * edges in the graph does not change.
      *
      * @param other The other graph
      */
@@ -493,7 +501,9 @@ public class Repository implements Collection<Pathway>, Iterable<Pathway>, Clone
      * @param keepAllVirtualPathways keep all virtual pathways (even if they were filtered out)
      * @return the metapathway
      */
-    public Repository buildMetapathway(RepositoryFilter filters, boolean disablePriority, boolean keepAllVirtualPathways) {
+    public Repository buildMetapathway(
+            RepositoryFilter filters, boolean disablePriority, boolean keepAllVirtualPathways
+    ) {
         var selectedPathways = processFilter(filters);
         var metapathwayRepository = new Repository();
         var metapathwayGraph = new Graph();
@@ -511,9 +521,10 @@ public class Repository implements Collection<Pathway>, Iterable<Pathway>, Clone
             for (var p : this) {
                 if (metapathwayRepository.hasVirtualPathway(p.id())) continue;
                 var virtualEdges = p.graph().edgesStream()
-                        .filter(e -> metapathwayGraph.hasNode(e.source()) && metapathwayGraph.hasNode(e.target()))
-                        .map(e -> Pair.of(e.source().id(), e.target().id()))
-                        .toList();
+                                    .filter(e -> metapathwayGraph.hasNode(e.source()) && metapathwayGraph.hasNode(
+                                            e.target()))
+                                    .map(e -> Pair.of(e.source().id(), e.target().id()))
+                                    .toList();
                 metapathwayRepository.addVirtualPathway(metapathway, p.id(), p.name(), virtualEdges);
             }
         }
@@ -525,12 +536,19 @@ public class Repository implements Collection<Pathway>, Iterable<Pathway>, Clone
         return metapathwayRepository;
     }
 
+    @Override
+    public String toString() {
+        return "Repository{" +
+                "pathways=" + pathways +
+                ", virtualPathways=" + virtualPathways +
+                '}';
+    }
+
     /**
-     * A record to store the filters applied to a repository to build a metapathway
-     * First we take all the pathways that are in the included categories and not in the excluded categories.
-     * Then we remove the pathways that are in the excluded pathways and add the ones that are in the included pathways.
-     * Node filters are applied to the resulting pathways.
-     * Nodes matching any of the node filters are removed.
+     * A record to store the filters applied to a repository to build a metapathway First we take all the pathways that
+     * are in the included categories and not in the excluded categories. Then we remove the pathways that are in the
+     * excluded pathways and add the ones that are in the included pathways. Node filters are applied to the resulting
+     * pathways. Nodes matching any of the node filters are removed.
      *
      * @param includedCategories categories to include
      * @param excludedCategories categories to exclude
@@ -565,13 +583,5 @@ public class Repository implements Collection<Pathway>, Iterable<Pathway>, Clone
         public void removeNode(String id) {
             edges.removeIf(e -> e.left().equals(id) || e.right().equals(id));
         }
-    }
-
-    @Override
-    public String toString() {
-        return "Repository{" +
-                "pathways=" + pathways +
-                ", virtualPathways=" + virtualPathways +
-                '}';
     }
 }

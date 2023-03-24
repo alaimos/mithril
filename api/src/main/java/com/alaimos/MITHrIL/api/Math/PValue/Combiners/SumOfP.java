@@ -34,7 +34,8 @@ public class SumOfP implements CombinerInterface {
         var nTerm = (int) Math.floor(pi) + 1;
         return IntStream
                 .range(1, nTerm)
-                .mapToDouble(i -> (2 * (i % 2) - 1) * Math.exp(CombinatoricsUtils.binomialCoefficientLog(k, i - 1) + k * Math.log(pi - i + 1) - denom))
+                .mapToDouble(i -> (2 * (i % 2) - 1) * Math.exp(
+                        CombinatoricsUtils.binomialCoefficientLog(k, i - 1) + k * Math.log(pi - i + 1) - denom))
                 .sum();
     }
 }

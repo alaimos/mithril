@@ -69,7 +69,9 @@ public class MiRNAContainer extends HashMap<String, MiRNA> {
                 if (tfNode == null) {
                     g.addNode(tfNode = new Node(tf.id(), tf.id(), geneNodeType, List.of()));
                 }
-                EdgeSubtype subtype = tf.type().equalsIgnoreCase("inhibition") ? miRNATFEdgeSubTypeInhibition : miRNATFEdgeSubTypeActivation;
+                EdgeSubtype subtype = tf.type()
+                                        .equalsIgnoreCase(
+                                                "inhibition") ? miRNATFEdgeSubTypeInhibition : miRNATFEdgeSubTypeActivation;
                 g.addEdge(new Edge(tfNode, miRNANode, new EdgeDetail(miRNATFEdgeType, subtype)));
             });
         }

@@ -20,7 +20,7 @@ public class PathwayMatrixReader implements DataReaderInterface<PathwayMatrix> {
     @SuppressWarnings("unchecked")
     public PathwayMatrixReader(@NotNull Pathway p, @NotNull MatrixFactoryInterface<?> matrixFactory) {
         reader.file(IOUtils.sanitizeFilename("pathway-matrix-" + p.id() + "-" + p.hashCode() + ".bin"));
-        this.pathwayId = p.id();
+        this.pathwayId     = p.id();
         this.matrixFactory = matrixFactory;
     }
 

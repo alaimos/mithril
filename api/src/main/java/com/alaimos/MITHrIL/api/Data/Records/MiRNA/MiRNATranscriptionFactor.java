@@ -9,14 +9,14 @@ public class MiRNATranscriptionFactor {
     private final EvidenceType evidenceType;
 
     public MiRNATranscriptionFactor(String id, String type, String evidenceType) {
-        this.id = id;
-        this.type = type;
+        this.id           = id;
+        this.type         = type;
         this.evidenceType = EvidenceType.fromString(evidenceType);
     }
 
     public MiRNATranscriptionFactor(String id, String type, EvidenceType evidenceType) {
-        this.id = id;
-        this.type = type;
+        this.id           = id;
+        this.type         = type;
         this.evidenceType = evidenceType;
     }
 

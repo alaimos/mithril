@@ -37,12 +37,10 @@ public class PathwayMatrixBuilder {
     }
 
     /**
-     * Build a matrix for a pathway
-     * The matrix (M) is built as follows:
-     * - the matrix is square, with n rows and n columns, where n is the number of nodes in the pathway
-     * - nodes are mapped to indexes in the matrix, starting from 0
-     * - for each edge (u, v) in the pathway, M[v,u] = -w(u, v) / sum(w(u, w) for all nodes w outgoing from u)
-     * - the diagonal elements are set to 1.0
+     * Build a matrix for a pathway The matrix (M) is built as follows: - the matrix is square, with n rows and n
+     * columns, where n is the number of nodes in the pathway - nodes are mapped to indexes in the matrix, starting from
+     * 0 - for each edge (u, v) in the pathway, M[v,u] = -w(u, v) / sum(w(u, w) for all nodes w outgoing from u) - the
+     * diagonal elements are set to 1.0
      *
      * @param p a pathway
      * @return a pair containing the matrix and a pair containing the indexes of nodes and the reverse map
@@ -60,10 +58,10 @@ public class PathwayMatrixBuilder {
         for (var e1 : g.edges().entrySet()) {
             wT = absoluteTotalWeight(g, g.node(e1.getKey()));
             for (var e2 : e1.getValue().entrySet()) {
-                e = e2.getValue();
-                u = id2Index.getInt(e.source().id());
-                v = id2Index.getInt(e.target().id());
-                i = v * n + u;
+                e       = e2.getValue();
+                u       = id2Index.getInt(e.source().id());
+                v       = id2Index.getInt(e.target().id());
+                i       = v * n + u;
                 data[i] = -e.weight() / wT;
                 if (!Double.isFinite(data[i])) {
                     data[i] = 0.0;

@@ -25,7 +25,7 @@ public class ExpressionBatchReader extends AbstractDataReader<Map<String, Expres
     }
 
     public ExpressionBatchReader setFile(File f) {
-        file = f;
+        file      = f;
         isGzipped = false;
         return this;
     }
@@ -56,7 +56,7 @@ public class ExpressionBatchReader extends AbstractDataReader<Map<String, Expres
                 if (node.isEmpty()) continue;
                 nodesSet.add(node);
                 for (var i = 1; i < s.length; i++) {
-                    s[i] = s[i].trim();
+                    s[i]  = s[i].trim();
                     value = 0.0;
                     if (!s[i].isEmpty() && !s[i].equalsIgnoreCase("null") && !s[i].equalsIgnoreCase("na")) {
                         try {
@@ -71,6 +71,8 @@ public class ExpressionBatchReader extends AbstractDataReader<Map<String, Expres
             }
         }
         var nodes = nodesSet.toArray(new String[0]);
-        return expressions.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> new ExpressionInput(nodes, e.getValue())));
+        return expressions.entrySet()
+                          .stream()
+                          .collect(Collectors.toMap(Map.Entry::getKey, e -> new ExpressionInput(nodes, e.getValue())));
     }
 }

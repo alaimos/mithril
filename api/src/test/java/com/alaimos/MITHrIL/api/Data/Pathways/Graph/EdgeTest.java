@@ -25,7 +25,10 @@ class EdgeTest {
         Node node3 = new Node("node3", "node3", "gene", List.of());
         edge1 = new Edge(node1, node2, new EdgeDetail("pprel", "activation"));
         edge2 = new Edge(node1, node2, new EdgeDetail("pprel", "activation"));
-        edge3 = new Edge(node1, node3, List.of(new EdgeDetail("pprel", "missing_interaction"), new EdgeDetail("pprel", "inhibition")));
+        edge3 = new Edge(
+                node1, node3,
+                List.of(new EdgeDetail("pprel", "missing_interaction"), new EdgeDetail("pprel", "inhibition"))
+        );
         Edge.setWeightComputationMethod(new DefaultEdgeWeightComputationMethod());
     }
 
@@ -45,7 +48,8 @@ class EdgeTest {
     void merge() {
         var e = new Edge(node1, node2, new EdgeDetail("pprel", "activation"));
         e.mergeWith(edge1, true, true);
-        assertEquals(List.of(new EdgeDetail("pprel", "activation"), new EdgeDetail("pprel", "activation")), e.details());
+        assertEquals(
+                List.of(new EdgeDetail("pprel", "activation"), new EdgeDetail("pprel", "activation")), e.details());
         assertEquals(1, e.weight(), 0.0001);
         e = new Edge(node1, node2, new EdgeDetail("pprel", "activation"));
         e.mergeWith(edge1, true, false);

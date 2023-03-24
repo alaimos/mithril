@@ -10,23 +10,26 @@ import com.alaimos.MITHrIL.app.Data.Records.ExpressionInput;
 import com.alaimos.MITHrIL.app.Data.Records.RepositoryMatrix;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Random;
 import java.util.function.Predicate;
 
-public class MITHrIL {
+public class MITHrIL implements Runnable, Closeable {
 
     /**
      * This predicate is used to filter out Differentially Expressed Nodes from other nodes
      */
-    private static final Predicate<? super Map.Entry<String, Double>> diffExpFilteringPredicate = e -> Double.isFinite(e.getValue()) && e.getValue() != 0.0;
+    private static final Predicate<? super Map.Entry<String, Double>> diffExpFilteringPredicate = e -> Double.isFinite(
+            e.getValue()) && e.getValue() != 0.0;
 
     //region Input Parameters
     protected Random random;
     protected ExpressionInput input;
     protected Repository repository;
     protected RepositoryMatrix repositoryMatrix;
-    protected MatrixInterface<?> repositoryMatrixTransposed;
+    protected MatrixInterface<?> repositoryMatrixTransposed = null;
     protected int numberOfRepetitions;
     protected int batchSize;
     protected EnrichmentProbabilityComputationInterface probabilityComputation;
@@ -97,10 +100,9 @@ public class MITHrIL {
     //endregion
 
     /**
-     * This method prepares the batch of data to be used in the next iteration.
-     * It returns a matrix where each row is a gene, and each column is the input of a run.
-     * The first column of the first batch is the original input.
-     * The other columns are permutations of the original input.
+     * This method prepares the batch of data to be used in the next iteration. It returns a matrix where each row is a
+     * gene, and each column is the input of a run. The first column of the first batch is the original input. The other
+     * columns are permutations of the original input.
      *
      * @param lastBatchElement the last element of the previous batch
      * @return a matrix containing the batch of data
@@ -122,8 +124,8 @@ public class MITHrIL {
     }
 
     /**
-     * Given a batch of data, this method computes the perturbations of the batch.
-     * Given a run, the perturbation is computed as pathwayMatrix * run, where pathwayMatrix is computed as (I-W)^-1.
+     * Given a batch of data, this method computes the perturbations of the batch. Given a run, the perturbation is
+     * computed as pathwayMatrix * run, where pathwayMatrix is computed as (I-W)^-1.
      *
      * @param batch the batch of data
      * @return the perturbations of the batch stored in a matrix, where each row is a gene, and each column is a run.
@@ -133,16 +135,41 @@ public class MITHrIL {
     }
 
     /**
-     * Given a batch perturbations, this method computes the accumulators of the batch.
-     * Given a run, the accumulator is computed as repositoryMatrix^T * run, where ^T is the transpose operator.
-     * The repositoryMatrix is a matrix where each row is a gene, and each column is a pathway.
-     * Position (i,j) is 1 if gene i is in pathway j, 0 otherwise.
+     * Given a batch perturbations, this method computes the accumulators of the batch. Given a run, the accumulator is
+     * computed as repositoryMatrix^T * run, where ^T is the transpose operator. The repositoryMatrix is a matrix where
+     * each row is a gene, and each column is a pathway. Position (i,j) is 1 if gene i is in pathway j, 0 otherwise.
      *
      * @param batchPerturbation the perturbations of a batch computed with computeBatchPerturbations
      * @return the accumulators of the batch stored in a matrix, where each row is a pathway, and each column is a run.
      */
     protected MatrixInterface<?> computeBatchAccumulators(@NotNull MatrixInterface<?> batchPerturbation) {
         return batchPerturbation.preMultiply(repositoryMatrixTransposed);
+    }
+
+    @Override
+    public void run() {
+        if (repositoryMatrixTransposed == null) {
+            repositoryMatrixTransposed = repositoryMatrix.matrix().transpose();
+        }
+        var lastBatchElement = 0;
+        do {
+            try (
+                    var batch = prepareBatch(lastBatchElement);
+                    var rawPerturbations = computeBatchPerturbations(batch);
+                    var rawAccumulators = computeBatchAccumulators(rawPerturbations)
+            ) {
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } while (lastBatchElement < numberOfRepetitions);
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (repositoryMatrixTransposed != null) {
+            repositoryMatrixTransposed.close();
+        }
     }
 
 //    /**

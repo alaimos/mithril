@@ -12,6 +12,8 @@ import java.io.ObjectOutputStream;
 import java.io.Serial;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.IntStream;
 
 import static org.bytedeco.pytorch.global.torch.dtype;
 import static org.bytedeco.pytorch.global.torch.zeros;
@@ -32,8 +34,8 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
     private int columns;
 
     private CPUMatrix(Tensor matrix, int rows, int columns) {
-        tensor = matrix;
-        this.rows = rows;
+        tensor       = matrix;
+        this.rows    = rows;
         this.columns = columns;
     }
 
@@ -57,21 +59,59 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
     }
 
     public CPUMatrix(double[] matrix, int rows, int columns) {
-        tensor = tensorFromArray(matrix, new long[]{rows, columns});
-        this.rows = rows;
+        tensor       = tensorFromArray(matrix, new long[]{rows, columns});
+        this.rows    = rows;
         this.columns = columns;
     }
 
     public CPUMatrix(@NotNull MatrixInterface<?> matrix) {
         if (matrix instanceof CPUMatrix dm) {
-            tensor = dm.tensor;
-            rows = dm.rows;
+            tensor  = dm.tensor;
+            rows    = dm.rows;
             columns = dm.columns;
         } else {
-            tensor = tensorFromArray(matrix.raw1D(), new long[]{matrix.rows(), matrix.columns()});
-            rows = matrix.rows();
+            tensor  = tensorFromArray(matrix.raw1D(), new long[]{matrix.rows(), matrix.columns()});
+            rows    = matrix.rows();
             columns = matrix.columns();
         }
+    }
+
+    private static double @NotNull [] vectorFromMatrixByRow(double @NotNull [] @NotNull [] matrix) {
+        var rows = matrix.length;
+        var cols = matrix[0].length;
+        var data = new double[rows * cols];
+        for (var i = 0; i < rows; i++) {
+            System.arraycopy(matrix[i], 0, data, i * cols, cols);
+        }
+        return data;
+    }
+
+    private static double @NotNull [] vectorFromMatrixByColumn(double @NotNull [] @NotNull [] matrix) {
+        var rows = matrix[0].length;
+        var cols = matrix.length;
+        var data = new double[rows * cols];
+        for (var i = 0; i < rows; i++) {
+            for (var j = 0; j < cols; j++) {
+                data[i * cols + j] = matrix[j][i];
+            }
+        }
+        return data;
+    }
+
+    private static Tensor tensorFromArray(double @NotNull [] array, long @NotNull [] shape) {
+        var tensor = zeros(shape, dtype(torch.ScalarType.Double));
+        try (var ptr = tensor.data_ptr_double()) {
+            ptr.put(array);
+        }
+        return tensor;
+    }
+
+    private static double @NotNull [] tensorToArray(@NotNull Tensor tensor) {
+        var array = new double[(int) tensor.numel()];
+        try (var ptr = tensor.data_ptr_double()) {
+            ptr.get(array);
+        }
+        return array;
     }
 
     /**
@@ -100,8 +140,7 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
     }
 
     /**
-     * Invert the matrix.
-     * It uses the Moore-Penrose pseudo-inverse to invert the matrix.
+     * Invert the matrix. It uses the Moore-Penrose pseudo-inverse to invert the matrix.
      *
      * @return a new matrix
      */
@@ -111,8 +150,7 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
     }
 
     /**
-     * Invert the matrix in place.
-     * It uses the Moore-Penrose pseudo-inverse to invert the matrix.
+     * Invert the matrix in place. It uses the Moore-Penrose pseudo-inverse to invert the matrix.
      */
     @Override
     public void invertInPlace() {
@@ -125,8 +163,7 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
     }
 
     /**
-     * Pre-multiply this matrix by another matrix.
-     * That is, the operation is performed as matrix * this.
+     * Pre-multiply this matrix by another matrix. That is, the operation is performed as matrix * this.
      *
      * @param matrix the other matrix
      * @return a new matrix
@@ -142,23 +179,23 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
     }
 
     /**
-     * Pre-multiply this matrix by a vector.
-     * That is, the operation is performed as vector * this.
+     * Pre-multiply this matrix by a vector. That is, the operation is performed as vector * this.
      *
      * @param vector the vector
      * @return a new vector
      */
     @Override
     public double[] preMultiply(double[] vector) {
-        try (var vectorTensor = tensorFromArray(vector, new long[]{1, vector.length});
-             var result = vectorTensor.matmul(tensor)) {
+        try (
+                var vectorTensor = tensorFromArray(vector, new long[]{1, vector.length});
+                var result = vectorTensor.matmul(tensor)
+        ) {
             return tensorToArray(result);
         }
     }
 
     /**
-     * Post-multiply this matrix by another matrix.
-     * That is, the operation is performed as this * matrix.
+     * Post-multiply this matrix by another matrix. That is, the operation is performed as this * matrix.
      *
      * @param matrix the other matrix
      * @return a new matrix
@@ -181,8 +218,10 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
      */
     @Override
     public double[] postMultiply(double[] vector) {
-        try (var vectorTensor = tensorFromArray(vector, new long[]{vector.length, 1});
-             var result = tensor.matmul(vectorTensor)) {
+        try (
+                var vectorTensor = tensorFromArray(vector, new long[]{vector.length, 1});
+                var result = tensor.matmul(vectorTensor)
+        ) {
             return tensorToArray(result);
         }
     }
@@ -278,22 +317,33 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
 
     @Override
     public double[] applyFunction(VectorToScalarFunction function, Direction direction) {
-        var result = new double[direction == Direction.ROW ? rows : columns];
-        for (var i = 0; i < result.length; i++) {
-            result[i] = function.apply(direction == Direction.ROW ? row(i) : column(i), i);
-        }
-        return result;
+        var size = direction == Direction.ROW ? rows() : columns();
+        return IntStream.range(0, size)
+                        .parallel()
+                        .mapToDouble(i -> function.apply(direction == Direction.ROW ? row(i) : column(i), i))
+                        .toArray();
     }
 
     @Override
     public MatrixInterface<?> applyFunction(ElementwiseFunction function) {
-        double[] result = new double[rows * columns];
-        for (var i = 0; i < rows; i++) {
-            for (var j = 0; j < columns; j++) {
-                result[i * columns + j] = function.apply(val(i, j), i, j);
-            }
-        }
+        var rows = rows();
+        var columns = columns();
+        var result = IntStream.range(0, rows)
+                              .parallel()
+                              .mapToObj(i -> IntStream.range(0, columns)
+                                                      .parallel()
+                                                      .mapToDouble(j -> function.apply(val(i, j), i, j)))
+                              .flatMapToDouble(Function.identity())
+                              .toArray();
         return new CPUMatrix(result, rows, columns);
+//
+//        double[] result = new double[rows * columns];
+//        for (var i = 0; i < rows; i++) {
+//            for (var j = 0; j < columns; j++) {
+//                result[i * columns + j] = function.apply(val(i, j), i, j);
+//            }
+//        }
+//        return new CPUMatrix(result, rows, columns);
     }
 
     @Override
@@ -332,51 +382,13 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
         tensor = tensorFromArray(raw, new long[]{rows, columns});
     }
 
-    private static double @NotNull [] vectorFromMatrixByRow(double @NotNull [] @NotNull [] matrix) {
-        var rows = matrix.length;
-        var cols = matrix[0].length;
-        var data = new double[rows * cols];
-        for (var i = 0; i < rows; i++) {
-            System.arraycopy(matrix[i], 0, data, i * cols, cols);
-        }
-        return data;
-    }
-
-    private static double @NotNull [] vectorFromMatrixByColumn(double @NotNull [] @NotNull [] matrix) {
-        var rows = matrix[0].length;
-        var cols = matrix.length;
-        var data = new double[rows * cols];
-        for (var i = 0; i < rows; i++) {
-            for (var j = 0; j < cols; j++) {
-                data[i * cols + j] = matrix[j][i];
-            }
-        }
-        return data;
-    }
-
-    private static Tensor tensorFromArray(double @NotNull [] array, long @NotNull [] shape) {
-        var tensor = zeros(shape, dtype(torch.ScalarType.Double));
-        try (var ptr = tensor.data_ptr_double()) {
-            ptr.put(array);
-        }
-        return tensor;
-    }
-
-    private static double @NotNull [] tensorToArray(@NotNull Tensor tensor) {
-        var array = new double[(int) tensor.numel()];
-        try (var ptr = tensor.data_ptr_double()) {
-            ptr.get(array);
-        }
-        return array;
-    }
-
     /**
      * Open a pointer to the underlying pytorch tensor and preload the data into a double array
      */
     private void openPointer() {
         if (pointer == null) {
             pointer = tensor.data_ptr_double();
-            data = new double[rows * columns];
+            data    = new double[rows * columns];
             pointer.get(data);
         }
     }
@@ -398,7 +410,7 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
     private void swapSize() {
         if (rows == columns) return;
         var tmp = rows;
-        rows = columns;
+        rows    = columns;
         columns = tmp;
     }
 }

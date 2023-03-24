@@ -12,6 +12,9 @@ public class DecoyBuilder {
 
     private static final DecoyBuilder INSTANCE = new DecoyBuilder();
 
+    private DecoyBuilder() {
+    }
+
     /**
      * Check if a pathway is a decoy
      *
@@ -36,14 +39,14 @@ public class DecoyBuilder {
         return INSTANCE;
     }
 
-    private DecoyBuilder() {
-    }
-
     /**
-     * Create a decoy pathway by selecting random nodes from the repository and connecting with the same topology
-     * as the original pathway
+     * Create a decoy pathway by selecting random nodes from the repository and connecting with the same topology as the
+     * original pathway
      */
-    public Pathway buildSingleDecoy(@NotNull Pathway p, @NotNull List<String> allNodes, @NotNull Map<String, Node> idToNodes, @NotNull Random rng) {
+    public Pathway buildSingleDecoy(
+            @NotNull Pathway p, @NotNull List<String> allNodes, @NotNull Map<String, Node> idToNodes,
+            @NotNull Random rng
+    ) {
         var g = p.graph();
         var decoyCategories = new ArrayList<>(p.categories());
         decoyCategories.add("decoy-pathway");
@@ -73,10 +76,15 @@ public class DecoyBuilder {
     /**
      * Create decoy pathways for all pathways in a repository. The decoys are added to the repository.
      */
-    public void buildAllDecoys(@NotNull Repository r, @NotNull List<String> allNodes, @NotNull Map<String, Node> idToNodes, @NotNull Random rng, boolean parallel) {
+    public void buildAllDecoys(
+            @NotNull Repository r, @NotNull List<String> allNodes, @NotNull Map<String, Node> idToNodes,
+            @NotNull Random rng, boolean parallel
+    ) {
         var pathwayStream = r.stream();
         if (parallel) pathwayStream = pathwayStream.parallel();
-        var decoys = pathwayStream.filter(p -> !isDecoy(p)).map(p -> buildSingleDecoy(p, allNodes, idToNodes, rng)).toList();
+        var decoys = pathwayStream.filter(p -> !isDecoy(p))
+                                  .map(p -> buildSingleDecoy(p, allNodes, idToNodes, rng))
+                                  .toList();
         r.addAll(decoys);
     }
 }

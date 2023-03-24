@@ -27,7 +27,7 @@ public class TextTable {
     }
 
     public TextTable(TableModel tableModel, boolean addNumbering) {
-        this.tableModel = tableModel;
+        this.tableModel      = tableModel;
         this.addRowNumbering = addNumbering;
     }
 

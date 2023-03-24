@@ -65,7 +65,10 @@ public class PathwayRepositoryReader extends AbstractRemoteDataReader<Repository
         if ((sLine.length != 3 && sLine.length != 4) || sLine[0].trim().isEmpty()) {
             throw new RuntimeException("Incorrect node line format -->" + line + "<--.");
         }
-        var aliases = Arrays.stream(sLine[2].split(LIST_SEPARATOR)).map(String::trim).filter(s -> !s.isEmpty()).toList();
+        var aliases = Arrays.stream(sLine[2].split(LIST_SEPARATOR))
+                            .map(String::trim)
+                            .filter(s -> !s.isEmpty())
+                            .toList();
         return new Node(sLine[0].trim(), sLine[1].trim(), (sLine.length != 4) ? "other" : sLine[3].trim(), aliases);
     }
 
@@ -109,17 +112,17 @@ public class PathwayRepositoryReader extends AbstractRemoteDataReader<Repository
             while ((line = r.readLine()) != null) {
                 if (!line.trim().isEmpty()) {
                     if (line.equalsIgnoreCase(PATHWAYS_HEADER)) {
-                        isPathway = true;
+                        isPathway   = true;
                         isEndpoints = isNode = isEdge = false;
                     } else if (line.equalsIgnoreCase(NODES_HEADER)) {
-                        isNode = true;
+                        isNode      = true;
                         isEndpoints = isPathway = isEdge = false;
                     } else if (line.equalsIgnoreCase(EDGES_HEADER)) {
-                        isEdge = true;
+                        isEdge      = true;
                         isEndpoints = isPathway = isNode = false;
                     } else if (line.equalsIgnoreCase(ENDPOINTS_HEADER)) {
                         isEndpoints = true;
-                        isEdge = isPathway = isNode = false;
+                        isEdge      = isPathway = isNode = false;
                     } else {
                         if (isPathway) {
                             var p = readPathway(line);

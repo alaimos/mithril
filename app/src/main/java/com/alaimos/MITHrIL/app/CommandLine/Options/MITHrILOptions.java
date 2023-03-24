@@ -7,9 +7,9 @@ import java.io.File;
 public class MITHrILOptions extends MITHrILCommonOptions {
 
     @Option(name = "-i", aliases = "-in", usage = """
-            a tab-separated input file where each line contains two values: a node identifier (gene, microRNA, metabolite) and its Log-Fold-Change.
-            If the Log-Fold-Change is absent or zero, the gene is assumed as non-differentially expressed.
-            Genes are identified by Entrez or ENSEMBL id, microRNA by mature name (miRBase release 21), metabolites or chemicals by KEGG and REACTOME (ChEBI) ids.""", required = true)
+                                                  a tab-separated input file where each line contains two values: a node identifier (gene, microRNA, metabolite) and its Log-Fold-Change.
+                                                  If the Log-Fold-Change is absent or zero, the gene is assumed as non-differentially expressed.
+                                                  Genes are identified by Entrez or ENSEMBL id, microRNA by mature name (miRBase release 21), metabolites or chemicals by KEGG and REACTOME (ChEBI) ids.""", required = true)
     public File input = null;
     @Option(name = "-o", aliases = "-out", usage = "main output file which contains pathway statistics such " +
             "as Impact Factor, Accumulator, p-Value and Adjusted p-Value.")

@@ -15,9 +15,9 @@ import java.util.stream.Collectors;
  */
 public class Edge implements Cloneable, Serializable {
 
-    private static EdgeWeightComputationInterface weightComputationMethod = null;
     @Serial
     private static final long serialVersionUID = 6045908408087788911L;
+    private static EdgeWeightComputationInterface weightComputationMethod = null;
     private final Node source;
     private final Node target;
     private final List<EdgeDetail> details = new ArrayList<>();
@@ -42,6 +42,10 @@ public class Edge implements Cloneable, Serializable {
         this.details.addAll(details);
     }
 
+    public static void setWeightComputationMethod(EdgeWeightComputationInterface w) {
+        weightComputationMethod = w;
+    }
+
     public Node source() {
         return source;
     }
@@ -58,10 +62,6 @@ public class Edge implements Cloneable, Serializable {
         return (this.details.size() > 1);
     }
 
-    public static void setWeightComputationMethod(EdgeWeightComputationInterface w) {
-        weightComputationMethod = w;
-    }
-
     public double weight() {
         if (weightComputationMethod == null) {
             throw new RuntimeException("Weight computation procedure is not set.");
@@ -72,7 +72,9 @@ public class Edge implements Cloneable, Serializable {
 
     public void mergeWith(@NotNull Edge e, boolean usePriority, boolean allowDuplicatedDetails) {
         // Add details from e to this edge
-        e.details.stream().filter(d -> allowDuplicatedDetails || !details.contains(d)).forEach(d -> details.add(new EdgeDetail(d)));
+        e.details.stream()
+                 .filter(d -> allowDuplicatedDetails || !details.contains(d))
+                 .forEach(d -> details.add(new EdgeDetail(d)));
         if (usePriority) { // if priority is used, keep only the details with the highest priority
             var maxPriority = details.stream().mapToInt(d -> d.subtype().priority()).max().orElse(0);
             details.removeIf(d -> d.subtype().priority() < maxPriority);

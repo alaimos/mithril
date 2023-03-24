@@ -12,8 +12,10 @@ public interface EnrichmentProbabilityComputationInterface extends ExtensionPoin
         return Utils.camelCaseToDotCase(getClass().getSimpleName());
     }
 
-    double computeProbability(List<String> allExperimentNodes,
-                              List<String> allNodesInPathway,
-                              List<String> allDiffExpNodes,
-                              List<String> allDiffExpNodesInPathway);
+    double computeProbability(
+            List<String> allExperimentNodes,
+            List<String> allNodesInPathway,
+            List<String> allDiffExpNodes,
+            List<String> allDiffExpNodesInPathway
+    );
 }

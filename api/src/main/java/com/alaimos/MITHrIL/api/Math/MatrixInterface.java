@@ -2,12 +2,11 @@ package com.alaimos.MITHrIL.api.Math;
 
 import java.io.Closeable;
 import java.io.Serializable;
-import java.util.function.Function;
 
 /**
- * This interface defines the interface of a nearly immutable matrix with some common operations.
- * The matrix is nearly immutable because it is possible to invert or transpose it in place to save memory.
- * A class that implements this interface should be able to perform serialization and deserialization to save the status.
+ * This interface defines the interface of a nearly immutable matrix with some common operations. The matrix is nearly
+ * immutable because it is possible to invert or transpose it in place to save memory. A class that implements this
+ * interface should be able to perform serialization and deserialization to save the status.
  */
 public interface MatrixInterface<E extends MatrixInterface<?>> extends Closeable, Serializable {
 
@@ -24,22 +23,19 @@ public interface MatrixInterface<E extends MatrixInterface<?>> extends Closeable
     void transposeInPlace();
 
     /**
-     * Invert the matrix.
-     * It uses the Moore-Penrose pseudo-inverse to invert the matrix.
+     * Invert the matrix. It uses the Moore-Penrose pseudo-inverse to invert the matrix.
      *
      * @return a new matrix
      */
     E invert();
 
     /**
-     * Invert the matrix in place.
-     * It uses the Moore-Penrose pseudo-inverse to invert the matrix.
+     * Invert the matrix in place. It uses the Moore-Penrose pseudo-inverse to invert the matrix.
      */
     void invertInPlace();
 
     /**
-     * Pre-multiply this matrix by another matrix.
-     * That is, the operation is performed as matrix * this.
+     * Pre-multiply this matrix by another matrix. That is, the operation is performed as matrix * this.
      *
      * @param matrix the other matrix
      * @return a new matrix
@@ -47,8 +43,7 @@ public interface MatrixInterface<E extends MatrixInterface<?>> extends Closeable
     E preMultiply(MatrixInterface<?> matrix);
 
     /**
-     * Pre-multiply this matrix by a vector.
-     * That is, the operation is performed as vector * this.
+     * Pre-multiply this matrix by a vector. That is, the operation is performed as vector * this.
      *
      * @param vector the vector
      * @return a new vector
@@ -56,8 +51,7 @@ public interface MatrixInterface<E extends MatrixInterface<?>> extends Closeable
     double[] preMultiply(double[] vector);
 
     /**
-     * Post-multiply this matrix by another matrix.
-     * That is, the operation is performed as this * matrix.
+     * Post-multiply this matrix by another matrix. That is, the operation is performed as this * matrix.
      *
      * @param matrix the other matrix
      * @return a new matrix
@@ -129,6 +123,14 @@ public interface MatrixInterface<E extends MatrixInterface<?>> extends Closeable
 
     MatrixInterface<?> applyFunction(ElementwiseFunction function);
 
+    /**
+     * Enum for the direction of the function application
+     */
+    enum Direction {
+        ROW,
+        COLUMN
+    }
+
     @FunctionalInterface
     interface ElementwiseFunction {
         double apply(double value, int i, int j);
@@ -137,13 +139,6 @@ public interface MatrixInterface<E extends MatrixInterface<?>> extends Closeable
     @FunctionalInterface
     interface VectorToScalarFunction {
         double apply(double[] vector, int index);
-    }
-
-    /**
-     * Enum for the direction of the function application
-     */
-    enum Direction {
-        ROW, COLUMN
     }
 
 }

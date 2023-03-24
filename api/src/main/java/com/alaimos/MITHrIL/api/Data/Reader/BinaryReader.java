@@ -9,6 +9,7 @@ import java.io.Serializable;
 
 /**
  * Read an object stored in binary format
+ *
  * @param <E> the type of the object to read
  */
 public class BinaryReader<E extends Serializable> extends AbstractDataReader<E> {
@@ -17,15 +18,17 @@ public class BinaryReader<E extends Serializable> extends AbstractDataReader<E> 
 
     /**
      * Create a new binary reader
+     *
      * @param aClass the class of the object to read
      */
     public BinaryReader(Class<E> aClass) {
         this.aClass = aClass;
-        isGzipped = true;
+        isGzipped   = true;
     }
 
     /**
      * Set the file to read
+     *
      * @param f the filename (relative to the application directory)
      * @return this object for method chaining
      */
@@ -38,6 +41,7 @@ public class BinaryReader<E extends Serializable> extends AbstractDataReader<E> 
 
     /**
      * Set the file to read
+     *
      * @param f the file object (absolute path)
      * @return this object for method chaining
      */
@@ -50,6 +54,7 @@ public class BinaryReader<E extends Serializable> extends AbstractDataReader<E> 
 
     /**
      * This method does nothing, since the file is always gzipped
+     *
      * @param gzipped ignored
      * @return this object for method chaining
      */
@@ -60,6 +65,7 @@ public class BinaryReader<E extends Serializable> extends AbstractDataReader<E> 
 
     /**
      * Read the object
+     *
      * @return the object
      * @throws IOException if an error occurs
      */

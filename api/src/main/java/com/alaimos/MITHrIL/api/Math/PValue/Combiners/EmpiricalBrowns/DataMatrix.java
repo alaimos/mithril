@@ -196,7 +196,7 @@ public record DataMatrix(String[] rowNames, double[][] data) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < rowNames.length; i++) {
             sb.append(rowNames[i])
-                    .append(Arrays.toString(data[i]).replace('[', '\t').replace(']', '\n').replace(',', '\t'));
+              .append(Arrays.toString(data[i]).replace('[', '\t').replace(']', '\n').replace(',', '\t'));
         }
         return sb.toString();
     }

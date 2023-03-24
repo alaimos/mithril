@@ -16,14 +16,12 @@ public final class IOUtils {
     private static final char WINDOWS_SEPARATOR = '\\';
 
     /**
-     * Returns the index of the last directory separator character.
-     * This method will handle a file in either Unix or Windows format.
-     * The position of the last forward or backslash is returned.
-     * The output will be the same irrespective of the machine that the code is running on.
+     * Returns the index of the last directory separator character. This method will handle a file in either Unix or
+     * Windows format. The position of the last forward or backslash is returned. The output will be the same
+     * irrespective of the machine that the code is running on.
      *
      * @param filename the filename to find the last path separator in, null returns -1
-     * @return the index of the last separator character, or -1 if there
-     * is no such character
+     * @return the index of the last separator character, or -1 if there is no such character
      */
     public static int indexOfLastSeparator(String filename) {
         if (filename == null) {
@@ -35,14 +33,9 @@ public final class IOUtils {
     }
 
     /**
-     * Gets the name minus the path from a full filename.
-     * This method will handle a file in either Unix or Windows format.
-     * The text after the last forward or backslash is returned.
-     * a/b/c.txt --> c.txt
-     * a.txt     --> a.txt
-     * a/b/c     --> c
-     * a/b/c/    --> ""
-     * The output will be the same irrespective of the machine that the code is running on.
+     * Gets the name minus the path from a full filename. This method will handle a file in either Unix or Windows
+     * format. The text after the last forward or backslash is returned. a/b/c.txt --> c.txt a.txt     --> a.txt a/b/c
+     * --> c a/b/c/    --> "" The output will be the same irrespective of the machine that the code is running on.
      *
      * @param filename the filename to query, null returns null
      * @return the name of the file without the path, or an empty string if none exists
@@ -56,9 +49,8 @@ public final class IOUtils {
     }
 
     /**
-     * Sanitize a filename by replacing all non-allowed characters with a dash.
-     * The allowed characters are: a-z, A-Z, 0-9, dot, dash and underscore.
-     * This method should be used only for filenames, not for paths.
+     * Sanitize a filename by replacing all non-allowed characters with a dash. The allowed characters are: a-z, A-Z,
+     * 0-9, dot, dash and underscore. This method should be used only for filenames, not for paths.
      *
      * @param filename the filename to sanitize
      * @return the sanitized filename

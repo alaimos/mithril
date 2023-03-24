@@ -18,7 +18,7 @@ public class MapBasedTableModel extends TextTableModel {
 
     public MapBasedTableModel(@NotNull List<Map<String, Object>> maps) {
         this.columnNames = new ArrayList<String>(maps.get(0).keySet());
-        this.maps = maps;
+        this.maps        = maps;
     }
 
     @Override

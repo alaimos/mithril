@@ -21,6 +21,13 @@ public class TranscriptionFactorsReader implements DataReaderInterface<MiRNACont
         this.container = container;
     }
 
+    private static @Nullable MiRNATranscriptionFactor fromStringArray(String @Nullable [] s) {
+        if (s == null || s.length < 5 || s[0].isEmpty() || s[1].isEmpty()) {
+            return null;
+        }
+        return new MiRNATranscriptionFactor(s[0], s[2], s[3]);
+    }
+
     @Override
     public String file() {
         return reader.file();
@@ -36,13 +43,6 @@ public class TranscriptionFactorsReader implements DataReaderInterface<MiRNACont
     public DataReaderInterface<MiRNAContainer> file(File f) {
         reader.file(f);
         return this;
-    }
-
-    private static @Nullable MiRNATranscriptionFactor fromStringArray(String @Nullable [] s) {
-        if (s == null || s.length < 5 || s[0].isEmpty() || s[1].isEmpty()) {
-            return null;
-        }
-        return new MiRNATranscriptionFactor(s[0], s[2], s[3]);
     }
 
     @Override

@@ -45,7 +45,7 @@ public class EmpiricalBrownsMethod implements CombinerInterface {
         var keepFilter = new String[keep.size()];
         var keepPValues = new double[keep.size()];
         for (var i = 0; i < keep.size(); i++) {
-            keepFilter[i] = filter[keep.get(i)];
+            keepFilter[i]  = filter[keep.get(i)];
             keepPValues[i] = pValues[keep.get(i)];
         }
         return Pair.of(keepFilter, keepPValues);
@@ -88,7 +88,7 @@ public class EmpiricalBrownsMethod implements CombinerInterface {
         var dfBrown = (2.0 * Math.pow(expected, 2)) / var;
         if (dfBrown > dfFisher) {
             dfBrown = dfFisher;
-            c = 1.0;
+            c       = 1.0;
         }
         var x = 2.0 * Arrays.stream(pValues).map(p -> -Math.log(p)).sum();
         return 1.0 - new ChiSquaredDistribution(dfBrown).cumulativeProbability(x / c);

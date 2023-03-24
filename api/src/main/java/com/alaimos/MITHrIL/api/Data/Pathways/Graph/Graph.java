@@ -1,8 +1,6 @@
 package com.alaimos.MITHrIL.api.Data.Pathways.Graph;
 
 import it.unimi.dsi.fastutil.Pair;
-import it.unimi.dsi.fastutil.ints.Int2IntMap;
-import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -43,6 +41,26 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
             addEdge(clonedEdge);
         });
         endpoints.addAll(g.endpoints);
+    }
+
+    /**
+     * Given a set of patterns, create a predicate that returns false if a node matches at least one of the patterns. If
+     * the patterns are null or empty, the predicate always returns true.
+     *
+     * @param patterns The patterns
+     * @return The predicate
+     */
+    @Contract(pure = true)
+    private static @NotNull Predicate<Node> nodeFilteringPredicate(Pattern[] patterns) {
+        if (patterns == null || patterns.length == 0) return n -> true;
+        return n -> {
+            for (Pattern p : patterns) {
+                if (p.matcher(n.id()).matches()) {
+                    return false;
+                }
+            }
+            return true;
+        };
     }
 
     /**
@@ -95,9 +113,8 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
     }
 
     /**
-     * Find a node in the graph using its id, name or aliases.
-     * First, it tries to find the node by id.
-     * Then, a search by name and aliases is performed.
+     * Find a node in the graph using its id, name or aliases. First, it tries to find the node by id. Then, a search by
+     * name and aliases is performed.
      *
      * @param needle the id, name or alias
      * @return the node object. Null if not found.
@@ -205,8 +222,8 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
     }
 
     /**
-     * Create a stream of all the edges ingoing to a node.
-     * The stream is wrapped in an Optional object to avoid NullPointerExceptions.
+     * Create a stream of all the edges ingoing to a node. The stream is wrapped in an Optional object to avoid
+     * NullPointerExceptions.
      *
      * @param n the node
      * @return an Optional object containing the stream of edges
@@ -226,8 +243,8 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
     }
 
     /**
-     * Create a stream of all the edges outgoing from a node.
-     * The stream is wrapped in an Optional object to avoid NullPointerExceptions.
+     * Create a stream of all the edges outgoing from a node. The stream is wrapped in an Optional object to avoid
+     * NullPointerExceptions.
      *
      * @param n the node
      * @return an Optional object containing the stream of edges
@@ -247,9 +264,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
     }
 
     /**
-     * Return a map of all the nodes in the graph.
-     * The key is the hash code of the node.
-     * The value is the node object.
+     * Return a map of all the nodes in the graph. The key is the hash code of the node. The value is the node object.
      *
      * @return a map of nodes
      */
@@ -271,7 +286,8 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      *
      * @param e                      the edge to add
      * @param merge                  if true, the edge is merged with the existing edge if present
-     * @param usePriority            if true, the edge subtype priority is used to keep only edge details with maximal priority
+     * @param usePriority            if true, the edge subtype priority is used to keep only edge details with maximal
+     *                               priority
      * @param allowDuplicatedDetails if true, duplicates are allowed in the edge details
      */
     public void addEdge(@NotNull Edge e, boolean merge, boolean usePriority, boolean allowDuplicatedDetails) {
@@ -299,7 +315,8 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      * Add an edge to the graph merging all the details with the existing one, if already present in the graph.
      *
      * @param e                      the edge to add
-     * @param usePriority            if true, the edge subtype priority is used to keep only edge details with maximal priority
+     * @param usePriority            if true, the edge subtype priority is used to keep only edge details with maximal
+     *                               priority
      * @param allowDuplicatedDetails if true, duplicates are kept in the edge details
      */
     public void addEdge(@NotNull Edge e, boolean usePriority, boolean allowDuplicatedDetails) {
@@ -307,8 +324,8 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
     }
 
     /**
-     * Add an edge to the graph merging all the details with the existing one, if already present in the graph.
-     * No priority is used, and duplicates are removed from the details.
+     * Add an edge to the graph merging all the details with the existing one, if already present in the graph. No
+     * priority is used, and duplicates are removed from the details.
      *
      * @param e the edge to add
      */
@@ -317,9 +334,8 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
     }
 
     /**
-     * Add a collection of edges to the graph merging all the details with the existing one,
-     * if already present in the graph.
-     * No priority is used, and duplicates are removed from the details.
+     * Add a collection of edges to the graph merging all the details with the existing one, if already present in the
+     * graph. No priority is used, and duplicates are removed from the details.
      *
      * @param edges the edges to add
      */
@@ -337,7 +353,6 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
     public Edge edge(@NotNull Node start, @NotNull Node end) {
         return edge(start.id(), end.id());
     }
-
 
     /**
      * Get an edge from the graph by its start and end nodes.
@@ -384,9 +399,8 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
     }
 
     /**
-     * Get the map of edges in the graph.
-     * The key is the hash code of the start node.
-     * The value is a map of edges, where the key is the hash code of the end node.
+     * Get the map of edges in the graph. The key is the hash code of the start node. The value is a map of edges, where
+     * the key is the hash code of the end node.
      *
      * @return the map of edges
      */
@@ -429,7 +443,10 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      * @param currentNode   The node where the traversal will start
      * @param markTraversal Are nodes marked so that they are visited only once?
      */
-    protected void traversalLogic(@NotNull BiConsumer<Node, Function<Node, TraversalAction>> consumer, @NotNull Collection<Node> results, @NotNull Node currentNode, boolean markTraversal) {
+    protected void traversalLogic(
+            @NotNull BiConsumer<Node, Function<Node, TraversalAction>> consumer, @NotNull Collection<Node> results,
+            @NotNull Node currentNode, boolean markTraversal
+    ) {
         final HashSet<Node> marked = new HashSet<>();
         consumer.accept(currentNode, o -> {
             if (o.equals(currentNode)) {
@@ -574,10 +591,9 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
     }
 
     /**
-     * Check if two graphs are equal.
-     * Two graphs are equal if they have the same nodes, edges and endpoints
-     * The order of the nodes and edges or the endpoints does not matter.
-     * To speed up the comparison, the hash codes of the graphs are compared first, then the number of nodes and edges.
+     * Check if two graphs are equal. Two graphs are equal if they have the same nodes, edges and endpoints The order of
+     * the nodes and edges or the endpoints does not matter. To speed up the comparison, the hash codes of the graphs
+     * are compared first, then the number of nodes and edges.
      *
      * @param o The other graph
      * @return true if the graphs are equal
@@ -609,8 +625,8 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
     }
 
     /**
-     * Create a bidirectional index between a contiguous sequence integers
-     * (1 to N, where N is the number of nodes) and node ids.
+     * Create a bidirectional index between a contiguous sequence integers (1 to N, where N is the number of nodes) and
+     * node ids.
      *
      * @return A pair of maps, the first maps from index to id, the second from id to index
      */
@@ -627,12 +643,10 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
     }
 
     /**
-     * Extend this graph with the nodes and edges of another graph.
-     * This is an iterative process, and it is different from the merge operation.
-     * First, all the edges with both source and target nodes in this graph are added.
-     * Then, until no more edges can be added, all the edges with at least one node in this graph are added.
-     * The process stops when the set of edges to be added is empty,
-     * or when the number of edges in the graph does not change.
+     * Extend this graph with the nodes and edges of another graph. This is an iterative process, and it is different
+     * from the merge operation. First, all the edges with both source and target nodes in this graph are added. Then,
+     * until no more edges can be added, all the edges with at least one node in this graph are added. The process stops
+     * when the set of edges to be added is empty, or when the number of edges in the graph does not change.
      *
      * @param other The other graph
      */
@@ -670,44 +684,24 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
     }
 
     /**
-     * Given a set of patterns, create a predicate that returns false if a node matches at least one of the patterns.
-     * If the patterns are null or empty, the predicate always returns true.
-     *
-     * @param patterns The patterns
-     * @return The predicate
-     */
-    @Contract(pure = true)
-    private static @NotNull Predicate<Node> nodeFilteringPredicate(Pattern[] patterns) {
-        if (patterns == null || patterns.length == 0) return n -> true;
-        return n -> {
-            for (Pattern p : patterns) {
-                if (p.matcher(n.id()).matches()) {
-                    return false;
-                }
-            }
-            return true;
-        };
-    }
-
-    /**
-     * Merge this graph with another one.
-     * If a node is present in both graphs, the node is added only once.
-     * If an edge is present in both graphs, the two edges are merged keeping only details with maximal priority.
-     * Nodes are filtered using the user-defined filters.
-     * Priority filtering can be disabled.
+     * Merge this graph with another one. If a node is present in both graphs, the node is added only once. If an edge
+     * is present in both graphs, the two edges are merged keeping only details with maximal priority. Nodes are
+     * filtered using the user-defined filters. Priority filtering can be disabled.
      *
      * @param other           The other graph
      * @param nodeFilters     The node filters
      * @param disablePriority Disable priority filtering
      * @return A list of pairs of node ids, each pair represents an edge that was added to the graph
      */
-    public List<Pair<String, String>> mergeWith(@NotNull Graph other, @Nullable Pattern[] nodeFilters, boolean disablePriority) {
+    public List<Pair<String, String>> mergeWith(
+            @NotNull Graph other, @Nullable Pattern[] nodeFilters, boolean disablePriority
+    ) {
         var addedEdges = new ArrayList<Pair<String, String>>();
         var filteringPredicate = nodeFilteringPredicate(nodeFilters);
         other.nodesStream()
-                .filter(filteringPredicate.or(Predicate.not(this::hasNode)))
-                .map(n -> (Node) n.clone())
-                .forEach(this::addNode);
+             .filter(filteringPredicate.or(Predicate.not(this::hasNode)))
+             .map(n -> (Node) n.clone())
+             .forEach(this::addNode);
         other.edgesStream().forEach(e -> {
             var source = e.source();
             var target = e.target();
@@ -721,17 +715,21 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
                 addedEdges.add(Pair.of(source.id(), target.id()));
             }
         });
-        setEndpoints(Stream.of(endpoints.stream(), other.endpoints.stream()).flatMap(Function.identity()).distinct().toList());
+        setEndpoints(Stream.of(endpoints.stream(), other.endpoints.stream())
+                           .flatMap(Function.identity())
+                           .distinct()
+                           .toList());
         return addedEdges;
     }
 
     /**
-     * The result of a traversal action, either continue, prune or stop.
-     * Continue means that the traversal will continue to the adjacent nodes.
-     * Prune means that the traversal will not continue to the adjacent nodes.
-     * Stop means that the traversal will stop.
+     * The result of a traversal action, either continue, prune or stop. Continue means that the traversal will continue
+     * to the adjacent nodes. Prune means that the traversal will not continue to the adjacent nodes. Stop means that
+     * the traversal will stop.
      */
     public enum TraversalAction {
-        CONTINUE, PRUNE, STOP
+        CONTINUE,
+        PRUNE,
+        STOP
     }
 }

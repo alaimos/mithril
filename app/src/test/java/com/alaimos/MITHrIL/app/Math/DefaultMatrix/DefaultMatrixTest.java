@@ -32,7 +32,9 @@ class DefaultMatrixTest {
     protected static final double[] M1_TIMES_M2 = {38, 44, 50, 56, 83, 98, 113, 128, 128, 152, 176, 200};
     protected static final double[] M1_TIMES_V1 = {32, 77, 122};
     protected static final double[] V2_TIMES_T_M2 = {80, 200, 320};
-    protected static final double[] T_M2_TIMES_M1 = {84, 99, 114, 96, 114, 132, 108, 129, 150, 120, 144, 168};
+    protected static final double[] T_M2_TIMES_M1 = {
+            84, 99, 114, 96, 114, 132, 108, 129, 150, 120, 144, 168
+    };
     protected DefaultMatrixFactory factory = new DefaultMatrixFactory();
     protected DefaultMatrix m1;
     protected DefaultMatrix m2;
@@ -52,8 +54,10 @@ class DefaultMatrixTest {
     @Test
     @Order(1)
     void factoryTest() {
-        try (var tm1 = factory.of(M1, 3, 3);
-             var tm2 = factory.of(new double[][]{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}})) {
+        try (
+                var tm1 = factory.of(M1, 3, 3);
+                var tm2 = factory.of(new double[][]{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}})
+        ) {
             assertArrayEquals(M1, tm1.raw1D(), DELTA);
             assertArrayEquals(M1, tm2.raw1D(), DELTA);
         }

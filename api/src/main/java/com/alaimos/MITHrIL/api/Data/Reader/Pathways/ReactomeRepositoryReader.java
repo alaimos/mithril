@@ -74,7 +74,10 @@ public class ReactomeRepositoryReader extends AbstractRemoteDataReader<Repositor
 
     private void readEndpoints(String @NotNull [] line) {
         var endpoints = line[9].split(OTHER_SEPARATOR, -1);
-        var epList = Arrays.stream(endpoints).map(String::trim).filter(trim -> !trim.isEmpty()).collect(Collectors.toList());
+        var epList = Arrays.stream(endpoints)
+                           .map(String::trim)
+                           .filter(trim -> !trim.isEmpty())
+                           .collect(Collectors.toList());
         if (epList.size() > 0) {
             var pathway = repository.get(line[0]).graph();
             pathway.setEndpoints(epList);
@@ -91,7 +94,7 @@ public class ReactomeRepositoryReader extends AbstractRemoteDataReader<Repositor
             while ((line = r.readLine()) != null) {
                 if (!line.trim().isEmpty()) {
                     if (line.startsWith("pathwayId")) continue;
-                    sLine = line.split(SEPARATOR, -1);
+                    sLine     = line.split(SEPARATOR, -1);
                     pathwayId = sLine[0];
                     if (sLine.length != 11 || sLine[10].equalsIgnoreCase("true")) continue;
                     create = !repository.contains(pathwayId);

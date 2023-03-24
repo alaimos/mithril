@@ -14,9 +14,9 @@ import java.util.Objects;
  */
 public class Node implements Comparable<Node>, Cloneable, Serializable {
 
-    private static NodeWeightComputationInterface weightComputationMethod = null;
     @Serial
     private static final long serialVersionUID = 9051335523535138069L;
+    private static NodeWeightComputationInterface weightComputationMethod = null;
     private final String id;
     private final String name;
     private final List<String> aliases;
@@ -38,9 +38,9 @@ public class Node implements Comparable<Node>, Cloneable, Serializable {
      * @param aliases node aliases
      */
     public Node(String id, String name, NodeType type, List<String> aliases) {
-        this.id = id;
-        this.name = name;
-        this.type = type;
+        this.id      = id;
+        this.name    = name;
+        this.type    = type;
         this.aliases = aliases;
     }
 
@@ -118,7 +118,8 @@ public class Node implements Comparable<Node>, Cloneable, Serializable {
      * Compare this node with another one
      *
      * @param o the object to be compared.
-     * @return a negative integer, zero, or a positive integer as this object is less than, equal to, or greater than the specified object.
+     * @return a negative integer, zero, or a positive integer as this object is less than, equal to, or greater than
+     * the specified object.
      */
     @Override
     public int compareTo(@NotNull Node o) {

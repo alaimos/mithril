@@ -10,7 +10,7 @@ import java.io.Writer;
 public class TextTableRenderer implements TableRenderer {
 
     protected String[] formats;
-    protected int[]    lengths;
+    protected int[] lengths;
 
     protected TextTable textTable;
 
@@ -19,14 +19,14 @@ public class TextTableRenderer implements TableRenderer {
     private boolean showNulls = false;
 
     public TextTableRenderer(TextTable textTable) {
-        this.textTable = textTable;
+        this.textTable  = textTable;
         this.tableModel = textTable.getTableModel();
     }
 
     public TextTableRenderer(TextTable textTable, boolean showNulls) {
-        this.textTable = textTable;
+        this.textTable  = textTable;
         this.tableModel = textTable.getTableModel();
-        this.showNulls = showNulls;
+        this.showNulls  = showNulls;
     }
 
     @Override

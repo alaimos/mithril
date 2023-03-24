@@ -52,8 +52,10 @@ class CPUMatrixTest {
     @Test
     @Order(1)
     void factoryTest() {
-        try (var tm1 = factory.of(M1, 3, 3);
-             var tm2 = factory.of(new double[][]{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}})) {
+        try (
+                var tm1 = factory.of(M1, 3, 3);
+                var tm2 = factory.of(new double[][]{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}})
+        ) {
             assertArrayEquals(M1, tm1.raw1D(), DELTA);
             assertArrayEquals(M1, tm2.raw1D(), DELTA);
         }

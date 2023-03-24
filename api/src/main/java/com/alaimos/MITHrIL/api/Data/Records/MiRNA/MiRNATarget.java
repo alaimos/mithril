@@ -22,9 +22,9 @@ public class MiRNATarget {
     }
 
     public MiRNATarget(String id, String name, String species, EvidenceType evidenceType) {
-        this.id = id;
-        this.name = name;
-        this.species = species;
+        this.id           = id;
+        this.name         = name;
+        this.species      = species;
         this.evidenceType = evidenceType;
     }
 

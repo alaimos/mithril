@@ -13,8 +13,7 @@ public abstract class AbstractCompressedDataWriter<T> extends AbstractDataWriter
     /**
      * Get an output stream for the file
      *
-     * @param append if true, the file will be appended
-     *               if false, the file will be overwritten
+     * @param append if true, the file will be appended if false, the file will be overwritten
      * @return an output stream
      * @throws IOException if an error occurs
      */

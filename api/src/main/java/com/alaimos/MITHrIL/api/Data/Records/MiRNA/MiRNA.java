@@ -20,9 +20,9 @@ public class MiRNA {
 //    }
 
     public MiRNA(String id, String species) {
-        this.id = id;
-        this.species = species;
-        this.targets = new HashSet<>();
+        this.id                   = id;
+        this.species              = species;
+        this.targets              = new HashSet<>();
         this.transcriptionFactors = new HashSet<>();
     }
 

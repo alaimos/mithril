@@ -19,9 +19,8 @@ import java.util.regex.Pattern;
 
 public final class Utils {
 
-    private static String currentVersion = null;
-
     public static final Pattern ENUM_PATTERN = Pattern.compile("[^a-zA-Z0-9_]+");
+    private static String currentVersion = null;
 
     public static String getCurrentVersion() {
         if (currentVersion == null) {
@@ -51,8 +50,7 @@ public final class Utils {
     }
 
     /**
-     * Get appdata directory
-     * If directory doesn't exist it will be created
+     * Get appdata directory If directory doesn't exist it will be created
      *
      * @return the file object
      */
@@ -88,8 +86,9 @@ public final class Utils {
     public static @Nullable File download(String url, File filename) {
         try {
             URL website = new URL(url);
-            try (ReadableByteChannel rbc = Channels.newChannel(website.openStream());
-                 FileOutputStream fos = new FileOutputStream(filename);
+            try (
+                    ReadableByteChannel rbc = Channels.newChannel(website.openStream());
+                    FileOutputStream fos = new FileOutputStream(filename);
             ) {
                 fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
                 return filename;
@@ -147,8 +146,10 @@ public final class Utils {
         return (T[]) Array.newInstance(clazz, size);
     }
 
-    public static <U, V> void applyArrayFunctionToMap(@NotNull Map<U, V> map, Function<V[], V[]> f,
-                                                      Class<U> uClass, Class<V> vClass) {
+    public static <U, V> void applyArrayFunctionToMap(
+            @NotNull Map<U, V> map, Function<V[], V[]> f,
+            Class<U> uClass, Class<V> vClass
+    ) {
         var n = map.size();
         if (n == 0) return;
         var uArray = genericArray(n, uClass);
@@ -167,6 +168,7 @@ public final class Utils {
 
     /**
      * Converts a camel case string (i.e.: HelloWorld) to a dot case string (i.e.: hello.world)
+     *
      * @param s the string
      * @return the converted string
      */

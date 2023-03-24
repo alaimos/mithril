@@ -12,10 +12,12 @@ public class DefaultProbabilityComputation implements EnrichmentProbabilityCompu
     }
 
     @Override
-    public double computeProbability(@NotNull List<String> allExperimentNodes,
-                                     @NotNull List<String> allNodesInPathway,
-                                     @NotNull List<String> allDiffExpNodes,
-                                     @NotNull List<String> allDiffExpNodesInPathway) {
+    public double computeProbability(
+            @NotNull List<String> allExperimentNodes,
+            @NotNull List<String> allNodesInPathway,
+            @NotNull List<String> allDiffExpNodes,
+            @NotNull List<String> allDiffExpNodesInPathway
+    ) {
         var p = allExperimentNodes.size();
         var m = allNodesInPathway.size();
         var k = allDiffExpNodes.size();

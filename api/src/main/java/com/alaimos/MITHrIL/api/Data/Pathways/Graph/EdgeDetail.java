@@ -20,6 +20,7 @@ public class EdgeDetail implements Cloneable, Serializable {
 
     /**
      * Create a clone of an EdgeDetail object
+     *
      * @param d EdgeDetail object
      */
     @Contract(pure = true)
@@ -34,7 +35,7 @@ public class EdgeDetail implements Cloneable, Serializable {
      * @param subType Edge subType
      */
     public EdgeDetail(EdgeType type, EdgeSubtype subType) {
-        this.type = type;
+        this.type    = type;
         this.subtype = subType;
     }
 
@@ -68,6 +69,7 @@ public class EdgeDetail implements Cloneable, Serializable {
 
     /**
      * Compare two edge details
+     *
      * @param o EdgeDetail object
      * @return true, if the two objects are equal
      */
@@ -80,6 +82,7 @@ public class EdgeDetail implements Cloneable, Serializable {
 
     /**
      * Get the hash code
+     *
      * @return the hash code
      */
     @Override
@@ -103,6 +106,7 @@ public class EdgeDetail implements Cloneable, Serializable {
 
     /**
      * Serialize the object
+     *
      * @param stream the stream
      * @throws IOException if something goes wrong
      */
@@ -115,14 +119,15 @@ public class EdgeDetail implements Cloneable, Serializable {
 
     /**
      * Deserialize the object
+     *
      * @param stream the stream
-     * @throws IOException if something goes wrong
+     * @throws IOException            if something goes wrong
      * @throws ClassNotFoundException if something goes wrong
      */
     @Serial
     private void readObject(@NotNull ObjectInputStream stream) throws IOException, ClassNotFoundException {
         stream.defaultReadObject();
-        type = EdgeType.valueOf(stream.readUTF());
+        type    = EdgeType.valueOf(stream.readUTF());
         subtype = EdgeSubtype.valueOf(stream.readUTF());
     }
 

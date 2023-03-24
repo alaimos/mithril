@@ -120,7 +120,8 @@ class RepositoryTest {
 
     @Test
     void buildMetapathway() {
-        var metapathwayRepository = repository.buildMetapathway(new Repository.RepositoryFilter(null, null, null, null, null), false, true);
+        var metapathwayRepository = repository.buildMetapathway(
+                new Repository.RepositoryFilter(null, null, null, null, null), false, true);
         assertEquals(1, metapathwayRepository.size());
         assertEquals(metapathwayRepository.get("metapathway"), metapathwayRepository.get());
         assertEquals(8, metapathwayRepository.get().graph().countNodes());

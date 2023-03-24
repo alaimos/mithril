@@ -40,7 +40,10 @@ public class ExtensionsService implements ServiceInterface {
         if (o.type == null || o.type.isEmpty()) {
             var extensionTypes = ExtensionManager.INSTANCE.getExtensionTypes();
             String[] columns = new String[]{"Name", "Description"};
-            String[][] data = extensionTypes.values().stream().map(e -> new String[]{e.name(), e.description()}).toArray(String[][]::new);
+            String[][] data = extensionTypes.values()
+                                            .stream()
+                                            .map(e -> new String[]{e.name(), e.description()})
+                                            .toArray(String[][]::new);
             TextTable tt = new TextTable(columns, data);
             tt.printTable();
         } else {
@@ -50,7 +53,10 @@ public class ExtensionsService implements ServiceInterface {
                 return;
             }
             String[] columns = new String[]{"Name", "Description"};
-            String[][] data = extensions.values().stream().map(e -> new String[]{e.name(), e.description()}).toArray(String[][]::new);
+            String[][] data = extensions.values()
+                                        .stream()
+                                        .map(e -> new String[]{e.name(), e.description()})
+                                        .toArray(String[][]::new);
             TextTable tt = new TextTable(columns, data);
             tt.printTable();
         }

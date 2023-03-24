@@ -20,12 +20,14 @@ public class SpeciesDatabaseReader implements DataReaderInterface<Map<String, Sp
     }
 
     private static RemoteTextFileReader speciesReader() {
-        var reader = new RemoteTextFileReader(Constants.INSTANCE.get("species_index_url"), true, Constants.INSTANCE.get("species_index_file"));
+        var reader = new RemoteTextFileReader(
+                Constants.INSTANCE.get("species_index_url"), true, Constants.INSTANCE.get("species_index_file"));
         return reader.separator("\t").fieldCountLimit(7);
     }
 
     private static RemoteTextFileReader reactomeIndexReader() {
-        var reader = new RemoteTextFileReader(Constants.INSTANCE.get("reactome_index_url"), true, Constants.INSTANCE.get("reactome_index_file"));
+        var reader = new RemoteTextFileReader(
+                Constants.INSTANCE.get("reactome_index_url"), true, Constants.INSTANCE.get("reactome_index_file"));
         return reader.separator("\t").fieldCountLimit(2);
     }
 
@@ -45,7 +47,10 @@ public class SpeciesDatabaseReader implements DataReaderInterface<Map<String, Sp
         }
         var hasReactome = reactomeMap.containsKey(s[0]);
         var reactomeUrl = reactomeMap.getOrDefault(s[0], "");
-        return new Species(s[0], s[1], (Integer.parseInt(s[2]) == 1), (Integer.parseInt(s[3]) == 1), hasReactome, s[4], s[5], s[6], reactomeUrl);
+        return new Species(
+                s[0], s[1], (Integer.parseInt(s[2]) == 1), (Integer.parseInt(s[3]) == 1), hasReactome, s[4], s[5], s[6],
+                reactomeUrl
+        );
     }
 
     @Override

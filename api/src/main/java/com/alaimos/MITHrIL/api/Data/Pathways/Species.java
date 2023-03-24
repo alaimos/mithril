@@ -9,8 +9,10 @@ import com.alaimos.MITHrIL.api.Data.Records.MiRNA.MiRNAContainer;
 
 import java.io.IOException;
 
-public record Species(String id, String name, boolean hasMiRNA, boolean hasTranscriptionFactors, boolean hasReactome,
-                      String pathwayUrl, String miRNAUrl, String transcriptionFactorsUrl, String reactomeUrl) {
+public record Species(
+        String id, String name, boolean hasMiRNA, boolean hasTranscriptionFactors, boolean hasReactome,
+        String pathwayUrl, String miRNAUrl, String transcriptionFactorsUrl, String reactomeUrl
+) {
 
     /**
      * Returns the repository of pathways for this species

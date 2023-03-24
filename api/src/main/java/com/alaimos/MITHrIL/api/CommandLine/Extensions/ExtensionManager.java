@@ -10,11 +10,11 @@ import java.util.stream.Collectors;
 
 public class ExtensionManager {
 
-    private static PluginManager defaultPluginManager = null;
     public static final ExtensionManager INSTANCE = new ExtensionManager();
+    private static PluginManager defaultPluginManager = null;
+    private final Map<String, Map<String, ExtensionInterface>> extensions = new HashMap<>();
     private Map<String, ExtensionTypeInterface> extensionTypes = null;
     private Map<Class<? extends ExtensionInterface>, String> extensionTypeNames = null;
-    private final Map<String, Map<String, ExtensionInterface>> extensions = new HashMap<>();
 
     /**
      * Private constructor for singleton
@@ -23,9 +23,8 @@ public class ExtensionManager {
     }
 
     /**
-     * Set the default plugin manager.
-     * This method should be called only once.
-     * However, if called more than once, it will be ignored.
+     * Set the default plugin manager. This method should be called only once. However, if called more than once, it
+     * will be ignored.
      *
      * @param pluginManager the default plugin manager
      */
@@ -88,8 +87,16 @@ public class ExtensionManager {
      */
     private void init() {
         if (extensionTypes != null) return;
-        extensionTypes = defaultPluginManager.getExtensions(ExtensionTypeInterface.class).stream().collect(Collectors.toMap(ExtensionTypeInterface::name, Function.identity()));
-        extensionTypeNames = extensionTypes.values().stream().collect(Collectors.toMap(ExtensionTypeInterface::classType, ExtensionTypeInterface::name));
+        extensionTypes = defaultPluginManager.getExtensions(ExtensionTypeInterface.class)
+                                             .stream()
+                                             .collect(Collectors.toMap(ExtensionTypeInterface::name,
+                                                                       Function.identity()
+                                             ));
+        extensionTypeNames = extensionTypes.values()
+                                           .stream()
+                                           .collect(Collectors.toMap(ExtensionTypeInterface::classType,
+                                                                     ExtensionTypeInterface::name
+                                           ));
     }
 
     /**

@@ -14,12 +14,13 @@ public abstract class AbstractRemoteDataReader<T> extends AbstractDataReader<T> 
 
     protected static long maxTimeCache = 86400; // 1 day
     protected static long limit = new Date().getTime() - maxTimeCache * 1000;
-    protected String url;
-    protected boolean persisted = true;
 
     static {
         maxCacheTime(Long.parseLong(System.getProperty("com.alaimos.MITHrIL.maxTimeCache", "86400")));
     }
+
+    protected String url;
+    protected boolean persisted = true;
 
     /**
      * Get the maximum time a cached file is valid
@@ -37,7 +38,7 @@ public abstract class AbstractRemoteDataReader<T> extends AbstractDataReader<T> 
      */
     public static void maxCacheTime(long maxTimeCache) {
         AbstractRemoteDataReader.maxTimeCache = maxTimeCache;
-        AbstractRemoteDataReader.limit = new Date().getTime() - maxTimeCache * 1000;
+        AbstractRemoteDataReader.limit        = new Date().getTime() - maxTimeCache * 1000;
     }
 
     /**

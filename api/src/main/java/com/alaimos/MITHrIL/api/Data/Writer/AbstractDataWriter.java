@@ -27,8 +27,7 @@ public abstract class AbstractDataWriter<T> implements DataWriterInterface<T> {
     /**
      * Get the output stream for the file
      *
-     * @param append if true, the file will be appended
-     *               if false, the file will be overwritten
+     * @param append if true, the file will be appended if false, the file will be overwritten
      * @return the output stream
      * @throws IOException if an I/O error occurs
      */

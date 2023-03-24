@@ -12,6 +12,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serial;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.IntStream;
 
 public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
 
@@ -86,8 +87,7 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
     }
 
     /**
-     * Invert the matrix.
-     * It uses the Moore-Penrose pseudo-inverse to invert the matrix.
+     * Invert the matrix. It uses the Moore-Penrose pseudo-inverse to invert the matrix.
      *
      * @return a new matrix
      */
@@ -97,8 +97,7 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
     }
 
     /**
-     * Invert the matrix in place.
-     * It uses the Moore-Penrose pseudo-inverse to invert the matrix.
+     * Invert the matrix in place. It uses the Moore-Penrose pseudo-inverse to invert the matrix.
      */
     @Override
     public void invertInPlace() {
@@ -106,8 +105,7 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
     }
 
     /**
-     * Pre-multiply this matrix by another matrix.
-     * That is, the operation is performed as matrix * this.
+     * Pre-multiply this matrix by another matrix. That is, the operation is performed as matrix * this.
      *
      * @param matrix the other matrix
      * @return a new matrix
@@ -122,8 +120,7 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
     }
 
     /**
-     * Pre-multiply this matrix by a vector.
-     * That is, the operation is performed as vector * this.
+     * Pre-multiply this matrix by a vector. That is, the operation is performed as vector * this.
      *
      * @param vector the vector
      * @return a new vector
@@ -134,8 +131,7 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
     }
 
     /**
-     * Post-multiply this matrix by another matrix.
-     * That is, the operation is performed as this * matrix.
+     * Post-multiply this matrix by another matrix. That is, the operation is performed as this * matrix.
      *
      * @param matrix the other matrix
      * @return a new matrix
@@ -242,21 +238,24 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
 
     @Override
     public double[] applyFunction(VectorToScalarFunction function, Direction direction) {
-        var result = new double[direction == Direction.ROW ? rows() : columns()];
-        for (var i = 0; i < result.length; i++) {
-            result[i] = function.apply(direction == Direction.ROW ? row(i) : column(i), i);
-        }
-        return result;
+        var size = direction == Direction.ROW ? rows() : columns();
+        return IntStream.range(0, size)
+                        .parallel()
+                        .mapToDouble(i -> function.apply(direction == Direction.ROW ? row(i) : column(i), i))
+                        .toArray();
     }
 
     @Override
     public MatrixInterface<?> applyFunction(ElementwiseFunction function) {
-        double[][] result = new double[rows()][columns()];
-        for (var i = 0; i < rows(); i++) {
-            for (var j = 0; j < columns(); j++) {
-                result[i][j] = function.apply(val(i, j), i, j);
-            }
-        }
+        var rows = rows();
+        var columns = columns();
+        var result = IntStream.range(0, rows)
+                              .parallel()
+                              .mapToObj(i -> IntStream.range(0, columns)
+                                                      .parallel()
+                                                      .mapToDouble(j -> function.apply(val(i, j), i, j))
+                                                      .toArray())
+                              .toArray(double[][]::new);
         return new DefaultMatrix(result);
     }
 
@@ -275,8 +274,8 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
     }
 
     /**
-     * Releases all resources associated with this matrix.
-     * For this implementation, it is not necessary to call this method.
+     * Releases all resources associated with this matrix. For this implementation, it is not necessary to call this
+     * method.
      */
     @Override
     public void close() {

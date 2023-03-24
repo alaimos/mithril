@@ -31,7 +31,7 @@ public class ServiceRunner implements Runnable {
      */
     public ServiceRunner(String executable, String[] args) {
         this.executable = executable;
-        this.args = args;
+        this.args       = args;
         fillServicesMap();
     }
 
@@ -50,7 +50,10 @@ public class ServiceRunner implements Runnable {
     private void printMainUsage(@NotNull PrintStream out) {
         out.println("java -jar " + executable + " [serviceName] arguments...\n\nAvailable services:\n");
         var columns = new String[]{"Name", "Description"};
-        var data = services.values().stream().map(s -> new String[]{s.getShortName(), s.getDescription()}).toArray(String[][]::new);
+        var data = services.values()
+                           .stream()
+                           .map(s -> new String[]{s.getShortName(), s.getDescription()})
+                           .toArray(String[][]::new);
         Arrays.sort(data, Comparator.comparing(o -> o[0]));
         new TextTable(columns, data).printTable(out, 3);
     }
@@ -59,7 +62,8 @@ public class ServiceRunner implements Runnable {
         out.println("java -jar " + executable + " " + serviceName + " [options...] arguments...");
         parser.printUsage(out);
         out.println();
-        out.println("  Example: java -jar " + executable + " " + serviceName + parser.printExample(OptionHandlerFilter.REQUIRED));
+        out.println("  Example: java -jar " + executable + " " + serviceName + parser.printExample(
+                OptionHandlerFilter.REQUIRED));
     }
 
     @Override

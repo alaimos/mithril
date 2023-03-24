@@ -33,12 +33,12 @@ public enum EvidenceType {
         this.value = value;
     }
 
+    public static EvidenceType fromString(String name) {
+        return Utils.getEnumFromString(EvidenceType.class, name, UNKNOWN);
+    }
+
     @Contract(pure = true)
     public int value() {
         return value;
-    }
-
-    public static EvidenceType fromString(String name) {
-        return Utils.getEnumFromString(EvidenceType.class, name, UNKNOWN);
     }
 }

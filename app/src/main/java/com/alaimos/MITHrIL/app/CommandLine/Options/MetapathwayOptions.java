@@ -20,7 +20,9 @@ public class MetapathwayOptions extends AbstractOptions {
     public boolean decoys = false;
     @Option(name = "-no-mirna-extension", usage = "disable pathway extension with miRNAs.", forbids = "-extension-evidence-type")
     public boolean noExtension = false;
-    @Option(name = "-extension-evidence-type", usage = "type of minimal evidence used when extending pathways.", forbids = "-no-mirna-extension", aliases = {"-enrichment-evidence-type"})
+    @Option(name = "-extension-evidence-type", usage = "type of minimal evidence used when extending pathways.", forbids = "-no-mirna-extension", aliases = {
+            "-enrichment-evidence-type"
+    })
     public EvidenceType extensionEvidenceType = EvidenceType.STRONG;
     @Option(name = "-reactome", usage = "add reactome pathways to the internal repository if available for the selected species.")
     public boolean reactome = false;
@@ -43,9 +45,9 @@ public class MetapathwayOptions extends AbstractOptions {
             "included in the computation.", metaVar = "cat1, cat2, ...", depends = "-m")
     public void setIncludeCategories(@NotNull String s) {
         includeCategories = Arrays.stream(s.split(","))
-                .filter(v -> !v.isEmpty())
-                .map(String::trim)
-                .toArray(String[]::new);
+                                  .filter(v -> !v.isEmpty())
+                                  .map(String::trim)
+                                  .toArray(String[]::new);
     }
 
     @Option(name = "-exclude-categories", usage = "a list of pathway categories (separated by comma) to exclude when " +
@@ -53,8 +55,8 @@ public class MetapathwayOptions extends AbstractOptions {
             "  be excluded from the computation.", metaVar = "cat1, cat2, ...", depends = "-m")
     public void setExcludeCategories(@NotNull String s) {
         excludeCategories = Arrays.stream(s.split(","))
-                .filter(v -> !v.isEmpty())
-                .map(String::trim)
-                .toArray(String[]::new);
+                                  .filter(v -> !v.isEmpty())
+                                  .map(String::trim)
+                                  .toArray(String[]::new);
     }
 }

@@ -51,8 +51,17 @@ public class OrganismsService implements ServiceInterface {
         SpeciesDatabaseReader speciesDbReader = SpeciesDatabaseReader.INSTANCE;
         try {
             var db = speciesDbReader.read();
-            String[] columns = new String[]{"Id", "Name", "Has miRNA-targets interactions?", "Has TF-miRNAs activations?", "Has REACTOME?"};
-            String[][] data = db.values().stream().map(s -> new String[]{s.id(), s.name(), ((s.hasMiRNA()) ? "Yes" : "No"), ((s.hasTranscriptionFactors()) ? "Yes" : "No"), ((s.hasReactome()) ? "Yes" : "No")}).toArray(String[][]::new);
+            String[] columns = new String[]{
+                    "Id", "Name", "Has miRNA-targets interactions?", "Has TF-miRNAs activations?", "Has REACTOME?"
+            };
+            String[][] data = db.values()
+                                .stream()
+                                .map(s -> new String[]{
+                                        s.id(), s.name(), ((s.hasMiRNA()) ? "Yes" : "No"),
+                                        ((s.hasTranscriptionFactors()) ? "Yes" : "No"),
+                                        ((s.hasReactome()) ? "Yes" : "No")
+                                })
+                                .toArray(String[][]::new);
             TextTable tt = new TextTable(columns, data);
             tt.printTable();
         } catch (Exception e) {

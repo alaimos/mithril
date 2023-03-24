@@ -2,7 +2,6 @@ package com.alaimos.MITHrIL.api.Math.PValue.Adjusters;
 
 import com.alaimos.MITHrIL.api.CommandLine.Extensions.ExtensionInterface;
 import com.alaimos.MITHrIL.api.Commons.Utils;
-import org.pf4j.ExtensionPoint;
 
 /**
  * A function which adjusts p-values on multiple hypotheses

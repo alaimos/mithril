@@ -117,7 +117,11 @@ public class Vectors {
      * @return the sequence of indices that would sort the array
      */
     public static int[] order(int @NotNull [] array) {
-        return IntStream.range(0, array.length).boxed().sorted(Comparator.comparingInt(o -> array[o])).mapToInt(v -> v).toArray();
+        return IntStream.range(0, array.length)
+                        .boxed()
+                        .sorted(Comparator.comparingInt(o -> array[o]))
+                        .mapToInt(v -> v)
+                        .toArray();
     }
 
     /**
@@ -127,7 +131,11 @@ public class Vectors {
      * @return the sequence of indices that would sort the array
      */
     public static int[] order(double @NotNull [] array) {
-        return IntStream.range(0, array.length).boxed().sorted(Comparator.comparingDouble(o -> array[o])).mapToInt(v -> v).toArray();
+        return IntStream.range(0, array.length)
+                        .boxed()
+                        .sorted(Comparator.comparingDouble(o -> array[o]))
+                        .mapToInt(v -> v)
+                        .toArray();
     }
 
     /**
@@ -138,7 +146,11 @@ public class Vectors {
      * @return the sequence of indices that would sort the array
      */
     public static <T extends Comparable<T>> int[] order(T @NotNull [] array) {
-        return IntStream.range(0, array.length).boxed().sorted(Comparator.comparing(o -> array[o])).mapToInt(v -> v).toArray();
+        return IntStream.range(0, array.length)
+                        .boxed()
+                        .sorted(Comparator.comparing(o -> array[o]))
+                        .mapToInt(v -> v)
+                        .toArray();
     }
 
     /**
@@ -148,7 +160,11 @@ public class Vectors {
      * @return the sequence of indices that would sort the array in decreasing order
      */
     public static int[] decreasingOrder(int @NotNull [] array) {
-        return IntStream.range(0, array.length).boxed().sorted((o1, o2) -> Integer.compare(array[o2], array[o1])).mapToInt(v -> v).toArray();
+        return IntStream.range(0, array.length)
+                        .boxed()
+                        .sorted((o1, o2) -> Integer.compare(array[o2], array[o1]))
+                        .mapToInt(v -> v)
+                        .toArray();
     }
 
     /**
@@ -158,7 +174,11 @@ public class Vectors {
      * @return the sequence of indices that would sort the array in decreasing order
      */
     public static int[] decreasingOrder(double @NotNull [] array) {
-        return IntStream.range(0, array.length).boxed().sorted((o1, o2) -> Double.compare(array[o2], array[o1])).mapToInt(v -> v).toArray();
+        return IntStream.range(0, array.length)
+                        .boxed()
+                        .sorted((o1, o2) -> Double.compare(array[o2], array[o1]))
+                        .mapToInt(v -> v)
+                        .toArray();
     }
 
     /**
@@ -169,7 +189,11 @@ public class Vectors {
      * @return the sequence of indices that would sort the array in decreasing order
      */
     public static <T extends Comparable<T>> int[] decreasingOrder(T @NotNull [] array) {
-        return IntStream.range(0, array.length).boxed().sorted((o1, o2) -> array[o2].compareTo(array[o1])).mapToInt(v -> v).toArray();
+        return IntStream.range(0, array.length)
+                        .boxed()
+                        .sorted((o1, o2) -> array[o2].compareTo(array[o1]))
+                        .mapToInt(v -> v)
+                        .toArray();
     }
 
     /**

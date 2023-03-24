@@ -76,10 +76,10 @@ public class TextTree {
             for (int i = 0; i < childCount; i++) {
                 boolean lastElement = i == childCount - 1;
                 if (lastElement) {
-                    ind = pref1;
+                    ind  = pref1;
                     bud2 = "`";
                 } else {
-                    ind = pref2;
+                    ind  = pref2;
                     bud2 = "";
                 }
                 printNode(model.getChild(node, i), !render ? pref3 : ind, !render ? "" : bud2, true);

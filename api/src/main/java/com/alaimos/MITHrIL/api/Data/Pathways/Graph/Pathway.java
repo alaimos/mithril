@@ -28,8 +28,8 @@ public class Pathway implements Cloneable, Serializable {
     }
 
     public Pathway(String id, String name, @NotNull Graph graph) {
-        this.id = id;
-        this.name = name;
+        this.id    = id;
+        this.name  = name;
         this.graph = graph;
     }
 
@@ -93,8 +93,7 @@ public class Pathway implements Cloneable, Serializable {
     }
 
     /**
-     * Check if this pathway is equal to another one.
-     * Two pathways are equal if they have the same id.
+     * Check if this pathway is equal to another one. Two pathways are equal if they have the same id.
      *
      * @param o the other pathway
      * @return true if the two pathways are equal
@@ -130,22 +129,21 @@ public class Pathway implements Cloneable, Serializable {
     }
 
     /**
+     * Is the pathway hidden? A hidden pathway should not be saved in the result file of any analysis performed on its
+     * repository. This is useful to hide the meta-pathway in the final results.
+     *
+     * @return the hidden flag
+     */
+    public boolean isHidden() {
+        return hidden;
+    }
+
+    /**
      * Set the hidden flag
      *
      * @param hidden the hidden flag
      */
     public void setHidden(boolean hidden) {
         this.hidden = hidden;
-    }
-
-    /**
-     * Is the pathway hidden?
-     * A hidden pathway should not be saved in the result file of any analysis performed on its repository.
-     * This is useful to hide the meta-pathway in the final results.
-     *
-     * @return the hidden flag
-     */
-    public boolean isHidden() {
-        return hidden;
     }
 }
