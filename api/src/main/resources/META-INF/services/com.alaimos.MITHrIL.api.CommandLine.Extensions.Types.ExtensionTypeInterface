@@ -3,3 +3,4 @@ com.alaimos.MITHrIL.api.CommandLine.Extensions.Types.CombinerInterfaceType
 com.alaimos.MITHrIL.api.CommandLine.Extensions.Types.MatrixFactoryInterfaceType
 com.alaimos.MITHrIL.api.CommandLine.Extensions.Types.NodeWeightComputationInterfaceType
 com.alaimos.MITHrIL.api.CommandLine.Extensions.Types.EdgeWeightComputationInterfaceType
+com.alaimos.MITHrIL.api.CommandLine.Extensions.Types.StreamMedianComputationInterfaceType

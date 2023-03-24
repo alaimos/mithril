@@ -6,6 +6,7 @@ import com.alaimos.MITHrIL.api.Math.MatrixFactoryInterface;
 import com.alaimos.MITHrIL.api.Math.MatrixInterface;
 import com.alaimos.MITHrIL.api.Math.PValue.Adjusters.AdjusterInterface;
 import com.alaimos.MITHrIL.api.Math.PValue.Combiners.CombinerInterface;
+import com.alaimos.MITHrIL.api.Math.StreamMedian.StreamMedianComputationInterface;
 import com.alaimos.MITHrIL.app.Data.Records.ExpressionInput;
 import com.alaimos.MITHrIL.app.Data.Records.RepositoryMatrix;
 import org.jetbrains.annotations.NotNull;
@@ -36,6 +37,7 @@ public class MITHrIL implements Runnable, Closeable {
     protected CombinerInterface pValueCombiner;
     protected AdjusterInterface pValueAdjuster;
     protected MatrixFactoryInterface<?> matrixFactory;
+    protected StreamMedianComputationInterface medianAlgorithm;
     protected boolean noPValue;
     //endregion
 
@@ -90,6 +92,11 @@ public class MITHrIL implements Runnable, Closeable {
 
     public MITHrIL matrixFactory(MatrixFactoryInterface<?> matrixFactory) {
         this.matrixFactory = matrixFactory;
+        return this;
+    }
+
+    public MITHrIL medianAlgorithm(StreamMedianComputationInterface medianAlgorithm) {
+        this.medianAlgorithm = medianAlgorithm;
         return this;
     }
 
