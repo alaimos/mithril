@@ -67,6 +67,14 @@ public interface MatrixInterface<E extends MatrixInterface<?>> extends Closeable
     double[] postMultiply(double[] vector);
 
     /**
+     * Subtract a matrix from this matrix
+     *
+     * @param matrix the matrix
+     * @return a new matrix
+     */
+    E subtract(MatrixInterface<?> matrix);
+
+    /**
      * Given a vector, it returns a new matrix obtained by subtracting the vector from each row or column of the matrix.
      * The direction parameter specifies if the vector is subtracted from rows or columns.
      *

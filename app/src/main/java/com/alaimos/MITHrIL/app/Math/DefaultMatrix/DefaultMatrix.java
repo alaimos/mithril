@@ -157,6 +157,21 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
     }
 
     /**
+     * Subtract a matrix from this matrix
+     *
+     * @param matrix the matrix
+     * @return a new matrix
+     */
+    @Override
+    public DefaultMatrix subtract(MatrixInterface<?> matrix) {
+        if (matrix instanceof DefaultMatrix dm) {
+            return new DefaultMatrix(internalMatrix.subtract(dm.internalMatrix));
+        } else {
+            return this.subtract(new DefaultMatrix(matrix));
+        }
+    }
+
+    /**
      * Given a vector, it returns a new matrix obtained by subtracting the vector from each row or column of the matrix.
      * The direction parameter specifies if the vector is subtracted from rows or columns.
      *

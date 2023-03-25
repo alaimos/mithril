@@ -83,20 +83,35 @@ public class ExtensionManager {
     }
 
     /**
+     * Get an extension by its name
+     *
+     * @param type the type of the extension as a java class object
+     * @param name the name of the extension
+     * @param <E>  the java type of the extension
+     * @return the extension
+     */
+    @SuppressWarnings("unchecked")
+    public <E extends ExtensionInterface> E getExtension(Class<E> type, String name) {
+        init();
+        initByType(extensionTypeNames.get(type));
+        return (E) extensions.get(extensionTypeNames.get(type)).get(name);
+    }
+
+    /**
      * Initialize the extension manager
      */
     private void init() {
         if (extensionTypes != null) return;
         extensionTypes = defaultPluginManager.getExtensions(ExtensionTypeInterface.class)
-                                             .stream()
-                                             .collect(Collectors.toMap(ExtensionTypeInterface::name,
-                                                                       Function.identity()
-                                             ));
+                .stream()
+                .collect(Collectors.toMap(ExtensionTypeInterface::name,
+                        Function.identity()
+                ));
         extensionTypeNames = extensionTypes.values()
-                                           .stream()
-                                           .collect(Collectors.toMap(ExtensionTypeInterface::classType,
-                                                                     ExtensionTypeInterface::name
-                                           ));
+                .stream()
+                .collect(Collectors.toMap(ExtensionTypeInterface::classType,
+                        ExtensionTypeInterface::name
+                ));
     }
 
     /**

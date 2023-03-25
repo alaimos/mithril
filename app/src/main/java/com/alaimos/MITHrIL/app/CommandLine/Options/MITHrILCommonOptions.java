@@ -9,7 +9,7 @@ public class MITHrILCommonOptions extends MetapathwayOptions {
     @Option(name = "-combiner", usage = "the name of a p-value combination method (see the list of \"combiner\" extensions for possible values).")
     public String pValueCombiner = "stouffer";
     @Option(name = "-adjuster", usage = "the name of a p-value adjustment method (see the list of \"adjuster\" extensions for possible values).")
-    public String pValueAdjuster = "BH";
+    public String pValueAdjuster = "benjamini.hochberg";
     @Option(name = "-number-of-iterations", usage = "number of iterations for the p-value computation.")
     public int pValueIterations = 2001;
     @Option(name = "-batch-size", usage = "number of iterations to be performed in a single batch.")

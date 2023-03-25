@@ -228,6 +228,21 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
     }
 
     /**
+     * Subtract a matrix from this matrix
+     *
+     * @param matrix the matrix
+     * @return a new matrix
+     */
+    @Override
+    public CPUMatrix subtract(MatrixInterface<?> matrix) {
+        if (matrix instanceof CPUMatrix dm) {
+            return new CPUMatrix(tensor.sub(dm.tensor), rows, columns);
+        } else {
+            return new CPUMatrix(matrix).subtract(this);
+        }
+    }
+
+    /**
      * Given a vector, it returns a new matrix obtained by subtracting the vector from each row or column of the matrix.
      * The direction parameter specifies if the vector is subtracted from rows or columns.
      *
