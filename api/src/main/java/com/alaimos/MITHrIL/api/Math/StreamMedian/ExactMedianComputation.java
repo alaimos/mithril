@@ -1,12 +1,13 @@
 package com.alaimos.MITHrIL.api.Math.StreamMedian;
 
 import org.apache.commons.math3.stat.descriptive.rank.Median;
+import org.jetbrains.annotations.NotNull;
 
 public class ExactMedianComputation implements StreamMedianComputationInterface {
 
     private static final Median MEDIAN = new Median();
     private double[] values = null;
-    private int lastAvailableIndex = 0;
+    private int firstAvailableIndex = 0;
     private int size = 0;
 
     /**
@@ -49,8 +50,10 @@ public class ExactMedianComputation implements StreamMedianComputationInterface 
     @Override
     public void addElement(double value) {
         init();
-        values[lastAvailableIndex] = value;
-        lastAvailableIndex = (lastAvailableIndex + 1) % values.length;
+        if (firstAvailableIndex == values.length) {
+            throw new IllegalStateException("The number of elements is greater than the maximum allowed");
+        }
+        values[firstAvailableIndex++] = value;
     }
 
     /**
@@ -59,17 +62,31 @@ public class ExactMedianComputation implements StreamMedianComputationInterface 
      * @param values the values of the elements
      */
     @Override
-    public void addElements(double[] values) {
-        if (values.length > this.values.length) {
+    public void addElements(double @NotNull [] values) {
+        addElements(values, 0);
+    }
+
+    /**
+     * Add multiple elements coming from the stream
+     *
+     * @param values the values of the elements
+     */
+    @Override
+    public void addElements(double @NotNull [] values, int start) {
+        if ((values.length - start) > this.values.length) {
             throw new IllegalArgumentException("The number of elements is greater than the maximum allowed");
         }
-        if (values.length == this.values.length) {
+        if (firstAvailableIndex == 0 && start == 0 && values.length == this.values.length) {
             this.values = values;
-            lastAvailableIndex = 0;
-        } else {
-            for (double value : values) {
-                addElement(value);
-            }
+            return;
+        }
+        if ((values.length - start) <= (this.values.length - firstAvailableIndex)) {
+            System.arraycopy(values, start, this.values, firstAvailableIndex, values.length);
+            firstAvailableIndex += (values.length - start);
+            return;
+        }
+        for (double value : values) {
+            addElement(value);
         }
     }
 
@@ -89,7 +106,7 @@ public class ExactMedianComputation implements StreamMedianComputationInterface 
     @Override
     public void clear() {
         values = null;
-        lastAvailableIndex = 0;
+        firstAvailableIndex = 0;
     }
 
     private void init() {

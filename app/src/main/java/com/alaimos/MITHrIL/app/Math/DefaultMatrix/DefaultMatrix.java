@@ -157,6 +157,36 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
     }
 
     /**
+     * Given a vector, it returns a new matrix obtained by subtracting the vector from each row or column of the matrix.
+     * The direction parameter specifies if the vector is subtracted from rows or columns.
+     *
+     * @param vector    the vector
+     * @param direction the direction
+     * @return a new matrix
+     */
+    @Override
+    public DefaultMatrix subtract(double[] vector, Direction direction) {
+        var size = direction == Direction.ROW ? rows() : columns();
+        double[][] tmp = new double[size][];
+        for (int i = 0; i < size; i++) {
+            tmp[i] = vector;
+        }
+        var tmpMatrix = direction == Direction.ROW ? Primitive64Matrix.FACTORY.rows(tmp) : Primitive64Matrix.FACTORY.columns(tmp);
+        return new DefaultMatrix(internalMatrix.subtract(tmpMatrix));
+    }
+
+    /**
+     * Subtract a value from each element of the matrix
+     *
+     * @param value the value
+     * @return a new matrix
+     */
+    @Override
+    public DefaultMatrix subtract(double value) {
+        return new DefaultMatrix(internalMatrix.subtract(value));
+    }
+
+    /**
      * Get the value of a cell
      *
      * @param i the row
@@ -240,9 +270,9 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
     public double[] applyFunction(VectorToScalarFunction function, Direction direction) {
         var size = direction == Direction.ROW ? rows() : columns();
         return IntStream.range(0, size)
-                        .parallel()
-                        .mapToDouble(i -> function.apply(direction == Direction.ROW ? row(i) : column(i), i))
-                        .toArray();
+                .parallel()
+                .mapToDouble(i -> function.apply(direction == Direction.ROW ? row(i) : column(i), i))
+                .toArray();
     }
 
     @Override
@@ -250,12 +280,12 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
         var rows = rows();
         var columns = columns();
         var result = IntStream.range(0, rows)
-                              .parallel()
-                              .mapToObj(i -> IntStream.range(0, columns)
-                                                      .parallel()
-                                                      .mapToDouble(j -> function.apply(val(i, j), i, j))
-                                                      .toArray())
-                              .toArray(double[][]::new);
+                .parallel()
+                .mapToObj(i -> IntStream.range(0, columns)
+                        .parallel()
+                        .mapToDouble(j -> function.apply(val(i, j), i, j))
+                        .toArray())
+                .toArray(double[][]::new);
         return new DefaultMatrix(result);
     }
 

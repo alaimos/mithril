@@ -67,6 +67,24 @@ public interface MatrixInterface<E extends MatrixInterface<?>> extends Closeable
     double[] postMultiply(double[] vector);
 
     /**
+     * Given a vector, it returns a new matrix obtained by subtracting the vector from each row or column of the matrix.
+     * The direction parameter specifies if the vector is subtracted from rows or columns.
+     *
+     * @param vector    the vector
+     * @param direction the direction
+     * @return a new matrix
+     */
+    E subtract(double[] vector, Direction direction);
+
+    /**
+     * Subtract a value from each element of the matrix
+     *
+     * @param value the value
+     * @return a new matrix
+     */
+    E subtract(double value);
+
+    /**
      * Get the value of a cell
      *
      * @param i the row
@@ -123,6 +141,19 @@ public interface MatrixInterface<E extends MatrixInterface<?>> extends Closeable
 
     MatrixInterface<?> applyFunction(ElementwiseFunction function);
 
+    default void forEach(Direction direction, ForEachFunction function) {
+        var last = direction == Direction.ROW ? rows() : columns();
+        if (direction == Direction.ROW) {
+            for (var i = 0; i < last; i++) {
+                function.run(row(i), i);
+            }
+        } else {
+            for (var i = 0; i < last; i++) {
+                function.run(column(i), i);
+            }
+        }
+    }
+
     /**
      * Enum for the direction of the function application
      */
@@ -141,4 +172,8 @@ public interface MatrixInterface<E extends MatrixInterface<?>> extends Closeable
         double apply(double[] vector, int index);
     }
 
+    @FunctionalInterface
+    interface ForEachFunction {
+        void run(double[] vector, int index);
+    }
 }

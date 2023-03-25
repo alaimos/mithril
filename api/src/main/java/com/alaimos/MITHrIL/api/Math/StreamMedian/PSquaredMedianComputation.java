@@ -4,7 +4,7 @@ import org.apache.commons.math3.stat.descriptive.rank.PSquarePercentile;
 
 public class PSquaredMedianComputation implements StreamMedianComputationInterface {
 
-    private static final PSquarePercentile MEDIAN = new PSquarePercentile(50);
+    private final PSquarePercentile median = new PSquarePercentile(50);
 
     /**
      * Returns the name of this median computation method
@@ -44,7 +44,7 @@ public class PSquaredMedianComputation implements StreamMedianComputationInterfa
      */
     @Override
     public void addElement(double value) {
-        MEDIAN.increment(value);
+        median.increment(value);
     }
 
     /**
@@ -54,7 +54,18 @@ public class PSquaredMedianComputation implements StreamMedianComputationInterfa
      */
     @Override
     public void addElements(double[] values) {
-        MEDIAN.incrementAll(values);
+        median.incrementAll(values);
+    }
+
+    /**
+     * Add multiple elements coming from the stream
+     *
+     * @param values the values of the elements
+     * @param start  the index of the first element to add
+     */
+    @Override
+    public void addElements(double[] values, int start) {
+        median.incrementAll(values, start, values.length - start);
     }
 
     /**
@@ -64,7 +75,7 @@ public class PSquaredMedianComputation implements StreamMedianComputationInterfa
      */
     @Override
     public double currentValue() {
-        return MEDIAN.getResult();
+        return median.getResult();
     }
 
     /**
@@ -72,6 +83,6 @@ public class PSquaredMedianComputation implements StreamMedianComputationInterfa
      */
     @Override
     public void clear() {
-        MEDIAN.clear();
+        median.clear();
     }
 }

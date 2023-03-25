@@ -4,6 +4,7 @@ import com.alaimos.MITHrIL.api.Commons.Utils;
 import org.pf4j.ExtensionPoint;
 
 import java.util.List;
+import java.util.Set;
 
 @FunctionalInterface
 public interface EnrichmentProbabilityComputationInterface extends ExtensionPoint {
@@ -13,9 +14,9 @@ public interface EnrichmentProbabilityComputationInterface extends ExtensionPoin
     }
 
     double computeProbability(
-            List<String> allExperimentNodes,
+            String[] allExperimentNodes,
             List<String> allNodesInPathway,
-            List<String> allDiffExpNodes,
+            Set<String> allDiffExpNodes,
             List<String> allDiffExpNodesInPathway
     );
 }

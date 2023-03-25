@@ -44,6 +44,14 @@ public interface StreamMedianComputationInterface extends ExtensionInterface {
     void addElements(double[] values);
 
     /**
+     * Add multiple elements coming from the stream
+     *
+     * @param values the values of the elements
+     * @param start  the index of the first element to add
+     */
+    void addElements(double[] values, int start);
+
+    /**
      * Get the current median value
      *
      * @return the current median value

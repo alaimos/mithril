@@ -9,37 +9,46 @@ import com.alaimos.MITHrIL.api.Math.PValue.Combiners.CombinerInterface;
 import com.alaimos.MITHrIL.api.Math.StreamMedian.StreamMedianComputationInterface;
 import com.alaimos.MITHrIL.app.Data.Records.ExpressionInput;
 import com.alaimos.MITHrIL.app.Data.Records.RepositoryMatrix;
+import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
+import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class MITHrIL implements Runnable, Closeable {
 
-    /**
-     * This predicate is used to filter out Differentially Expressed Nodes from other nodes
-     */
-    private static final Predicate<? super Map.Entry<String, Double>> diffExpFilteringPredicate = e -> Double.isFinite(
-            e.getValue()) && e.getValue() != 0.0;
-
     //region Input Parameters
-    protected Random random;
-    protected ExpressionInput input;
-    protected Repository repository;
-    protected RepositoryMatrix repositoryMatrix;
-    protected MatrixInterface<?> repositoryMatrixTransposed = null;
-    protected int numberOfRepetitions;
-    protected int batchSize;
-    protected EnrichmentProbabilityComputationInterface probabilityComputation;
-    protected CombinerInterface pValueCombiner;
-    protected AdjusterInterface pValueAdjuster;
-    protected MatrixFactoryInterface<?> matrixFactory;
-    protected StreamMedianComputationInterface medianAlgorithm;
-    protected boolean noPValue;
+    private Random random;
+    private ExpressionInput input;
+    private Repository repository;
+    private RepositoryMatrix repositoryMatrix;
+    private MatrixInterface<?> repositoryMatrixTransposed = null;
+    private int numberOfRepetitions;
+    private int batchSize;
+    private EnrichmentProbabilityComputationInterface probabilityComputation;
+    private CombinerInterface pValueCombiner;
+    private AdjusterInterface pValueAdjuster;
+    private MatrixFactoryInterface<?> matrixFactory;
+    private Supplier<StreamMedianComputationInterface> medianAlgorithmFactory;
+    private boolean noPValue;
     //endregion
+
+    private StreamMedianComputationInterface[] medians = null;
+    private double[] nodePerturbations = null;
+    private double[] nodeCorrectedPerturbations = null;
+    private double[] pathwayAccumulators = null;
+    private double[] pathwayCorrectedAccumulators = null;
+    private double[] nodePValues = null;
+    private double[] nodeAdjustedPValues = null;
+    private double[] pathwayPValues = null;
+    private double[] pathwayAdjustedPValues = null;
+
+    private Object2DoubleMap<String> probabilityCache = new Object2DoubleOpenHashMap<>();
 
     //region Constructors and setters
     public MITHrIL() {
@@ -95,8 +104,8 @@ public class MITHrIL implements Runnable, Closeable {
         return this;
     }
 
-    public MITHrIL medianAlgorithm(StreamMedianComputationInterface medianAlgorithm) {
-        this.medianAlgorithm = medianAlgorithm;
+    public MITHrIL medianAlgorithmFactory(Supplier<StreamMedianComputationInterface> medianAlgorithmFactory) {
+        this.medianAlgorithmFactory = medianAlgorithmFactory;
         return this;
     }
 
@@ -114,7 +123,7 @@ public class MITHrIL implements Runnable, Closeable {
      * @param lastBatchElement the last element of the previous batch
      * @return a matrix containing the batch of data
      */
-    protected MatrixInterface<?> prepareBatch(int lastBatchElement) {
+    private MatrixInterface<?> prepareBatch(int lastBatchElement) {
         var id2index = repositoryMatrix.pathwayMatrix().id2Index();
         int batchSize = Math.min(this.batchSize, (numberOfRepetitions + 1) - lastBatchElement);
         var batchData = new double[id2index.size() * batchSize];
@@ -137,7 +146,7 @@ public class MITHrIL implements Runnable, Closeable {
      * @param batch the batch of data
      * @return the perturbations of the batch stored in a matrix, where each row is a gene, and each column is a run.
      */
-    protected MatrixInterface<?> computeBatchPerturbations(@NotNull MatrixInterface<?> batch) {
+    private MatrixInterface<?> computeBatchPerturbations(@NotNull MatrixInterface<?> batch) {
         return batch.preMultiply(repositoryMatrix.pathwayMatrix().matrix());
     }
 
@@ -149,15 +158,49 @@ public class MITHrIL implements Runnable, Closeable {
      * @param batchPerturbation the perturbations of a batch computed with computeBatchPerturbations
      * @return the accumulators of the batch stored in a matrix, where each row is a pathway, and each column is a run.
      */
-    protected MatrixInterface<?> computeBatchAccumulators(@NotNull MatrixInterface<?> batchPerturbation) {
+    private MatrixInterface<?> computeBatchAccumulators(@NotNull MatrixInterface<?> batchPerturbation) {
         return batchPerturbation.preMultiply(repositoryMatrixTransposed);
+    }
+
+    private double[] computeBatchAccumulators(double[] batchPerturbations) {
+        return repositoryMatrixTransposed.postMultiply(batchPerturbations);
+    }
+
+    private void init() {
+        if (repositoryMatrixTransposed == null) {
+            repositoryMatrixTransposed = repositoryMatrix.matrix().transpose();
+        }
+        if (medians == null) {
+            var numberOfGenes = repositoryMatrix.pathwayMatrix().id2Index().size();
+            medians = new StreamMedianComputationInterface[numberOfGenes];
+            for (var i = 0; i < numberOfRepetitions; i++) {
+                medians[i] = medianAlgorithmFactory.get();
+                medians[i].numberOfElements(numberOfRepetitions + 1);
+            }
+        }
+        probabilityCache.clear();
+    }
+
+    private List<String> intersect(@NotNull Set<String> ids, @NotNull String p) {
+        return repository.virtualPathway(p).edges().stream().flatMap(e -> Stream.of(e.left(), e.right())).filter(ids::contains).toList();
+    }
+
+    private List<String> intersect(@NotNull String[] ids, @NotNull String p) {
+        var idSet = new HashSet<String>();
+        Collections.addAll(idSet, ids);
+        return repository.virtualPathway(p).edges().stream().flatMap(e -> Stream.of(e.left(), e.right())).filter(idSet::contains).toList();
+    }
+
+    private double probability(String p) {
+        return probabilityCache.computeIfAbsent(p, (String id) -> {
+            var deGenes = input.expressions().keySet();
+            return probabilityComputation.computeProbability(input.nodes(), intersect(input.nodes(), id), deGenes, intersect(deGenes, id));
+        });
     }
 
     @Override
     public void run() {
-        if (repositoryMatrixTransposed == null) {
-            repositoryMatrixTransposed = repositoryMatrix.matrix().transpose();
-        }
+        init();
         var lastBatchElement = 0;
         do {
             try (
@@ -165,11 +208,77 @@ public class MITHrIL implements Runnable, Closeable {
                     var rawPerturbations = computeBatchPerturbations(batch);
                     var rawAccumulators = computeBatchAccumulators(rawPerturbations)
             ) {
-
+                var first = lastBatchElement == 0 ? 1 : 0;
+                if (numberOfRepetitions > 0) {
+                    rawPerturbations.forEach(MatrixInterface.Direction.ROW, (v, i) -> medians[i].addElements(v, first));
+                }
+                if (lastBatchElement == 0) {
+                    nodePerturbations = rawPerturbations.column(0);
+                    pathwayAccumulators = rawAccumulators.column(0);
+                    if (!noPValue) {
+                        nodePValues = new double[nodePerturbations.length];
+                        pathwayPValues = new double[pathwayAccumulators.length];
+                    }
+                }
+                if (!noPValue) {
+                    countPValueEvents(rawPerturbations, first, nodePerturbations, nodePValues);
+                    countPValueEvents(rawAccumulators, first, pathwayAccumulators, pathwayPValues);
+                }
+                lastBatchElement += batch.columns();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         } while (lastBatchElement < numberOfRepetitions);
+        applyDistributionCorrection();
+        finalizePValues();
+    }
+
+    private static void countPValueEvents(@NotNull MatrixInterface<?> rawAccumulators, int first, double[] accumulators, double[] pValues) {
+        rawAccumulators.forEach(MatrixInterface.Direction.ROW, (v, i) -> {
+            var p = accumulators[i];
+            for (var j = first; j < v.length; j++) {
+                if ((p > 0 && v[j] >= p) || (p < 0 && v[j] <= p))
+                    pValues[i] += 1.0;
+            }
+        });
+    }
+
+    private void applyDistributionCorrection() {
+        if (numberOfRepetitions > 0) {
+            nodeCorrectedPerturbations = new double[nodePerturbations.length];
+            for (var i = 0; i < nodePerturbations.length; i++) {
+                nodeCorrectedPerturbations[i] = nodePerturbations[i] - medians[i].currentValue();
+            }
+            pathwayCorrectedAccumulators = computeBatchAccumulators(nodeCorrectedPerturbations);
+        } else {
+            nodeCorrectedPerturbations = nodePerturbations;
+            pathwayCorrectedAccumulators = pathwayAccumulators;
+        }
+    }
+
+    private void finalizePValues() {
+        if (!noPValue) {
+            finalizePValues(nodePValues, false);
+            finalizePValues(pathwayPValues, true);
+            nodeAdjustedPValues = pValueAdjuster.adjust(nodePValues);
+            pathwayAdjustedPValues = pValueAdjuster.adjust(pathwayPValues);
+        }
+    }
+
+    private void finalizePValues(double @NotNull [] pValues, boolean combine) {
+        var minPValue = 1.0 / (double) numberOfRepetitions / 100.0;
+        for (var i = 0; i < pValues.length; i++) {
+            pValues[i] /= numberOfRepetitions;
+            if (pValues[i] <= minPValue) {
+                pValues[i] = minPValue;
+            } else if (pValues[i] > 1) { //This should never happen!
+                throw new RuntimeException("P-value greater than 1");
+            }
+            if (combine) {
+                var enrichmentP = probability(repositoryMatrix.index2Id().get(i));
+                pValues[i] = pValueCombiner.combine(pValues[i], enrichmentP);
+            }
+        }
     }
 
     @Override
@@ -231,7 +340,7 @@ public class MITHrIL implements Runnable, Closeable {
 //     * @param node the node
 //     * @return the fold change of that node
 //     */
-//    protected double getExpression(NodeInterface node) {
+//    private double getExpression(NodeInterface node) {
 //        return getExpression(node.getId());
 //    }
 //
@@ -300,7 +409,7 @@ public class MITHrIL implements Runnable, Closeable {
 //        return weight;
 //    }
 //
-//    protected void putPerturbation(String nId, String pId, double pert, double acc) {
+//    private void putPerturbation(String nId, String pId, double pert, double acc) {
 //        if (!perturbations.containsKey(pId)) {
 //            visitedPerturbations.put(pId, new HashMap<>());
 //            nodeAccumulators.put(pId, new HashMap<>());
@@ -310,7 +419,7 @@ public class MITHrIL implements Runnable, Closeable {
 //        nodeAccumulators.get(pId).put(nId, acc);
 //    }
 //
-//    protected double perturbation(@NotNull NodeInterface n, @NotNull PathwayInterface p, String startNode) {
+//    private double perturbation(@NotNull NodeInterface n, @NotNull PathwayInterface p, String startNode) {
 //        var pId = p.getId();
 //        var nId = n.getId();
 //        if (!visitedPerturbations.containsKey(pId)) {
@@ -347,7 +456,7 @@ public class MITHrIL implements Runnable, Closeable {
 //     * @param p A pathway which contains such node
 //     * @return The perturbation
 //     */
-//    protected double perturbation(NodeInterface n, PathwayInterface p) {
+//    private double perturbation(NodeInterface n, PathwayInterface p) {
 //        return perturbation(n, p, n.getId());
 //        /*var pId = p.getId();
 //        var nId = n.getId();
@@ -380,7 +489,7 @@ public class MITHrIL implements Runnable, Closeable {
 //     * @param p the pathway
 //     * @return the impact factor
 //     */
-//    protected double impactFactor(PathwayInterface p) {
+//    private double impactFactor(PathwayInterface p) {
 //        if (impactFactors.containsKey(p.getId())) {
 //            return impactFactors.get(p.getId());
 //        }
@@ -405,7 +514,7 @@ public class MITHrIL implements Runnable, Closeable {
 //     * @param p a virtual pathway
 //     * @return the impact factor
 //     */
-//    protected double impactFactor(String p) {
+//    private double impactFactor(String p) {
 //        if (impactFactors.containsKey(p)) {
 //            return impactFactors.get(p);
 //        }
@@ -432,7 +541,7 @@ public class MITHrIL implements Runnable, Closeable {
 //     * @param p the pathway
 //     * @return the accumulation
 //     */
-//    protected double accumulation(PathwayInterface p) {
+//    private double accumulation(PathwayInterface p) {
 //        if (accumulators.containsKey(p.getId())) {
 //            return accumulators.get(p.getId());
 //        }
@@ -450,7 +559,7 @@ public class MITHrIL implements Runnable, Closeable {
 //     * @param p a virtual pathway
 //     * @return the accumulation
 //     */
-//    protected double accumulation(String p) {
+//    private double accumulation(String p) {
 //        if (accumulators.containsKey(p)) {
 //            return accumulators.get(p);
 //        }
@@ -552,7 +661,7 @@ public class MITHrIL implements Runnable, Closeable {
 //     * @param pathways  a list of pathways
 //     * @return a new instance of this object
 //     */
-//    protected MITHrIL initSelf(double[] expChange, List<String> nodes, List<PathwayInterface> pathways) {
+//    private MITHrIL initSelf(double[] expChange, List<String> nodes, List<PathwayInterface> pathways) {
 //        MITHrIL tmp = null;
 //        try {
 //            tmp = getClass().getDeclaredConstructor().newInstance();
@@ -589,7 +698,7 @@ public class MITHrIL implements Runnable, Closeable {
 //     * @param i                the current iteration index
 //     * @param randAccumulators the map of random accumulators
 //     */
-//    protected void incrementCounters(PathwayInterface p, MITHrIL tmp, int i, HashMap<String, double[]> randAccumulators) {
+//    private void incrementCounters(PathwayInterface p, MITHrIL tmp, int i, HashMap<String, double[]> randAccumulators) {
 //        String pId = p.getId();
 //        GraphInterface g = p.getGraph();
 //        randAccumulators.get(pId)[i] = tmp.accumulators.get(pId);
@@ -604,7 +713,7 @@ public class MITHrIL implements Runnable, Closeable {
 //     * @param i                the current iteration index
 //     * @param randAccumulators the map of random accumulators
 //     */
-//    protected void incrementCounters(String p, MITHrIL tmp, int i, HashMap<String, double[]> randAccumulators) {
+//    private void incrementCounters(String p, MITHrIL tmp, int i, HashMap<String, double[]> randAccumulators) {
 //        randAccumulators.get(p)[i] = tmp.accumulators.get(p);
 //        incrementNodesCounters(repository.getNodesOfVirtualPathway(p), tmp, p, repository.getSourceOfVirtualPathway(p).getId());
 //    }
@@ -713,7 +822,7 @@ public class MITHrIL implements Runnable, Closeable {
 //     * @param p a pathway
 //     * @return a list of sorted nodes
 //     */
-//    protected List<NodeInterface> getSortedNodes(@NotNull PathwayInterface p) {
+//    private List<NodeInterface> getSortedNodes(@NotNull PathwayInterface p) {
 //        GraphInterface g = p.getGraph();
 //        List<NodeInterface> nodes;
 //        if (sortedNodes.containsKey(p)) {
@@ -901,7 +1010,7 @@ public class MITHrIL implements Runnable, Closeable {
 //    /**
 //     * Run method used internally in pValue computation
 //     */
-//    protected void internalRun(List<PathwayInterface> pathways) {
+//    private void internalRun(List<PathwayInterface> pathways) {
 //        for (PathwayInterface p : pathways) {
 //            for (NodeInterface n : getSortedNodes(p)) {
 //                perturbation(n, p);
