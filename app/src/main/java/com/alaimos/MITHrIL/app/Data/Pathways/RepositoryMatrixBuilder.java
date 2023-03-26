@@ -27,7 +27,7 @@ public class RepositoryMatrixBuilder {
         for (var vp : r.virtualPathways()) {
             j = pathwayId2Index.getInt(vp.id());
             for (var n : vp.nodes()) {
-                i                  = nodeId2index.getInt(n.id());
+                i = nodeId2index.getInt(n.id());
                 data[i * cols + j] = n.weight();
             }
         }

@@ -122,6 +122,89 @@ public class MITHrIL implements Runnable, Closeable {
     //endregion
 
     /**
+     * Run the MITHrIL algorithm
+     */
+    @Override
+    public void run() {
+        init();
+        var lastBatchElement = 0;
+        do {
+            try (
+                    var batch = prepareBatch(lastBatchElement);
+                    var batchNodePerturbations = computeBatchPerturbations(batch);
+                    var batchNodeAccumulators = batchNodePerturbations.subtract(batch);
+                    var batchRawPathwayAccumulators = computeBatchAccumulators(batchNodeAccumulators)
+            ) {
+                var first = lastBatchElement == 0 ? 1 : 0;
+                if (lastBatchElement == 0) {
+                    nodePerturbations = batchNodePerturbations.column(0);
+                    nodeAccumulators = batchNodeAccumulators.column(0);
+                    pathwayAccumulators = batchRawPathwayAccumulators.column(0);
+                    if (!noPValue) {
+                        nodePValues = new double[nodePerturbations.length];
+                        pathwayPValues = new double[pathwayAccumulators.length];
+                    }
+                    if (numberOfRepetitions > 0) {
+                        batchRawPathwayAccumulators.forEach(MatrixInterface.Direction.ROW, (v, i) -> medians[i].addElements(v, first));
+                    }
+                }
+                if (!noPValue) {
+                    countPValueEvents(batchNodePerturbations, first, this.nodePerturbations, nodePValues);
+                    countPValueEvents(batchRawPathwayAccumulators, first, pathwayAccumulators, pathwayPValues);
+                }
+                lastBatchElement += batch.columns();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } while (lastBatchElement < numberOfRepetitions);
+        applyDistributionCorrection();
+        finalizePValues();
+        computeImpactFactors();
+    }
+
+    /**
+     * Get the output of the algorithm.
+     *
+     * @return the output of the algorithm.
+     */
+    public MITHrILOutput output() {
+        return new MITHrILOutput(nodePerturbations, nodeAccumulators, pathwayAccumulators, pathwayCorrectedAccumulators, pathwayImpactFactors, nodePValues, nodeAdjustedPValues, pathwayPValues, pathwayAdjustedPValues);
+    }
+
+    /**
+     * Free the resources used by the algorithm.
+     *
+     * @throws IOException this exception is never thrown, but it is required by the {@link AutoCloseable} interface.
+     */
+    @Override
+    public void close() throws IOException {
+        if (repositoryMatrixTransposed != null) {
+            repositoryMatrixTransposed.close();
+        }
+    }
+
+    //region Utility methods
+
+    /**
+     * Initializes the internal state of the algorithm.
+     * This method is called automatically by the {@link #run()} method.
+     */
+    private void init() {
+        if (repositoryMatrixTransposed == null) {
+            repositoryMatrixTransposed = repositoryMatrix.matrix().transpose();
+        }
+        if (medians == null) {
+            var numberOfPathways = repositoryMatrix.id2Index().size();
+            medians = new StreamMedianComputationInterface[numberOfPathways];
+            for (var i = 0; i < numberOfRepetitions; i++) {
+                medians[i] = medianAlgorithmFactory.get();
+                medians[i].numberOfElements(numberOfRepetitions);
+            }
+        }
+        probabilityCache.clear();
+    }
+
+    /**
      * This method prepares the batch of data to be used in the next iteration. It returns a matrix where each row is a
      * gene, and each column is the input of a run. The first column of the first batch is the original input. The other
      * columns are permutations of the original input.
@@ -168,31 +251,37 @@ public class MITHrIL implements Runnable, Closeable {
         return batchPerturbation.preMultiply(repositoryMatrixTransposed);
     }
 
-    private void init() {
-        if (repositoryMatrixTransposed == null) {
-            repositoryMatrixTransposed = repositoryMatrix.matrix().transpose();
-        }
-        if (medians == null) {
-            var numberOfPathways = repositoryMatrix.id2Index().size();
-            medians = new StreamMedianComputationInterface[numberOfPathways];
-            for (var i = 0; i < numberOfRepetitions; i++) {
-                medians[i] = medianAlgorithmFactory.get();
-                medians[i].numberOfElements(numberOfRepetitions);
-            }
-        }
-        probabilityCache.clear();
-    }
-
+    /**
+     * Given a set of node identifiers, this method intersects the set with the nodes of the pathway p.
+     *
+     * @param ids the set of node identifiers
+     * @param p   the pathway identifier
+     * @return the intersection of the set with the nodes of the pathway p
+     */
     private List<String> intersect(@NotNull Set<String> ids, @NotNull String p) {
         return repository.virtualPathway(p).edges().stream().flatMap(e -> Stream.of(e.left(), e.right())).filter(ids::contains).toList();
     }
 
+    /**
+     * Given an array of node identifiers, this method intersects the array with the nodes of the pathway p.
+     *
+     * @param ids the array of node identifiers
+     * @param p   the pathway identifier
+     * @return the intersection of the array with the nodes of the pathway p
+     */
     private List<String> intersect(@NotNull String[] ids, @NotNull String p) {
         var idSet = new HashSet<String>();
         Collections.addAll(idSet, ids);
         return repository.virtualPathway(p).edges().stream().flatMap(e -> Stream.of(e.left(), e.right())).filter(idSet::contains).toList();
     }
 
+    /**
+     * Given a pathway, this method computes the probability of observing by chance a number of DE genes equal to the
+     * number of DE genes observed in the pathway.
+     *
+     * @param p the pathway identifier
+     * @return the probability
+     */
     private double probability(String p) {
         return probabilityCache.computeIfAbsent(p, (String id) -> {
             var deGenes = input.expressions().keySet();
@@ -200,48 +289,17 @@ public class MITHrIL implements Runnable, Closeable {
         });
     }
 
-    @Override
-    public void run() {
-        init();
-        var lastBatchElement = 0;
-        do {
-            try (
-                    var batch = prepareBatch(lastBatchElement);
-                    var batchNodePerturbations = computeBatchPerturbations(batch);
-                    var batchNodeAccumulators = batchNodePerturbations.subtract(batch);
-                    var batchRawPathwayAccumulators = computeBatchAccumulators(batchNodeAccumulators)
-            ) {
-                var first = lastBatchElement == 0 ? 1 : 0;
-                if (lastBatchElement == 0) {
-                    nodePerturbations = batchNodePerturbations.column(0);
-                    nodeAccumulators = batchNodeAccumulators.column(0);
-                    pathwayAccumulators = batchRawPathwayAccumulators.column(0);
-                    if (!noPValue) {
-                        nodePValues = new double[nodePerturbations.length];
-                        pathwayPValues = new double[pathwayAccumulators.length];
-                    }
-                    if (numberOfRepetitions > 0) {
-                        batchRawPathwayAccumulators.forEach(MatrixInterface.Direction.ROW, (v, i) -> medians[i].addElements(v, first));
-                    }
-                }
-                if (!noPValue) {
-                    countPValueEvents(batchNodePerturbations, first, this.nodePerturbations, nodePValues);
-                    countPValueEvents(batchRawPathwayAccumulators, first, pathwayAccumulators, pathwayPValues);
-                }
-                lastBatchElement += batch.columns();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        } while (lastBatchElement < numberOfRepetitions);
-        applyDistributionCorrection();
-        finalizePValues();
-        computeImpactFactors();
-    }
-
-    public MITHrILOutput output() {
-        return new MITHrILOutput(nodePerturbations, nodeAccumulators, pathwayAccumulators, pathwayCorrectedAccumulators, pathwayImpactFactors, nodePValues, nodeAdjustedPValues, pathwayPValues, pathwayAdjustedPValues);
-    }
-
+    /**
+     * Given the raw accumulators of a batch, this method computes the number of events matching the p-value definition.
+     * That is the number of times we observe a raw accumulator (absolute value) greater than the raw accumulator of the
+     * user input (absolute value).
+     * The absolute value is not explicitly computed to avoid the overhead of the Math.abs.
+     *
+     * @param rawAccumulators the raw accumulators of a batch
+     * @param first           the first column of the batch to consider
+     * @param accumulators    the accumulators of the user input
+     * @param pValues         the array containing the counts to update
+     */
     private static void countPValueEvents(@NotNull MatrixInterface<?> rawAccumulators, int first, double[] accumulators, double[] pValues) {
         rawAccumulators.forEach(MatrixInterface.Direction.ROW, (v, i) -> {
             var p = accumulators[i];
@@ -252,6 +310,10 @@ public class MITHrIL implements Runnable, Closeable {
         });
     }
 
+    /**
+     * Correct the raw accumulators of this run by subtracting the median of random accumulators.
+     * The median is used to be robust to outliers.
+     */
     private void applyDistributionCorrection() {
         if (numberOfRepetitions > 0) {
             pathwayCorrectedAccumulators = new double[pathwayAccumulators.length];
@@ -263,6 +325,10 @@ public class MITHrIL implements Runnable, Closeable {
         }
     }
 
+    /**
+     * Finalize the p-values by dividing the count of events by the number of repetitions.
+     * Then, the p-values are adjusted for multiple hypothesis testing.
+     */
     private void finalizePValues() {
         if (!noPValue) {
             finalizePValues(nodePValues, false);
@@ -272,6 +338,14 @@ public class MITHrIL implements Runnable, Closeable {
         }
     }
 
+    /**
+     * Finalize the p-values by dividing the count of events by the number of repetitions.
+     * Then, the p-values are adjusted for multiple hypothesis testing.
+     *
+     * @param pValues the array containing the counts to update
+     * @param combine if true, the p-values are combined with the probability of observing the pathway by chance
+     *                (see {@link #probability(String)})
+     */
     private void finalizePValues(double @NotNull [] pValues, boolean combine) {
         var minPValue = 1.0 / (double) numberOfRepetitions / 100.0;
         for (var i = 0; i < pValues.length; i++) {
@@ -288,6 +362,9 @@ public class MITHrIL implements Runnable, Closeable {
         }
     }
 
+    /**
+     * Compute the impact factors of the pathways.
+     */
     private void computeImpactFactors() {
         pathwayImpactFactors = new double[pathwayAccumulators.length];
         for (var i = 0; i < pathwayAccumulators.length; i++) {
@@ -303,11 +380,5 @@ public class MITHrIL implements Runnable, Closeable {
             }
         }
     }
-
-    @Override
-    public void close() throws IOException {
-        if (repositoryMatrixTransposed != null) {
-            repositoryMatrixTransposed.close();
-        }
-    }
+    //endregion
 }

@@ -1,4 +1,4 @@
-package com.alaimos.MITHrIL.app.Algorithms;
+package com.alaimos.MITHrIL.app.Algorithms.Metapathway;
 
 import com.alaimos.MITHrIL.api.CommandLine.Extensions.ExtensionManager;
 import com.alaimos.MITHrIL.api.Data.Pathways.Graph.Edge;
@@ -17,15 +17,28 @@ import java.io.File;
 import java.util.List;
 import java.util.Random;
 
-public class MetapathwayBuilder implements Runnable {
+public class MetapathwayBuilderFromOptions implements Runnable {
 
-    private static final Logger log = LoggerFactory.getLogger(MetapathwayBuilder.class);
+    private static final Logger log = LoggerFactory.getLogger(MetapathwayBuilderFromOptions.class);
     private final MetapathwayOptions options;
     private final Random random;
     private Repository metapathway = null;
 
+    /**
+     * Build a metapathway from options
+     *
+     * @param options options
+     * @param random  random number generator
+     * @return the metapathway
+     */
+    public static Repository build(MetapathwayOptions options, Random random) {
+        var builder = new MetapathwayBuilderFromOptions(options, random);
+        builder.run();
+        return builder.get();
+    }
 
-    public MetapathwayBuilder(MetapathwayOptions options, Random random) {
+
+    public MetapathwayBuilderFromOptions(MetapathwayOptions options, Random random) {
         this.options = options;
         this.random = random;
     }
@@ -98,10 +111,8 @@ public class MetapathwayBuilder implements Runnable {
     private Repository.@NotNull RepositoryFilter prepareFilter() {
         var includePathways = readFile(options.includePathways);
         var excludePathways = readFile(options.excludePathways);
-        var includeCategories = options.includeCategories != null && options.includeCategories.length > 0 ?
-                List.of(options.includeCategories) : null;
-        var excludeCategories = options.excludeCategories != null && options.excludeCategories.length > 0 ?
-                List.of(options.excludeCategories) : null;
+        var includeCategories = options.includeCategories != null && options.includeCategories.length > 0 ? List.of(options.includeCategories) : null;
+        var excludeCategories = options.excludeCategories != null && options.excludeCategories.length > 0 ? List.of(options.excludeCategories) : null;
         return new Repository.RepositoryFilter(includeCategories, excludeCategories, includePathways, excludePathways, null);
     }
 }
