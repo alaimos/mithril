@@ -42,8 +42,8 @@ public class ExactMedianComputation implements StreamMedianComputationInterface 
     }
 
     /**
-     * Add a new element coming from the stream.
-     * If we have already reached the maximum number of elements, the oldest element is overwritten.
+     * Add a new element coming from the stream. If we have already reached the maximum number of elements, the oldest
+     * element is overwritten.
      *
      * @param value the value of the element
      */
@@ -105,7 +105,7 @@ public class ExactMedianComputation implements StreamMedianComputationInterface 
      */
     @Override
     public void clear() {
-        values = null;
+        values              = null;
         firstAvailableIndex = 0;
     }
 

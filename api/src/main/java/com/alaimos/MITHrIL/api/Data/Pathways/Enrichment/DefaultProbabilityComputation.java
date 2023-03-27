@@ -12,9 +12,13 @@ public class DefaultProbabilityComputation implements EnrichmentProbabilityCompu
         return "default";
     }
 
+    public String description() {
+        return "Default probability computation (it uses the hypergeometric distribution to test the enrichment)";
+    }
+
     @Override
     public double computeProbability(
-            @NotNull String[] allExperimentNodes,
+            @NotNull String @NotNull [] allExperimentNodes,
             @NotNull List<String> allNodesInPathway,
             @NotNull Set<String> allDiffExpNodes,
             @NotNull List<String> allDiffExpNodesInPathway

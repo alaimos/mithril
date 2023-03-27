@@ -28,4 +28,8 @@ public class MITHrILCommonOptions extends MetapathwayOptions {
     public String inversionFactory = "default";
     @Option(name = "-multiplication-factory", usage = "the matrix math library used to perform the operations needed for the MITHrIL iteration (see the list of \"matrix-math\" extensions for possible values).")
     public String multiplicationFactory = "default";
+    @Option(name = "-enrichment-probability", usage = "the algorithm used to compute the enrichment probability of the pathway (see the list of \"enrichment-probability\" extensions for possible values).")
+    public String enrichmentProbability = "default";
+    @Option(name = "-median-algorithm", usage = "the algorithm used to compute the median of a data stream (see the list of \"stream-median\" extensions for possible values).")
+    public String medianAlgorithm = "default";
 }

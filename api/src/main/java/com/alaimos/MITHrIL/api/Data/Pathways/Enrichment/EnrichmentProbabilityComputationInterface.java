@@ -1,17 +1,11 @@
 package com.alaimos.MITHrIL.api.Data.Pathways.Enrichment;
 
-import com.alaimos.MITHrIL.api.Commons.Utils;
-import org.pf4j.ExtensionPoint;
+import com.alaimos.MITHrIL.api.CommandLine.Extensions.ExtensionInterface;
 
 import java.util.List;
 import java.util.Set;
 
-@FunctionalInterface
-public interface EnrichmentProbabilityComputationInterface extends ExtensionPoint {
-
-    default String name() {
-        return Utils.camelCaseToDotCase(getClass().getSimpleName());
-    }
+public interface EnrichmentProbabilityComputationInterface extends ExtensionInterface {
 
     double computeProbability(
             String[] allExperimentNodes,

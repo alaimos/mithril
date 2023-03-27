@@ -3,21 +3,29 @@ package com.alaimos.MITHrIL.app.CommandLine.Services;
 import com.alaimos.MITHrIL.api.CommandLine.Extensions.ExtensionManager;
 import com.alaimos.MITHrIL.api.CommandLine.Interfaces.OptionsInterface;
 import com.alaimos.MITHrIL.api.CommandLine.Interfaces.ServiceInterface;
+import com.alaimos.MITHrIL.api.Data.Pathways.Enrichment.EnrichmentProbabilityComputationInterface;
+import com.alaimos.MITHrIL.api.Data.Writer.BinaryWriter;
 import com.alaimos.MITHrIL.api.Math.MatrixFactoryInterface;
 import com.alaimos.MITHrIL.api.Math.PValue.Adjusters.AdjusterInterface;
 import com.alaimos.MITHrIL.api.Math.PValue.Combiners.CombinerInterface;
+import com.alaimos.MITHrIL.api.Math.StreamMedian.StreamMedianComputationInterface;
 import com.alaimos.MITHrIL.app.Algorithms.MITHrIL;
 import com.alaimos.MITHrIL.app.Algorithms.Metapathway.MatrixBuilderFromMetapathway;
 import com.alaimos.MITHrIL.app.Algorithms.Metapathway.MetapathwayBuilderFromOptions;
 import com.alaimos.MITHrIL.app.CommandLine.Options.MITHrILOptions;
 import com.alaimos.MITHrIL.app.Data.Reader.ExpressionMapReader;
 import com.alaimos.MITHrIL.app.Data.Records.ExpressionInput;
+import com.alaimos.MITHrIL.app.Data.Records.MITHrILOutput;
+import com.alaimos.MITHrIL.app.Data.Records.RepositoryMatrix;
+import com.alaimos.MITHrIL.app.Data.Writer.MITHrILPathwayOutputWriter;
+import com.alaimos.MITHrIL.app.Data.Writer.MITHrILPerturbationDetailedOutputWriter;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
@@ -62,24 +70,62 @@ public class MITHrILService implements ServiceInterface {
             log.info("Running MITHrIL");
             try (var mithril = new MITHrIL()) {
                 mithril.input(input)
-                        .repository(metapathwayRepository)
-                        .repositoryMatrix(metapathwayMatrix)
-                        .matrixFactory(multiplicationMatrixFactory)
-                        .random(random)
-                        .batchSize(options.batchSize)
-                        .numberOfRepetitions(options.pValueIterations)
-                        .pValueCombiner(extManager.getExtension(CombinerInterface.class, options.pValueCombiner))
-                        .pValueAdjuster(extManager.getExtension(AdjusterInterface.class, options.pValueAdjuster))
-                        .noPValue(options.noPValue)
-                        .run();
+                       .repository(metapathwayRepository)
+                       .repositoryMatrix(metapathwayMatrix)
+                       .matrixFactory(multiplicationMatrixFactory)
+                       .random(random)
+                       .batchSize(options.batchSize)
+                       .numberOfRepetitions(options.pValueIterations)
+                       .pValueCombiner(extManager.getExtension(CombinerInterface.class, options.pValueCombiner))
+                       .pValueAdjuster(extManager.getExtension(AdjusterInterface.class, options.pValueAdjuster))
+                       .probabilityComputation(
+                               extManager.getExtension(
+                                       EnrichmentProbabilityComputationInterface.class, options.enrichmentProbability
+                               )
+                       )
+                       .medianAlgorithmFactory(
+                               extManager.getExtensionSupplier(
+                                       StreamMedianComputationInterface.class, options.medianAlgorithm
+                               )
+                       )
+                       .noPValue(options.noPValue)
+                       .run();
                 var output = mithril.output();
-                // todo: write output
+                if (options.output != null) {
+                    new MITHrILPathwayOutputWriter(metapathwayRepository, metapathwayMatrix)
+                            .write(options.output, output);
+                }
+                if (options.perturbationOutput != null) {
+                    new MITHrILPerturbationDetailedOutputWriter(
+                            metapathwayRepository, metapathwayMatrix, false
+                    ).write(options.perturbationOutput, output);
+                }
+                if (options.endpointOutput != null) {
+                    new MITHrILPerturbationDetailedOutputWriter(
+                            metapathwayRepository, metapathwayMatrix, true
+                    ).write(options.endpointOutput, output);
+                }
+                saveBinaryOutput(output, metapathwayMatrix);
             }
             log.info("Done");
         } catch (IllegalArgumentException e) {
             log.error(e.getMessage());
         } catch (Throwable e) {
             log.error("An error occurred", e);
+        }
+    }
+
+    private void validateOutputDirectory(File f, String name) {
+        if (f == null) return;
+        var parent = f.getParentFile();
+        if (!parent.exists()) {
+            throw new IllegalArgumentException(name + " directory does not exist");
+        }
+        if (!parent.isDirectory()) {
+            throw new IllegalArgumentException(name + " is not a directory");
+        }
+        if (!parent.canWrite()) {
+            throw new IllegalArgumentException("Cannot write to " + name + " directory");
         }
     }
 
@@ -90,15 +136,13 @@ public class MITHrILService implements ServiceInterface {
         if (!options.input.exists() || !options.input.canRead()) {
             throw new IllegalArgumentException("Input file does not exist or is not a file");
         }
-        if (options.output == null) {
-            throw new IllegalArgumentException("Output file is not specified");
+        if (options.output == null && options.binaryOutput == null) {
+            throw new IllegalArgumentException("An output file should be specified (either text or binary)");
         }
-        if (options.endpointOutput == null) {
-            throw new IllegalArgumentException("Endpoint output file is not specified");
-        }
-        if (options.perturbationOutput == null) {
-            throw new IllegalArgumentException("Perturbation output file is not specified");
-        }
+        validateOutputDirectory(options.output, "Output");
+        validateOutputDirectory(options.endpointOutput, "Endpoint output");
+        validateOutputDirectory(options.perturbationOutput, "Perturbation output");
+        validateOutputDirectory(options.binaryOutput, "Binary output");
     }
 
     private ExpressionInput readInputFile() throws IOException {
@@ -119,5 +163,14 @@ public class MITHrILService implements ServiceInterface {
             factory.setMaxThreads(options.threads);
         }
         return factory;
+    }
+
+    private void saveBinaryOutput(MITHrILOutput output, RepositoryMatrix repositoryMatrix) throws IOException {
+        if (options.binaryOutput == null) return;
+        log.info("Saving binary output to {}", options.binaryOutput.getAbsolutePath());
+        output.setPathwayIndex2Id(repositoryMatrix.index2Id());
+        output.setNodeIndex2Id(repositoryMatrix.pathwayMatrix().index2Id());
+        new BinaryWriter<MITHrILOutput>().write(options.binaryOutput, output);
+        log.info("Binary output saved");
     }
 }

@@ -19,7 +19,7 @@ public class ExpressionMapReader extends AbstractDataReader<ExpressionInput> {
     }
 
     public ExpressionMapReader setFile(File f) {
-        file      = f;
+        file = f;
         isGzipped = false;
         return this;
     }

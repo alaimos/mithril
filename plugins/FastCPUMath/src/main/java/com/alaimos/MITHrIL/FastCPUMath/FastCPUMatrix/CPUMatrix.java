@@ -35,8 +35,8 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
     private int columns;
 
     private CPUMatrix(Tensor matrix, int rows, int columns) {
-        tensor = matrix;
-        this.rows = rows;
+        tensor       = matrix;
+        this.rows    = rows;
         this.columns = columns;
     }
 
@@ -60,19 +60,19 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
     }
 
     public CPUMatrix(double[] matrix, int rows, int columns) {
-        tensor = tensorFromArray(matrix, new long[]{rows, columns});
-        this.rows = rows;
+        tensor       = tensorFromArray(matrix, new long[]{rows, columns});
+        this.rows    = rows;
         this.columns = columns;
     }
 
     public CPUMatrix(@NotNull MatrixInterface<?> matrix) {
         if (matrix instanceof CPUMatrix dm) {
-            tensor = dm.tensor;
-            rows = dm.rows;
+            tensor  = dm.tensor;
+            rows    = dm.rows;
             columns = dm.columns;
         } else {
-            tensor = tensorFromArray(matrix.raw1D(), new long[]{matrix.rows(), matrix.columns()});
-            rows = matrix.rows();
+            tensor  = tensorFromArray(matrix.raw1D(), new long[]{matrix.rows(), matrix.columns()});
+            rows    = matrix.rows();
             columns = matrix.columns();
         }
     }
@@ -364,9 +364,9 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
     public double[] applyFunction(VectorToScalarFunction function, Direction direction) {
         var size = direction == Direction.ROW ? rows() : columns();
         return IntStream.range(0, size)
-                .parallel()
-                .mapToDouble(i -> function.apply(direction == Direction.ROW ? row(i) : column(i), i))
-                .toArray();
+                        .parallel()
+                        .mapToDouble(i -> function.apply(direction == Direction.ROW ? row(i) : column(i), i))
+                        .toArray();
     }
 
     @Override
@@ -374,12 +374,12 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
         var rows = rows();
         var columns = columns();
         var result = IntStream.range(0, rows)
-                .parallel()
-                .mapToObj(i -> IntStream.range(0, columns)
-                        .parallel()
-                        .mapToDouble(j -> function.apply(val(i, j), i, j)))
-                .flatMapToDouble(Function.identity())
-                .toArray();
+                              .parallel()
+                              .mapToObj(i -> IntStream.range(0, columns)
+                                                      .parallel()
+                                                      .mapToDouble(j -> function.apply(val(i, j), i, j)))
+                              .flatMapToDouble(Function.identity())
+                              .toArray();
         return new CPUMatrix(result, rows, columns);
 //
 //        double[] result = new double[rows * columns];
@@ -433,7 +433,7 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
     private void openPointer() {
         if (pointer == null) {
             pointer = tensor.data_ptr_double();
-            data = new double[rows * columns];
+            data    = new double[rows * columns];
             pointer.get(data);
         }
     }
@@ -455,7 +455,7 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
     private void swapSize() {
         if (rows == columns) return;
         var tmp = rows;
-        rows = columns;
+        rows    = columns;
         columns = tmp;
     }
 }

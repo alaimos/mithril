@@ -19,6 +19,11 @@ public class MatrixBuilderFromMetapathway implements Runnable {
     private final MatrixFactoryInterface<?> matrixFactory;
     private RepositoryMatrix matrix = null;
 
+    public MatrixBuilderFromMetapathway(Repository repository, MatrixFactoryInterface<?> matrixFactory) {
+        this.repository    = repository;
+        this.matrixFactory = matrixFactory;
+    }
+
     /**
      * Build the matrix representation of a repository
      *
@@ -30,11 +35,6 @@ public class MatrixBuilderFromMetapathway implements Runnable {
         var builder = new MatrixBuilderFromMetapathway(repository, matrixFactory);
         builder.run();
         return builder.get();
-    }
-
-    public MatrixBuilderFromMetapathway(Repository repository, MatrixFactoryInterface<?> matrixFactory) {
-        this.repository = repository;
-        this.matrixFactory = matrixFactory;
     }
 
     /**

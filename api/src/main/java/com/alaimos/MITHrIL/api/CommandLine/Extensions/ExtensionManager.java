@@ -3,9 +3,11 @@ package com.alaimos.MITHrIL.api.CommandLine.Extensions;
 import com.alaimos.MITHrIL.api.CommandLine.Extensions.Types.ExtensionTypeInterface;
 import org.pf4j.PluginManager;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class ExtensionManager {
@@ -98,20 +100,51 @@ public class ExtensionManager {
     }
 
     /**
+     * Given an extension type and name, return a supplier that will create a new instance of the extension class. This
+     * is useful when you want to create many instances of the same extension. This method might not work if the
+     * extension class does not have a default constructor.
+     *
+     * @param type the type of the extension
+     * @param name the name of the extension
+     * @param <E>  the java type of the extension
+     * @return the supplier
+     */
+    @SuppressWarnings("unchecked")
+    public <E extends ExtensionInterface> Supplier<E> getExtensionSupplier(Class<E> type, String name) {
+        init();
+        initByType(extensionTypeNames.get(type));
+        try {
+            var baseClass = (Class<E>) extensions.get(extensionTypeNames.get(type)).get(name).getClass();
+            var constructor = baseClass.getDeclaredConstructor();
+            return () -> {
+                try {
+                    return constructor.newInstance();
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                    throw new RuntimeException(e);
+                }
+            };
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * Initialize the extension manager
      */
     private void init() {
         if (extensionTypes != null) return;
-        extensionTypes = defaultPluginManager.getExtensions(ExtensionTypeInterface.class)
-                .stream()
-                .collect(Collectors.toMap(ExtensionTypeInterface::name,
-                        Function.identity()
-                ));
+        extensionTypes     = defaultPluginManager.getExtensions(ExtensionTypeInterface.class)
+                                                 .stream()
+                                                 .collect(Collectors.toMap(
+                                                         ExtensionTypeInterface::name,
+                                                         Function.identity()
+                                                 ));
         extensionTypeNames = extensionTypes.values()
-                .stream()
-                .collect(Collectors.toMap(ExtensionTypeInterface::classType,
-                        ExtensionTypeInterface::name
-                ));
+                                           .stream()
+                                           .collect(Collectors.toMap(
+                                                   ExtensionTypeInterface::classType,
+                                                   ExtensionTypeInterface::name
+                                           ));
     }
 
     /**

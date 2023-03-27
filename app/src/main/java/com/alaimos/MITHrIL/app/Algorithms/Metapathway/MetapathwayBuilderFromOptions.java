@@ -24,6 +24,11 @@ public class MetapathwayBuilderFromOptions implements Runnable {
     private final Random random;
     private Repository metapathway = null;
 
+    public MetapathwayBuilderFromOptions(MetapathwayOptions options, Random random) {
+        this.options = options;
+        this.random  = random;
+    }
+
     /**
      * Build a metapathway from options
      *
@@ -35,12 +40,6 @@ public class MetapathwayBuilderFromOptions implements Runnable {
         var builder = new MetapathwayBuilderFromOptions(options, random);
         builder.run();
         return builder.get();
-    }
-
-
-    public MetapathwayBuilderFromOptions(MetapathwayOptions options, Random random) {
-        this.options = options;
-        this.random = random;
     }
 
     /**
@@ -71,15 +70,22 @@ public class MetapathwayBuilderFromOptions implements Runnable {
             log.info("Building metapathway");
             metapathway = s.repository().buildMetapathway(prepareFilter(), false, false);
             if (!options.noExtension && s.hasMiRNA()) {
-                log.info("Reading miRNA for {} with minimum evidence {}", s.name(), options.extensionEvidenceType.name());
+                log.info(
+                        "Reading miRNA for {} with minimum evidence {}", s.name(),
+                        options.extensionEvidenceType.name()
+                );
                 var containerGraph = s.miRNAContainer().toGraph(options.extensionEvidenceType);
                 log.info("Extending metapathway with miRNAs");
                 metapathway.extendWith(containerGraph);
             }
             log.info("Setting edge weight computation method to {}", options.edgeWeightComputationMethod);
-            Edge.setWeightComputationMethod(ExtensionManager.INSTANCE.getExtension(EdgeWeightComputationInterface.class, options.edgeWeightComputationMethod));
+            Edge.setWeightComputationMethod(ExtensionManager.INSTANCE.getExtension(EdgeWeightComputationInterface.class,
+                                                                                   options.edgeWeightComputationMethod
+            ));
             log.info("Setting node weight computation method to {}", options.nodeWeightComputationMethod);
-            Node.setWeightComputationMethod(ExtensionManager.INSTANCE.getExtension(NodeWeightComputationInterface.class, options.nodeWeightComputationMethod));
+            Node.setWeightComputationMethod(ExtensionManager.INSTANCE.getExtension(NodeWeightComputationInterface.class,
+                                                                                   options.nodeWeightComputationMethod
+            ));
             log.info("Repository ready");
         } catch (Throwable e) {
             log.error("An error occurred while building the metapathway", e);
@@ -111,8 +117,11 @@ public class MetapathwayBuilderFromOptions implements Runnable {
     private Repository.@NotNull RepositoryFilter prepareFilter() {
         var includePathways = readFile(options.includePathways);
         var excludePathways = readFile(options.excludePathways);
-        var includeCategories = options.includeCategories != null && options.includeCategories.length > 0 ? List.of(options.includeCategories) : null;
-        var excludeCategories = options.excludeCategories != null && options.excludeCategories.length > 0 ? List.of(options.excludeCategories) : null;
-        return new Repository.RepositoryFilter(includeCategories, excludeCategories, includePathways, excludePathways, null);
+        var includeCategories = options.includeCategories != null && options.includeCategories.length > 0 ? List.of(
+                options.includeCategories) : null;
+        var excludeCategories = options.excludeCategories != null && options.excludeCategories.length > 0 ? List.of(
+                options.excludeCategories) : null;
+        return new Repository.RepositoryFilter(
+                includeCategories, excludeCategories, includePathways, excludePathways, null);
     }
 }

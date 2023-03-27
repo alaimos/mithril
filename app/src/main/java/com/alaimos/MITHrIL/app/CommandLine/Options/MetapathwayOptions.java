@@ -26,9 +26,9 @@ public class MetapathwayOptions extends AbstractOptions {
     public EvidenceType extensionEvidenceType = EvidenceType.STRONG;
     @Option(name = "-reactome", usage = "add reactome pathways to the internal repository if available for the selected species.")
     public boolean reactome = false;
-    @Option(name = "-m", aliases = "-meta-pathway", usage = "this option is now ignored. It is always true.")
+    @Option(name = "-m", aliases = "-meta-pathway", usage = "this option is now ignored. It is always true.", hidden = true)
     public boolean metaPathway_ignored = true;
-    @Option(name = "-no-complete", usage = "this option is now ignored.")
+    @Option(name = "-no-complete", usage = "this option is now ignored.", hidden = true)
     public boolean noCompletePathway_ignored = false;
     @Option(name = "-include-pathways", usage = "a file containing the list of pathways used when building the metapathway")
     public File includePathways = null;
