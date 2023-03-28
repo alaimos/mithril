@@ -508,11 +508,12 @@ public class Repository implements Collection<Pathway>, Iterable<Pathway>, Clone
         var metapathwayRepository = new Repository();
         var metapathwayGraph = new Graph();
         var metapathway = new Pathway("metapathway", "Metapathway", metapathwayGraph);
+        var nodeFilters = (filters != null) ? filters.nodeFilters : null;
         metapathway.setHidden(true);
         metapathwayRepository.add(metapathway);
         metapathwayRepository.defaultPathway = "metapathway";
         for (var p : selectedPathways) {
-            var virtualEdges = metapathwayGraph.mergeWith(p.graph(), filters.nodeFilters, disablePriority);
+            var virtualEdges = metapathwayGraph.mergeWith(p.graph(), nodeFilters, disablePriority);
             if (keepAllVirtualPathways || !virtualEdges.isEmpty()) {
                 metapathwayRepository.addVirtualPathway(metapathway, p.id(), p.name(), virtualEdges);
             }

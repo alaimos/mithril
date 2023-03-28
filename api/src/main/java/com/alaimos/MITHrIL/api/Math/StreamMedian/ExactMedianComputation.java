@@ -63,6 +63,7 @@ public class ExactMedianComputation implements StreamMedianComputationInterface 
      */
     @Override
     public void addElements(double @NotNull [] values) {
+        init();
         addElements(values, 0);
     }
 
@@ -73,6 +74,7 @@ public class ExactMedianComputation implements StreamMedianComputationInterface 
      */
     @Override
     public void addElements(double @NotNull [] values, int start) {
+        init();
         if ((values.length - start) > this.values.length) {
             throw new IllegalArgumentException("The number of elements is greater than the maximum allowed");
         }
@@ -81,8 +83,13 @@ public class ExactMedianComputation implements StreamMedianComputationInterface 
             return;
         }
         if ((values.length - start) <= (this.values.length - firstAvailableIndex)) {
-            System.arraycopy(values, start, this.values, firstAvailableIndex, values.length);
-            firstAvailableIndex += (values.length - start);
+            var remaining = this.values.length - firstAvailableIndex;
+            var toCopy = values.length - start;
+            if (toCopy > remaining) {
+                throw new IllegalStateException("The number of elements is greater than the maximum allowed");
+            }
+            System.arraycopy(values, start, this.values, firstAvailableIndex, toCopy);
+            firstAvailableIndex += toCopy;
             return;
         }
         for (double value : values) {
@@ -97,6 +104,7 @@ public class ExactMedianComputation implements StreamMedianComputationInterface 
      */
     @Override
     public double currentValue() {
+        init();
         return MEDIAN.evaluate(values);
     }
 

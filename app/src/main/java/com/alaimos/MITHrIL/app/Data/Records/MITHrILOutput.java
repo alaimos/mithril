@@ -141,6 +141,23 @@ public class MITHrILOutput implements Serializable {
         });
     }
 
+    @Override
+    public String toString() {
+        return "MITHrILOutput{" +
+                "nodePerturbations=" + Arrays.toString(nodePerturbations) +
+                ", nodeAccumulators=" + Arrays.toString(nodeAccumulators) +
+                ", pathwayAccumulators=" + Arrays.toString(pathwayAccumulators) +
+                ", pathwayCorrectedAccumulators=" + Arrays.toString(pathwayCorrectedAccumulators) +
+                ", pathwayImpactFactors=" + Arrays.toString(pathwayImpactFactors) +
+                ", nodePValues=" + Arrays.toString(nodePValues) +
+                ", nodeAdjustedPValues=" + Arrays.toString(nodeAdjustedPValues) +
+                ", pathwayPValues=" + Arrays.toString(pathwayPValues) +
+                ", pathwayAdjustedPValues=" + Arrays.toString(pathwayAdjustedPValues) +
+                ", pathwayProbabilities=" + Arrays.toString(pathwayProbabilities) +
+                ", pathwayNetworkProbabilities=" + Arrays.toString(pathwayNetworkProbabilities) +
+                '}';
+    }
+
     @Serial
     private void writeObject(@NotNull ObjectOutputStream stream) throws IOException {
         stream.defaultWriteObject();

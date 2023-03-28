@@ -14,6 +14,7 @@ import java.io.IOException;
 
 public class MatrixBuilderFromMetapathway implements Runnable {
 
+    public static boolean USE_CACHE = true;
     private static final Logger log = LoggerFactory.getLogger(MatrixBuilderFromMetapathway.class);
     private final Repository repository;
     private final MatrixFactoryInterface<?> matrixFactory;
@@ -47,6 +48,7 @@ public class MatrixBuilderFromMetapathway implements Runnable {
             var reader = new RepositoryMatrixReader(repository, matrixFactory);
             log.debug("The matrix representation is stored in {}", reader.file());
             try {
+                if (!USE_CACHE) throw new IOException("Cache disabled");
                 matrix = reader.read();
                 log.info("Matrix representation found, using it");
             } catch (IOException e) {

@@ -29,14 +29,14 @@ public class MITHrIL implements Runnable, Closeable {
     private Repository repository;
     private RepositoryMatrix repositoryMatrix;
     private MatrixInterface<?> repositoryMatrixTransposed = null;
-    private int numberOfRepetitions;
-    private int batchSize;
+    private int numberOfRepetitions = 2001;
+    private int batchSize = 1000;
     private EnrichmentProbabilityComputationInterface probabilityComputation;
     private CombinerInterface pValueCombiner;
     private AdjusterInterface pValueAdjuster;
     private MatrixFactoryInterface<?> matrixFactory;
     private Supplier<StreamMedianComputationInterface> medianAlgorithmFactory;
-    private boolean noPValue;
+    private boolean noPValue = false;
     //endregion
     //region Internal state variables
     private StreamMedianComputationInterface[] medians = null;
@@ -156,13 +156,13 @@ public class MITHrIL implements Runnable, Closeable {
             ) {
                 var first = lastBatchElement == 0 ? 1 : 0;
                 if (lastBatchElement == 0) {
-                    nodePerturbations   = batchNodePerturbations.column(0);
-                    nodeAccumulators    = batchNodeAccumulators.column(0);
-                    pathwayAccumulators = batchRawPathwayAccumulators.column(0);
+                    nodePerturbations    = batchNodePerturbations.column(0);
+                    nodeAccumulators     = batchNodeAccumulators.column(0);
+                    pathwayAccumulators  = batchRawPathwayAccumulators.column(0);
+                    pathwayProbabilities = new double[pathwayAccumulators.length];
                     if (!noPValue) {
                         nodePValues                 = new double[nodePerturbations.length];
                         pathwayPValues              = new double[pathwayAccumulators.length];
-                        pathwayProbabilities        = new double[pathwayAccumulators.length];
                         pathwayNetworkProbabilities = new double[pathwayAccumulators.length];
                         Arrays.fill(pathwayProbabilities, -1.0);
                     }
@@ -223,7 +223,7 @@ public class MITHrIL implements Runnable, Closeable {
         if (medians == null) {
             var numberOfPathways = repositoryMatrix.id2Index().size();
             medians = new StreamMedianComputationInterface[numberOfPathways];
-            for (var i = 0; i < numberOfRepetitions; i++) {
+            for (var i = 0; i < numberOfPathways; i++) {
                 medians[i] = medianAlgorithmFactory.get();
                 medians[i].numberOfElements(numberOfRepetitions);
             }
@@ -289,6 +289,7 @@ public class MITHrIL implements Runnable, Closeable {
                          .edges()
                          .stream()
                          .flatMap(e -> Stream.of(e.left(), e.right()))
+                         .distinct()
                          .filter(ids::contains)
                          .toList();
     }
@@ -307,6 +308,7 @@ public class MITHrIL implements Runnable, Closeable {
                          .edges()
                          .stream()
                          .flatMap(e -> Stream.of(e.left(), e.right()))
+                         .distinct()
                          .filter(idSet::contains)
                          .toList();
     }
