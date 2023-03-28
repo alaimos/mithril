@@ -174,10 +174,10 @@ public class MITHrIL implements Runnable, Closeable {
                         pathwayNetworkProbabilities = new double[pathwayAccumulators.length];
                         Arrays.fill(pathwayProbabilities, -1.0);
                     }
-                    if (numberOfRepetitions > 0) {
-                        batchRawPathwayAccumulators.forEach(
-                                MatrixInterface.Direction.ROW, (v, i) -> medians[i].addElements(v, first));
-                    }
+                }
+                if (numberOfRepetitions > 0) {
+                    batchRawPathwayAccumulators.forEach(
+                            MatrixInterface.Direction.ROW, (v, i) -> medians[i].addElements(v, first));
                 }
                 if (!noPValue) {
                     countPValueEvents(batchNodePerturbations, first, this.nodePerturbations, nodePValues);
