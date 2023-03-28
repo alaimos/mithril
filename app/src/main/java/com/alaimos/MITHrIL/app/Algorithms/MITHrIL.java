@@ -10,11 +10,15 @@ import com.alaimos.MITHrIL.api.Math.StreamMedian.StreamMedianComputationInterfac
 import com.alaimos.MITHrIL.app.Data.Records.ExpressionInput;
 import com.alaimos.MITHrIL.app.Data.Records.MITHrILOutput;
 import com.alaimos.MITHrIL.app.Data.Records.RepositoryMatrix;
+import it.unimi.dsi.logging.ProgressLogger;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -22,6 +26,7 @@ public class MITHrIL implements Runnable, Closeable {
 
     //region Constants
     private static final double LOG_2 = Math.log(2);
+    private static final Logger log = LoggerFactory.getLogger(MITHrIL.class);
     //endregion
     //region Input Parameters
     private Random random;
@@ -148,11 +153,14 @@ public class MITHrIL implements Runnable, Closeable {
     public void run() {
         init();
         var lastBatchElement = 0;
+        var pl = new ProgressLogger(log, 1, TimeUnit.MINUTES, "iterations");
+        pl.start("Starting iterations");
         do {
             try (
-                    var batch = prepareBatch(lastBatchElement); var batchNodePerturbations = computeBatchPerturbations(
-                    batch); var batchNodeAccumulators = batchNodePerturbations.subtract(
-                    batch); var batchRawPathwayAccumulators = computeBatchAccumulators(batchNodeAccumulators)
+                    var batch = prepareBatch(lastBatchElement);
+                    var batchNodePerturbations = computeBatchPerturbations(batch);
+                    var batchNodeAccumulators = batchNodePerturbations.subtract(batch);
+                    var batchRawPathwayAccumulators = computeBatchAccumulators(batchNodeAccumulators)
             ) {
                 var first = lastBatchElement == 0 ? 1 : 0;
                 if (lastBatchElement == 0) {
@@ -176,12 +184,18 @@ public class MITHrIL implements Runnable, Closeable {
                     countPValueEvents(batchRawPathwayAccumulators, first, pathwayAccumulators, pathwayPValues);
                 }
                 lastBatchElement += batch.columns();
+                pl.update(batch.columns());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         } while (lastBatchElement < numberOfRepetitions);
+        pl.done();
+        pl.logger.info(pl.toString());
+        log.info("Applying distribution correction");
         applyDistributionCorrection();
+        log.info("Computing p-values");
         finalizePValues();
+        log.info("Computing impact factors");
         computeImpactFactors();
     }
 

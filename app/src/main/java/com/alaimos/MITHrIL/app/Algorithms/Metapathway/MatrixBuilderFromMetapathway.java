@@ -52,6 +52,7 @@ public class MatrixBuilderFromMetapathway implements Runnable {
                 matrix = reader.read();
                 log.info("Matrix representation found, using it");
             } catch (IOException e) {
+                log.debug("Matrix representation not found", e);
                 log.info("Matrix representation not found, building it");
                 log.info("Building metapathway matrix");
                 var metapathwayMatrix = new PathwayMatrixBuilder(matrixFactory).build(repository.get());

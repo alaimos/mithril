@@ -1,11 +1,11 @@
-package com.alaimos.MITHrIL.FastCPUMath.FastCPUMatrix;
+package com.alaimos.MITHrIL.FastGPUMath.FastGPUMatrix;
 
 import com.alaimos.MITHrIL.api.Math.MatrixFactoryInterface;
 import com.alaimos.MITHrIL.api.Math.MatrixInterface;
 import org.pf4j.Extension;
 
 @Extension
-public class CPUMatrixFactory implements MatrixFactoryInterface<CPUMatrix> {
+public class GPUMatrixFactory implements MatrixFactoryInterface<GPUMatrix> {
 
     /**
      * Get the name of the matrix implementation
@@ -14,12 +14,12 @@ public class CPUMatrixFactory implements MatrixFactoryInterface<CPUMatrix> {
      */
     @Override
     public String name() {
-        return "fast-cpu";
+        return "fast-gpu";
     }
 
     @Override
     public String description() {
-        return "A fast CPU matrix implementation based on the pytorch library. It is not always supported (for example on M1 macs), but it is faster than the default implementation based on the ojAlgo library.";
+        return "A fast GPU matrix implementation based on the pytorch library. It is not always supported (for example on M1 macs), but it is faster than the default implementation based on the ojAlgo library.";
     }
 
     /**
@@ -40,8 +40,8 @@ public class CPUMatrixFactory implements MatrixFactoryInterface<CPUMatrix> {
      * @return a new matrix
      */
     @Override
-    public CPUMatrix of(double[][] matrix) {
-        return new CPUMatrix(matrix);
+    public GPUMatrix of(double[][] matrix) {
+        return new GPUMatrix(matrix);
     }
 
     /**
@@ -54,8 +54,8 @@ public class CPUMatrixFactory implements MatrixFactoryInterface<CPUMatrix> {
      * @return a new matrix
      */
     @Override
-    public CPUMatrix of(double[] matrix, int rows, int columns) {
-        return new CPUMatrix(matrix, rows, columns);
+    public GPUMatrix of(double[] matrix, int rows, int columns) {
+        return new GPUMatrix(matrix, rows, columns);
     }
 
     /**
@@ -67,20 +67,20 @@ public class CPUMatrixFactory implements MatrixFactoryInterface<CPUMatrix> {
      * @return a new matrix
      */
     @Override
-    public CPUMatrix of(double[][] matrix, MatrixInterface.Direction direction) {
-        return new CPUMatrix(matrix, direction);
+    public GPUMatrix of(double[][] matrix, MatrixInterface.Direction direction) {
+        return new GPUMatrix(matrix, direction);
     }
 
     /**
      * Create a new matrix from a matrix of another type. This operation is useful to convert a matrix of a different
      * implementation to a matrix of this implementation. For example, if you have a GPU matrix, and you want to use it
-     * on the CPU, you can use this method to convert it.
+     * on the GPU, you can use this method to convert it.
      *
      * @param matrix the matrix to convert
      * @return a new matrix
      */
     @Override
-    public CPUMatrix of(MatrixInterface<?> matrix) {
-        return new CPUMatrix(matrix);
+    public GPUMatrix of(MatrixInterface<?> matrix) {
+        return new GPUMatrix(matrix);
     }
 }

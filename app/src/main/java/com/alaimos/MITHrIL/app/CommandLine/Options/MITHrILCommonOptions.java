@@ -31,5 +31,5 @@ public class MITHrILCommonOptions extends MetapathwayOptions {
     @Option(name = "-enrichment-probability", usage = "the algorithm used to compute the enrichment probability of the pathway (see the list of \"enrichment-probability\" extensions for possible values).")
     public String enrichmentProbability = "default";
     @Option(name = "-median-algorithm", usage = "the algorithm used to compute the median of a data stream (see the list of \"stream-median\" extensions for possible values).")
-    public String medianAlgorithm = "default";
+    public String medianAlgorithm = "exact";
 }

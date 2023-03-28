@@ -22,11 +22,12 @@ import java.util.stream.Collectors;
 public class ExpressionBatchReader extends AbstractDataReader<Map<String, ExpressionInput>> {
 
     public ExpressionBatchReader() {
+        isGzipped = false;
     }
 
     public ExpressionBatchReader setFile(File f) {
-        file = f;
-        isGzipped = false;
+        file      = f;
+        isGzipped = f.getName().endsWith(".gz");
         return this;
     }
 
@@ -35,6 +36,7 @@ public class ExpressionBatchReader extends AbstractDataReader<Map<String, Expres
         var map = new Int2ObjectOpenHashMap<String>();
         var nodesSet = new HashSet<String>();
         var expressions = new HashMap<String, Object2DoubleMap<String>>();
+        isGzipped = file.getName().endsWith(".gz");
         try (var r = new BufferedReader(new InputStreamReader(getInputStream()))) {
             var line = r.readLine();
             if (line == null) throw new RuntimeException("Invalid input file: file is empty");
@@ -56,7 +58,7 @@ public class ExpressionBatchReader extends AbstractDataReader<Map<String, Expres
                 if (node.isEmpty()) continue;
                 nodesSet.add(node);
                 for (var i = 1; i < s.length; i++) {
-                    s[i] = s[i].trim();
+                    s[i]  = s[i].trim();
                     value = 0.0;
                     if (!s[i].isEmpty() && !s[i].equalsIgnoreCase("null") && !s[i].equalsIgnoreCase("na")) {
                         try {
@@ -72,7 +74,7 @@ public class ExpressionBatchReader extends AbstractDataReader<Map<String, Expres
         }
         var nodes = nodesSet.toArray(new String[0]);
         return expressions.entrySet()
-                .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> new ExpressionInput(nodes, e.getValue())));
+                          .stream()
+                          .collect(Collectors.toMap(Map.Entry::getKey, e -> new ExpressionInput(nodes, e.getValue())));
     }
 }

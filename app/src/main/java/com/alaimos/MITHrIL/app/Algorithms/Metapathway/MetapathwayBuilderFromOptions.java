@@ -60,7 +60,7 @@ public class MetapathwayBuilderFromOptions implements Runnable {
             var repository = s.repository();
             if (options.reactome && s.hasReactome()) {
                 log.info("Adding Reactome pathways to the repository");
-                s.addReactomeToRepository(repository);
+                repository = s.addReactomeToRepository(repository);
             }
             log.debug("The repository contains {} pathways", repository.size());
             if (options.decoys) {
@@ -68,7 +68,7 @@ public class MetapathwayBuilderFromOptions implements Runnable {
                 log.debug("The repository now contains {} pathways", repository.size());
             }
             log.info("Building metapathway");
-            metapathway = s.repository().buildMetapathway(prepareFilter(), false, false);
+            metapathway = repository.buildMetapathway(prepareFilter(), false, false);
             if (!options.noExtension && s.hasMiRNA()) {
                 log.info(
                         "Reading miRNA for {} with minimum evidence {}", s.name(),

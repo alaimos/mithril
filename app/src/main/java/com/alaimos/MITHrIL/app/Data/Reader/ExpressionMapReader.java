@@ -16,11 +16,12 @@ import java.util.HashSet;
 public class ExpressionMapReader extends AbstractDataReader<ExpressionInput> {
 
     public ExpressionMapReader() {
+        isGzipped = false;
     }
 
     public ExpressionMapReader setFile(File f) {
-        file = f;
-        isGzipped = false;
+        file      = f;
+        isGzipped = f.getName().endsWith(".gz");
         return this;
     }
 
@@ -28,6 +29,7 @@ public class ExpressionMapReader extends AbstractDataReader<ExpressionInput> {
     protected ExpressionInput realReader() throws IOException {
         var expressionMap = new Object2DoubleOpenHashMap<String>();
         var nodes = new HashSet<String>();
+        isGzipped = file.getName().endsWith(".gz");
         try (var r = new BufferedReader(new InputStreamReader(getInputStream()))) {
             String line;
             String[] s;

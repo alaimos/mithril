@@ -1,6 +1,8 @@
 package com.alaimos.MITHrIL.api.Data.Reader;
 
+import com.alaimos.MITHrIL.api.CommandLine.Extensions.ExtensionManager;
 import com.alaimos.MITHrIL.api.Commons.Utils;
+import org.apache.commons.io.input.ClassLoaderObjectInputStream;
 
 import java.io.File;
 import java.io.IOException;
@@ -71,9 +73,16 @@ public class BinaryReader<E extends Serializable> extends AbstractDataReader<E> 
      */
     @Override
     protected E realReader() throws IOException {
-        try (ObjectInputStream is = new ObjectInputStream(getInputStream())) {
+        try (var is = new ObjectInputStream(getInputStream())) {
             return Utils.checkedCast(is.readObject(), aClass);
         } catch (ClassNotFoundException e) {
+            var loaders = ExtensionManager.getClassLoaders();
+            for (var l : loaders) {
+                try (var classLoaderIS = new ClassLoaderObjectInputStream(l, getInputStream())) {
+                    return Utils.checkedCast(classLoaderIS.readObject(), aClass);
+                } catch (ClassNotFoundException ignored) {
+                }
+            }
             throw new IOException(e);
         }
     }

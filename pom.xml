@@ -40,9 +40,11 @@
         <log4j.version>2.20.0</log4j.version>
         <org.jetbrains.annotations.version>24.0.1</org.jetbrains.annotations.version>
         <commons.lang3.version>3.12.0</commons.lang3.version>
+        <commons.io.version>2.11.0</commons.io.version>
         <junit-jupiter.version>5.9.2</junit-jupiter.version>
         <args4j.version>2.33</args4j.version>
         <it.unimi.dsi.fastutil.version>8.5.12</it.unimi.dsi.fastutil.version>
+        <it.unimi.dsi.dsiutils.version>2.7.3</it.unimi.dsi.dsiutils.version>
     </properties>
 
     <repositories>

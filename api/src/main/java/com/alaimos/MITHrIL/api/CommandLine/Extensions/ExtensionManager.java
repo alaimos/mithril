@@ -1,7 +1,11 @@
 package com.alaimos.MITHrIL.api.CommandLine.Extensions;
 
 import com.alaimos.MITHrIL.api.CommandLine.Extensions.Types.ExtensionTypeInterface;
+import org.jetbrains.annotations.NotNull;
 import org.pf4j.PluginManager;
+import org.pf4j.PluginWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -33,6 +37,18 @@ public class ExtensionManager {
     public static void setDefaultPluginManager(PluginManager pluginManager) {
         if (defaultPluginManager != null) return;
         defaultPluginManager = pluginManager;
+    }
+
+    /**
+     * Return the class loaders of all plugins
+     *
+     * @return an array of class loaders
+     */
+    public static ClassLoader @NotNull [] getClassLoaders() {
+        return defaultPluginManager.getPlugins()
+                                   .stream()
+                                   .map(PluginWrapper::getPluginClassLoader)
+                                   .toArray(ClassLoader[]::new);
     }
 
     /**
