@@ -133,6 +133,7 @@ public class GPUMatrix implements MatrixInterface<GPUMatrix> {
     @Override
     public void transposeInPlace() {
         closePointer();
+        closeGPUTensor();
         try (var tmp = cpuTensor.t()) {
             cpuTensor.close();
             cpuTensor = tmp.contiguous();
@@ -251,7 +252,7 @@ public class GPUMatrix implements MatrixInterface<GPUMatrix> {
         if (matrix instanceof GPUMatrix dm) {
             copyToGPU();
             dm.copyToGPU();
-            return new GPUMatrix(gpuTensor.sub(dm.cpuTensor).to(CPU_DEVICE, torch.ScalarType.Double), rows, columns);
+            return new GPUMatrix(gpuTensor.sub(dm.gpuTensor).to(CPU_DEVICE, torch.ScalarType.Double), rows, columns);
         } else {
             return new GPUMatrix(matrix).subtract(this);
         }
@@ -471,6 +472,13 @@ public class GPUMatrix implements MatrixInterface<GPUMatrix> {
             data = null;
             pointer.close();
             pointer = null;
+        }
+    }
+
+    private void closeGPUTensor() {
+        if (gpuTensor != null) {
+            gpuTensor.close();
+            gpuTensor = null;
         }
     }
 
