@@ -68,7 +68,7 @@ public class MetapathwayBuilderFromOptions implements Runnable {
                 log.debug("The repository now contains {} pathways", repository.size());
             }
             log.info("Building metapathway");
-            metapathway = repository.buildMetapathway(prepareFilter(), false, false);
+            metapathway = repository.buildMetapathway(prepareFilter(), false, options.keepAllPathways);
             if (!options.noExtension && s.hasMiRNA()) {
                 log.info(
                         "Reading miRNA for {} with minimum evidence {}", s.name(),
@@ -79,12 +79,14 @@ public class MetapathwayBuilderFromOptions implements Runnable {
                 metapathway.extendWith(containerGraph);
             }
             log.info("Setting edge weight computation method to {}", options.edgeWeightComputationMethod);
-            Edge.setWeightComputationMethod(ExtensionManager.INSTANCE.getExtension(EdgeWeightComputationInterface.class,
-                                                                                   options.edgeWeightComputationMethod
+            Edge.setWeightComputationMethod(ExtensionManager.INSTANCE.getExtension(
+                    EdgeWeightComputationInterface.class,
+                    options.edgeWeightComputationMethod
             ));
             log.info("Setting node weight computation method to {}", options.nodeWeightComputationMethod);
-            Node.setWeightComputationMethod(ExtensionManager.INSTANCE.getExtension(NodeWeightComputationInterface.class,
-                                                                                   options.nodeWeightComputationMethod
+            Node.setWeightComputationMethod(ExtensionManager.INSTANCE.getExtension(
+                    NodeWeightComputationInterface.class,
+                    options.nodeWeightComputationMethod
             ));
             log.info("Repository ready");
         } catch (Throwable e) {

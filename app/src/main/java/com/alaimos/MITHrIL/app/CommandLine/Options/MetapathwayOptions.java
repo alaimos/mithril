@@ -26,6 +26,8 @@ public class MetapathwayOptions extends AbstractOptions {
     public EvidenceType extensionEvidenceType = EvidenceType.STRONG;
     @Option(name = "-reactome", usage = "add reactome pathways to the internal repository if available for the selected species.")
     public boolean reactome = false;
+    @Option(name = "-keep-all-pathways", usage = "merges all the selected pathways when building the metapathway but keep the content of the other pathways to compute the perturbation indexes.")
+    public boolean keepAllPathways = false;
     @Option(name = "-m", aliases = "-meta-pathway", usage = "this option is now ignored. It is always true.", hidden = true)
     public boolean metaPathway_ignored = true;
     @Option(name = "-no-complete", usage = "this option is now ignored.", hidden = true)
