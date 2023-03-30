@@ -19,18 +19,17 @@
 
 package it.unimi.dsi.logging;
 
-import static it.unimi.dsi.Util.RUNTIME;
-
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import it.unimi.dsi.Util;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import it.unimi.dsi.Util;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static it.unimi.dsi.Util.RUNTIME;
 
 /**
  * Tunable progress logger.
@@ -102,11 +101,10 @@ import it.unimi.dsi.Util;
 public final class ProgressLogger {
     public static final long ONE_SECOND = 1000;
     public static final long TEN_SECONDS = 10 * ONE_SECOND;
+    public static final long DEFAULT_LOG_INTERVAL = TEN_SECONDS;
     public static final long ONE_MINUTE = ONE_SECOND * 60;
     public static final long TEN_MINUTES = ONE_MINUTE * 10;
     public static final long ONE_HOUR = ONE_MINUTE * 60;
-    public static final long DEFAULT_LOG_INTERVAL = TEN_SECONDS;
-
     /**
      * An array of pattern defining rules that turn plural into singular (the corresponding replacement string is in the
      * same position in {@link #SINGULAR}). More specific rules are at the end of the array (and should be tested
@@ -218,10 +216,6 @@ public final class ProgressLogger {
      */
     public long count;
     /**
-     * The value of {@link #count} at the last call to {@link #updateInternal(long)} (i.e., at the last output).
-     */
-    private long lastCount;
-    /**
      * The number of expected calls to {@link #update()} (used to compute the percentages, ignored if negative).
      */
     public long expectedUpdates;
@@ -253,7 +247,10 @@ public final class ProgressLogger {
      * {@linkplain TimeUnit#MINUTES minutes} or {@linkplain TimeUnit#HOURS hours}.
      */
     public TimeUnit itemTimeUnit;
-
+    /**
+     * The value of {@link #count} at the last call to {@link #updateInternal(long)} (i.e., at the last output).
+     */
+    private long lastCount;
     /**
      * The name of a single counted item.
      */

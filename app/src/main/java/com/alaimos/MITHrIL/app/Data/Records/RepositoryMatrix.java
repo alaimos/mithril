@@ -19,9 +19,9 @@ public final class RepositoryMatrix implements Serializable {
     @Serial
     private static final long serialVersionUID = 4318039760513484999L;
     private final MatrixInterface<?> matrix;
+    private final PathwayMatrix pathwayMatrix;
     private transient Int2ObjectMap<String> index2Id;
     private transient Object2IntMap<String> id2Index;
-    private final PathwayMatrix pathwayMatrix;
 
     public RepositoryMatrix(
             MatrixInterface<?> matrix,

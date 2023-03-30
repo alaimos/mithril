@@ -118,6 +118,7 @@ public class MITHrILService implements ServiceInterface {
     private void validateOutputDirectory(File f, String name) {
         if (f == null) return;
         var parent = f.getParentFile();
+        if (parent == null) parent = new File(".");
         if (!parent.exists()) {
             throw new IllegalArgumentException(name + " directory does not exist");
         }

@@ -19,7 +19,9 @@ public class MITHrILPerturbationDetailedOutputWriter extends AbstractDataWriter<
     protected RepositoryMatrix matrix;
     protected boolean onlyEndpoints;
 
-    public MITHrILPerturbationDetailedOutputWriter(Repository repository, RepositoryMatrix matrix, boolean onlyEndpoints) {
+    public MITHrILPerturbationDetailedOutputWriter(
+            Repository repository, RepositoryMatrix matrix, boolean onlyEndpoints
+    ) {
         this.repository    = repository;
         this.onlyEndpoints = onlyEndpoints;
         this.matrix        = matrix;
@@ -27,7 +29,7 @@ public class MITHrILPerturbationDetailedOutputWriter extends AbstractDataWriter<
 
     private void writeEntry(
             PrintStream ps, String pathwayId, String pathwayName, String nodeId, String nodeName,
-            double perturbation, double accumulator, double p
+            double perturbation, double accumulator, double p, double pAdjusted
     ) {
         writeArray(ps, new String[]{
                 pathwayId,
@@ -36,7 +38,8 @@ public class MITHrILPerturbationDetailedOutputWriter extends AbstractDataWriter<
                 nodeName,
                 Double.toString(perturbation),
                 Double.toString(accumulator),
-                Double.toString(p)
+                Double.toString(p),
+                Double.toString(pAdjusted)
         });
         ps.println();
     }
@@ -53,6 +56,7 @@ public class MITHrILPerturbationDetailedOutputWriter extends AbstractDataWriter<
             var perturbations = data.nodePerturbations();
             var accumulators = data.nodeAccumulators();
             var pValues = data.nodePValues();
+            var pValuesAdjusted = data.nodeAdjustedPValues();
             var nodeId2Index = matrix.pathwayMatrix().id2Index();
             var endpoints = new HashSet<>(repository.get().graph().endpoints());
             ps.println("# Pathway Id\tPathway Name\tGene Id\tGene Name\tPerturbation\tAccumulator\tpValue");
@@ -64,12 +68,12 @@ public class MITHrILPerturbationDetailedOutputWriter extends AbstractDataWriter<
                 pathwayName = p.name();
                 nodes       = p.nodes();
                 for (var n : nodes) {
-                    nodeId  = n.id();
+                    nodeId = n.id();
                     if (onlyEndpoints && !endpoints.contains(nodeId)) continue;
                     nodeIdx = nodeId2Index.getInt(nodeId);
                     writeEntry(
                             ps, pathwayId, pathwayName, nodeId, n.name(), perturbations[nodeIdx], accumulators[nodeIdx],
-                            pValues[nodeIdx]
+                            pValues[nodeIdx], pValuesAdjusted[nodeIdx]
                     );
                 }
             }

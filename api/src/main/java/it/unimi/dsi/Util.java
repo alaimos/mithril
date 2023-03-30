@@ -33,28 +33,30 @@ import java.util.Locale;
  * @since 0.1
  */
 public final class Util {
-    private Util() {
-    }
-
+    /**
+     * A static reference to {@link Runtime#getRuntime()}.
+     */
+    public static final Runtime RUNTIME = Runtime.getRuntime();
     /**
      * A reasonable format for real numbers. Shared by all format methods.
      */
     private static final NumberFormat FORMAT_DOUBLE = NumberFormat.getInstance(Locale.US);
+    /**
+     * A reasonable format for integers. Shared by all format methods.
+     */
+    private static final NumberFormat FORMAT_LONG = NumberFormat.getInstance(Locale.US);
+    private static final FieldPosition UNUSED_FIELD_POSITION = new java.text.FieldPosition(0);
 
     static {
         if (FORMAT_DOUBLE instanceof DecimalFormat) ((DecimalFormat) FORMAT_DOUBLE).applyPattern("#,##0.00");
     }
 
-    /**
-     * A reasonable format for integers. Shared by all format methods.
-     */
-    private static final NumberFormat FORMAT_LONG = NumberFormat.getInstance(Locale.US);
-
     static {
         if (FORMAT_DOUBLE instanceof DecimalFormat) ((DecimalFormat) FORMAT_LONG).applyPattern("#,###");
     }
 
-    private static final FieldPosition UNUSED_FIELD_POSITION = new java.text.FieldPosition(0);
+    private Util() {
+    }
 
     /**
      * Formats a number.
@@ -82,7 +84,6 @@ public final class Util {
         return FORMAT_LONG.format(l, new StringBuffer(), UNUSED_FIELD_POSITION).toString();
     }
 
-
     /**
      * Formats a size.
      *
@@ -101,11 +102,6 @@ public final class Util {
         if (l >= 1000L) return format(l / 1000.0) + "K";
         return Long.toString(l);
     }
-
-    /**
-     * A static reference to {@link Runtime#getRuntime()}.
-     */
-    public static final Runtime RUNTIME = Runtime.getRuntime();
 
     /**
      * Tries to compact memory as much as possible by forcing garbage collection.

@@ -14,8 +14,8 @@ import java.io.IOException;
 
 public class MatrixBuilderFromMetapathway implements Runnable {
 
-    public static boolean USE_CACHE = true;
     private static final Logger log = LoggerFactory.getLogger(MatrixBuilderFromMetapathway.class);
+    public static boolean USE_CACHE = true;
     private final Repository repository;
     private final MatrixFactoryInterface<?> matrixFactory;
     private RepositoryMatrix matrix = null;

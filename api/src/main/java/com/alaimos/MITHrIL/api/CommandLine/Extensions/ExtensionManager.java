@@ -4,8 +4,6 @@ import com.alaimos.MITHrIL.api.CommandLine.Extensions.Types.ExtensionTypeInterfa
 import org.jetbrains.annotations.NotNull;
 import org.pf4j.PluginManager;
 import org.pf4j.PluginWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
