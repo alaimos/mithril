@@ -28,6 +28,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
     private final Map<String, Map<String, Edge>> incomingEdges = new HashMap<>();
     private final List<String> endpoints = new ArrayList<>();
     private Integer hashCode = null;
+    private int diameter = -1;
 
     public Graph() {
     }
@@ -41,6 +42,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
             addEdge(clonedEdge);
         });
         endpoints.addAll(g.endpoints);
+        diameter = -1;
     }
 
     /**
@@ -565,6 +567,38 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
         return new ArrayList<>(result);
     }
 
+    public int diameter() {
+        if (diameter < 0) {
+            diameter = 0;
+            var nodes = this.nodes.values();
+            var count = this.nodes.size();
+            var q = new ArrayDeque<Node>();
+            var dist = new Object2IntOpenHashMap<Node>(count);
+            for (var n : nodes) {
+                dist.clear();
+                q.offer(n);
+                dist.put(n, 0);
+                while (!q.isEmpty()) {
+                    var u = q.poll();
+                    var dU = dist.getInt(u);
+                    for (var e : outgoingEdges.get(u.id()).values()) {
+                        var v = e.target();
+                        var dV = dist.getOrDefault(v, -1);
+                        if (dV < 0) {
+                            dV = dU + 1;
+                            dist.put(v, dV);
+                            if (dV > diameter) {
+                                diameter = dV;
+                            }
+                            q.offer(v);
+                        }
+                    }
+                }
+            }
+        }
+        return diameter;
+    }
+
     /**
      * Iterate over all the nodes in the graph
      *
@@ -591,8 +625,10 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
     }
 
     /**
-     * Check if two graphs are equal. Two graphs are equal if they have the same nodes, edges and endpoints The order of
-     * the nodes and edges or the endpoints does not matter. To speed up the comparison, the hash codes of the graphs
+     * Check if two graphs are equal.
+     * Two graphs are equal if they have the same nodes, edges and endpoints, The order of
+     * the nodes and edges or the endpoints does not matter.
+     * To speed up the comparison, the hash codes of the graphs
      * are compared first, then the number of nodes and edges.
      *
      * @param o The other graph
@@ -685,7 +721,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
 
     /**
      * Merge this graph with another one. If a node is present in both graphs, the node is added only once. If an edge
-     * is present in both graphs, the two edges are merged keeping only details with maximal priority. Nodes are
+     * is present in both graphs, the two edges are merged, keeping only details with maximal priority. Nodes are
      * filtered using the user-defined filters. Priority filtering can be disabled.
      *
      * @param other           The other graph
