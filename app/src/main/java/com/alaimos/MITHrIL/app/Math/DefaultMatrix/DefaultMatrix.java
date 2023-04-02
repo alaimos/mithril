@@ -115,7 +115,7 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
         if (matrix instanceof DefaultMatrix dm) {
             return new DefaultMatrix(dm.internalMatrix.multiply(internalMatrix));
         } else {
-            return new DefaultMatrix(matrix).preMultiply(this);
+            return this.preMultiply(new DefaultMatrix(matrix));
         }
     }
 

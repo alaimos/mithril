@@ -190,7 +190,6 @@ public class MITHrIL implements Runnable, Closeable {
             }
         } while (lastBatchElement < numberOfRepetitions);
         pl.done();
-        pl.logger.info(pl.toString());
         log.info("Applying distribution correction");
         applyDistributionCorrection();
         log.info("Computing p-values");

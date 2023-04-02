@@ -183,7 +183,7 @@ public class GPUMatrix implements MatrixInterface<GPUMatrix> {
             var rows = dm.rows();
             return new GPUMatrix(dm.gpuTensor.matmul(gpuTensor).to(CPU_DEVICE, torch.ScalarType.Double), rows, columns);
         } else {
-            return new GPUMatrix(matrix).preMultiply(this);
+            return this.preMultiply(new GPUMatrix(matrix));
         }
     }
 

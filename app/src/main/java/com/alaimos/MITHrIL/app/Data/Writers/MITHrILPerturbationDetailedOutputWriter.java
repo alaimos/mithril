@@ -1,4 +1,4 @@
-package com.alaimos.MITHrIL.app.Data.Writer;
+package com.alaimos.MITHrIL.app.Data.Writers;
 
 import com.alaimos.MITHrIL.api.Data.Pathways.Graph.Node;
 import com.alaimos.MITHrIL.api.Data.Pathways.Graph.Repository;

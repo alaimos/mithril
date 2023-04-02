@@ -1,4 +1,4 @@
-package com.alaimos.MITHrIL.app.Data.Reader;
+package com.alaimos.MITHrIL.app.Data.Readers;
 
 import com.alaimos.MITHrIL.api.Commons.IOUtils;
 import com.alaimos.MITHrIL.api.Data.Reader.AbstractDataReader;

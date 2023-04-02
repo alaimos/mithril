@@ -121,7 +121,7 @@ public class ContextualisedMatrixBuilder implements Runnable {
      * @param uId  node id
      * @param uIdx node index
      */
-    public void nonExpressedVisit(String uId, int uIdx) {
+    private void nonExpressedVisit(String uId, int uIdx) {
         var g = repository.get().graph();
         var u = g.node(uId);
         if (u == null) return;
@@ -167,7 +167,7 @@ public class ContextualisedMatrixBuilder implements Runnable {
      * In this way, if A_i is the attenuation matrix of non-expressed node i, this method directly computes I - sum(A_i)
      * for all non-expressed nodes i.
      */
-    public void fillAttenuationMatrix() {
+    private void fillAttenuationMatrix() {
         var id2Index = originalMatrix.pathwayMatrix().id2Index();
         var n = id2Index.size();
         attenuationMatrix = new double[n * n];
@@ -184,7 +184,16 @@ public class ContextualisedMatrixBuilder implements Runnable {
         }
     }
 
-    public void computeContextualizedMatrix() {
+    private void sumIdentityMatrix() {
+        var n = originalMatrix.pathwayMatrix().id2Index().size();
+        int idx;
+        for (var i = 0; i < n; i++) {
+            idx = i * n + i;
+            if (attenuationMatrix[idx] == 0.0) attenuationMatrix[idx] = 1.0;
+        }
+    }
+
+    private void computeContextualizedMatrix() {
         var n = originalMatrix.pathwayMatrix().id2Index().size();
         var attenuationMatrixObject = matrixFactory.of(attenuationMatrix, n, n);
         var originalMatrixObject = originalMatrix.pathwayMatrix().matrix();
@@ -199,6 +208,7 @@ public class ContextualisedMatrixBuilder implements Runnable {
         try {
             log.info("Computing attenuation matrix");
             fillAttenuationMatrix();
+            sumIdentityMatrix();
             log.info("Computing contextualized matrix");
             computeContextualizedMatrix();
             log.info("Contextualized matrix ready");

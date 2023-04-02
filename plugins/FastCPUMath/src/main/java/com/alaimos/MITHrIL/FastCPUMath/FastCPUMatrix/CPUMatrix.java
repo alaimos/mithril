@@ -175,7 +175,7 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
             var rows = dm.rows();
             return new CPUMatrix(dm.tensor.matmul(tensor), rows, columns);
         } else {
-            return new CPUMatrix(matrix).preMultiply(this);
+            return this.preMultiply(new CPUMatrix(matrix));
         }
     }
 

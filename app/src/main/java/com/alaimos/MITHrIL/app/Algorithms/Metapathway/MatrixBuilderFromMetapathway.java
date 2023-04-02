@@ -4,9 +4,9 @@ import com.alaimos.MITHrIL.api.Data.Pathways.Graph.Repository;
 import com.alaimos.MITHrIL.api.Math.MatrixFactoryInterface;
 import com.alaimos.MITHrIL.app.Data.Pathways.PathwayMatrixBuilder;
 import com.alaimos.MITHrIL.app.Data.Pathways.RepositoryMatrixBuilder;
-import com.alaimos.MITHrIL.app.Data.Reader.RepositoryMatrixReader;
+import com.alaimos.MITHrIL.app.Data.Readers.RepositoryMatrixReader;
 import com.alaimos.MITHrIL.app.Data.Records.RepositoryMatrix;
-import com.alaimos.MITHrIL.app.Data.Writer.RepositoryMatrixWriter;
+import com.alaimos.MITHrIL.app.Data.Writers.RepositoryMatrixWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

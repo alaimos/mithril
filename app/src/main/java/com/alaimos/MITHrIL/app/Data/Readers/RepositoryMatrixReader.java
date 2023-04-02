@@ -1,26 +1,23 @@
-package com.alaimos.MITHrIL.app.Data.Reader;
+package com.alaimos.MITHrIL.app.Data.Readers;
 
 import com.alaimos.MITHrIL.api.Commons.IOUtils;
-import com.alaimos.MITHrIL.api.Data.Pathways.Graph.Pathway;
+import com.alaimos.MITHrIL.api.Data.Pathways.Graph.Repository;
 import com.alaimos.MITHrIL.api.Data.Reader.BinaryReader;
 import com.alaimos.MITHrIL.api.Data.Reader.DataReaderInterface;
 import com.alaimos.MITHrIL.api.Math.MatrixFactoryInterface;
-import com.alaimos.MITHrIL.app.Data.Records.PathwayMatrix;
+import com.alaimos.MITHrIL.app.Data.Records.RepositoryMatrix;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
 
-public class PathwayMatrixReader implements DataReaderInterface<PathwayMatrix> {
+public class RepositoryMatrixReader implements DataReaderInterface<RepositoryMatrix> {
 
-    private final BinaryReader<PathwayMatrix> reader = new BinaryReader<>(PathwayMatrix.class);
+    private final BinaryReader<RepositoryMatrix> reader = new BinaryReader<>(RepositoryMatrix.class);
     private final MatrixFactoryInterface<?> matrixFactory;
-    private final String pathwayId;
 
-    @SuppressWarnings("unchecked")
-    public PathwayMatrixReader(@NotNull Pathway p, @NotNull MatrixFactoryInterface<?> matrixFactory) {
-        reader.file(IOUtils.sanitizeFilename("pathway-matrix-" + p.id() + "-" + p.hashCode() + ".bin"));
-        this.pathwayId     = p.id();
+    public RepositoryMatrixReader(@NotNull Repository r, @NotNull MatrixFactoryInterface<?> matrixFactory) {
+        reader.file(IOUtils.sanitizeFilename("repository-matrix-" + r.hashCode() + ".bin"));
         this.matrixFactory = matrixFactory;
     }
 
@@ -41,7 +38,7 @@ public class PathwayMatrixReader implements DataReaderInterface<PathwayMatrix> {
      * @return this object
      */
     @Override
-    public DataReaderInterface<PathwayMatrix> file(String f) {
+    public DataReaderInterface<RepositoryMatrix> file(String f) {
         return this;
     }
 
@@ -52,7 +49,7 @@ public class PathwayMatrixReader implements DataReaderInterface<PathwayMatrix> {
      * @return this object
      */
     @Override
-    public DataReaderInterface<PathwayMatrix> file(File f) {
+    public DataReaderInterface<RepositoryMatrix> file(File f) {
         return this;
     }
 
@@ -63,9 +60,7 @@ public class PathwayMatrixReader implements DataReaderInterface<PathwayMatrix> {
      * @throws IOException if something goes wrong
      */
     @Override
-    public PathwayMatrix read() throws IOException {
-        var pm = PathwayMatrix.of(reader.read(), matrixFactory);
-        if (!pm.pathwayId().equals(pathwayId)) throw new IOException("Pathway ID mismatch");
-        return pm;
+    public RepositoryMatrix read() throws IOException {
+        return RepositoryMatrix.of(reader.read(), matrixFactory);
     }
 }
