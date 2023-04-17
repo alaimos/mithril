@@ -15,7 +15,9 @@ import it.unimi.dsi.fastutil.longs.Long2DoubleOpenHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Stack;
 
 public class ContextualisedMatrixBuilder implements Runnable {
 
@@ -23,7 +25,7 @@ public class ContextualisedMatrixBuilder implements Runnable {
     private final Repository repository;
     private final MatrixFactoryInterface<?> matrixFactory;
     private final RepositoryMatrix originalMatrix;
-    private final List<String> nonExpressedNodes;
+    private final String[] nonExpressedNodes;
     private final double epsilon;
     private final double minWeight;
     private MatrixInterface<?> contextualisedMatrix = null;
@@ -33,7 +35,7 @@ public class ContextualisedMatrixBuilder implements Runnable {
 
     public ContextualisedMatrixBuilder(
             Repository repository, RepositoryMatrix matrix, MatrixFactoryInterface<?> matrixFactory,
-            List<String> nonExpressedNodes, double epsilon
+            String[] nonExpressedNodes, double epsilon
     ) {
         if (epsilon <= 0) throw new IllegalArgumentException("Epsilon must be positive");
         if (epsilon >= 1) throw new IllegalArgumentException("Epsilon must be less than 1");
@@ -56,7 +58,7 @@ public class ContextualisedMatrixBuilder implements Runnable {
      */
     public static MatrixInterface<?> build(
             Repository repository, RepositoryMatrix matrix, MatrixFactoryInterface<?> matrixFactory,
-            List<String> nonExpressedNodes, double epsilon
+            String[] nonExpressedNodes, double epsilon
     ) {
         var builder = new ContextualisedMatrixBuilder(repository, matrix, matrixFactory, nonExpressedNodes, epsilon);
         builder.run();
