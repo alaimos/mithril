@@ -114,7 +114,7 @@ public class PHENSIM implements Runnable, Closeable {
         return this;
     }
     //endregion
-    
+
     /**
      * Run the MITHrIL algorithm
      */
