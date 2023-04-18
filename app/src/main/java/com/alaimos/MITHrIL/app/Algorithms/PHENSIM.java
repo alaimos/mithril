@@ -114,7 +114,7 @@ public class PHENSIM implements Runnable, Closeable {
         return this;
     }
     //endregion
-
+    
     /**
      * Run the MITHrIL algorithm
      */
@@ -410,7 +410,7 @@ public class PHENSIM implements Runnable, Closeable {
 
     //endregion
 
-
+    //region INNER CLASSES
     public static class PartialSimulationOutput {
 
         private final PartialResultContainer nodeResultsContainer;
@@ -576,6 +576,6 @@ public class PHENSIM implements Runnable, Closeable {
         public double[] pathwayActivityScores() {
             return runs[0].pathwayActivityScores();
         }
-
     }
+    //endregion
 }
