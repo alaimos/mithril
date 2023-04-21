@@ -625,10 +625,8 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
     }
 
     /**
-     * Check if two graphs are equal.
-     * Two graphs are equal if they have the same nodes, edges and endpoints, The order of
-     * the nodes and edges or the endpoints does not matter.
-     * To speed up the comparison, the hash codes of the graphs
+     * Check if two graphs are equal. Two graphs are equal if they have the same nodes, edges and endpoints, The order
+     * of the nodes and edges or the endpoints does not matter. To speed up the comparison, the hash codes of the graphs
      * are compared first, then the number of nodes and edges.
      *
      * @param o The other graph
@@ -716,6 +714,9 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
                 }
             }
             remainingEdges = newRemainingEdges;
+        }
+        if (other.endpoints.size() > 0) {
+            setEndpoints(other.endpoints);
         }
     }
 

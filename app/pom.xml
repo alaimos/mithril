@@ -129,6 +129,12 @@
             <version>${junit-jupiter.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.sbml.jsbml</groupId>
+            <artifactId>jsbml-core</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+
     </dependencies>
 
 </project>

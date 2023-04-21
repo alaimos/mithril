@@ -59,57 +59,57 @@ public class PHENSIM implements Runnable, Closeable {
     public PHENSIM() {
     }
 
-    public PHENSIM setRandom(Random random) {
+    public PHENSIM random(Random random) {
         this.random = random;
         return this;
     }
 
-    public PHENSIM setConstraints(ExpressionConstraint[] constraints) {
+    public PHENSIM constraints(ExpressionConstraint[] constraints) {
         this.constraints = constraints;
         return this;
     }
 
-    public PHENSIM setNonExpressedNodes(String[] nonExpressedNodes) {
+    public PHENSIM nonExpressedNodes(String[] nonExpressedNodes) {
         this.nonExpressedNodes = nonExpressedNodes;
         return this;
     }
 
-    public PHENSIM setRepository(Repository repository) {
+    public PHENSIM repository(Repository repository) {
         this.repository = repository;
         return this;
     }
 
-    public PHENSIM setRepositoryMatrix(RepositoryMatrix repositoryMatrix) {
+    public PHENSIM repositoryMatrix(RepositoryMatrix repositoryMatrix) {
         this.repositoryMatrix = repositoryMatrix;
         return this;
     }
 
-    public PHENSIM setNumberOfRepetitions(int numberOfRepetitions) {
+    public PHENSIM numberOfRepetitions(int numberOfRepetitions) {
         this.numberOfRepetitions = numberOfRepetitions;
         return this;
     }
 
-    public PHENSIM setNumberOfSimulations(int numberOfSimulations) {
+    public PHENSIM numberOfSimulations(int numberOfSimulations) {
         this.numberOfSimulations = numberOfSimulations;
         return this;
     }
 
-    public PHENSIM setBatchSize(int batchSize) {
+    public PHENSIM batchSize(int batchSize) {
         this.batchSize = batchSize;
         return this;
     }
 
-    public PHENSIM setEpsilon(double epsilon) {
+    public PHENSIM epsilon(double epsilon) {
         this.epsilon = epsilon;
         return this;
     }
 
-    public PHENSIM setPValueAdjuster(AdjusterInterface pValueAdjuster) {
+    public PHENSIM pValueAdjuster(AdjusterInterface pValueAdjuster) {
         this.pValueAdjuster = pValueAdjuster;
         return this;
     }
 
-    public PHENSIM setMatrixFactory(MatrixFactoryInterface<?> matrixFactory) {
+    public PHENSIM matrixFactory(MatrixFactoryInterface<?> matrixFactory) {
         this.matrixFactory = matrixFactory;
         return this;
     }
@@ -575,6 +575,14 @@ public class PHENSIM implements Runnable, Closeable {
 
         public double[] pathwayActivityScores() {
             return runs[0].pathwayActivityScores();
+        }
+
+        public int[][] nodeCounters() {
+            return runs[0].nodeResultsContainer.counters;
+        }
+
+        public int[][] pathwayCounters() {
+            return runs[0].pathwayResultsContainer.counters;
         }
     }
     //endregion

@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Stack;
 
 public class ContextualisedMatrixBuilder implements Runnable {
@@ -208,12 +207,17 @@ public class ContextualisedMatrixBuilder implements Runnable {
     @Override
     public void run() {
         try {
-            log.info("Computing attenuation matrix");
-            fillAttenuationMatrix();
-            sumIdentityMatrix();
-            log.info("Computing contextualized matrix");
-            computeContextualizedMatrix();
-            log.info("Contextualized matrix ready");
+            if (nonExpressedNodes.length > 0) {
+                log.info("Computing attenuation matrix");
+                fillAttenuationMatrix();
+                sumIdentityMatrix();
+                log.info("Computing contextualized matrix");
+                computeContextualizedMatrix();
+                log.info("Contextualized matrix ready");
+            } else {
+                log.info("Skipping contextualization: no non-expressed nodes");
+                contextualisedMatrix = originalMatrix.pathwayMatrix().matrix();
+            }
         } catch (Throwable e) {
             log.error("An error occurred while building the matrix representation", e);
         }

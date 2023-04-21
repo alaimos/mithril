@@ -43,22 +43,29 @@ public class RandomExpressionGenerator {
         var expressions = new double[constraints.length];
         for (int i = 0; i < constraints.length; i++) {
             nodeIds[i]     = constraints[i].nodeId;
-            expressions[i] = randomExpression(constraints[i]);
+            expressions[i] = nextRandomExpressionFromConstraint(constraints[i]);
         }
         return Pair.of(nodeIds, expressions);
     }
 
-
     /**
-     * Generate a normally distributed random number
+     * Generate a normally distributed random number with a minimum value. The sign of the minimum value is used to
+     * determine the direction of the distribution. If the minimum value is positive, the random number is taken from
+     * the right tail of the distribution, otherwise from the left tail. This is achieved by generating a
+     * normally-distributed random number and then copying the sign of the minimum value to the generated number.
+     * Finally, if the generated number is smaller (in absolute value) than the minimum value, the minimum value is
+     * returned.
      *
-     * @param mean mean of the distribution
-     * @param sd   standard deviation of the distribution
-     * @return a number
+     * @param mean    mean of the distribution
+     * @param sd      standard deviation of the distribution
+     * @param epsilon the minimum value to return
+     * @return a random number
      */
-    private double gaussianRandomNumber(double mean, double sd) {
-        return sd * random.nextGaussian() + mean;
+    private double nextGaussianRandomNumber(double mean, double sd, double epsilon) {
+        var r = Math.copySign(Math.abs(sd * random.nextGaussian() + mean), epsilon);
+        return ((r < 0 && r > epsilon) || (r > 0 && r < epsilon)) ? epsilon : r;
     }
+
 
     /**
      * Generate a random expression value
@@ -66,14 +73,12 @@ public class RandomExpressionGenerator {
      * @param c an expression constraint
      * @return the expression value
      */
-    private double randomExpression(@NotNull ExpressionConstraint c) {
+    private double nextRandomExpressionFromConstraint(@NotNull ExpressionConstraint c) {
         var direction = c.direction;
         if (c.distribution == null && Double.isNaN(c.baseLog2FoldChange)) {
             return switch (direction) {
-                case OVEREXPRESSION -> Math.max(
-                        epsilon, gaussianRandomNumber(UP_LOG_FC_MEAN, UP_DOWN_LOG_FC_STD_DEV));
-                case UNDEREXPRESSION -> Math.min(
-                        -epsilon, gaussianRandomNumber(DOWN_LOG_FC_MEAN, UP_DOWN_LOG_FC_STD_DEV));
+                case OVEREXPRESSION -> nextGaussianRandomNumber(UP_LOG_FC_MEAN, UP_DOWN_LOG_FC_STD_DEV, epsilon);
+                case UNDEREXPRESSION -> nextGaussianRandomNumber(DOWN_LOG_FC_MEAN, UP_DOWN_LOG_FC_STD_DEV, -epsilon);
                 default -> 0.0;
             };
         }
@@ -84,8 +89,8 @@ public class RandomExpressionGenerator {
             mean += c.baseLog2FoldChange;
         }
         return switch (direction) {
-            case OVEREXPRESSION -> Math.max(epsilon, gaussianRandomNumber(mean, sd));
-            case UNDEREXPRESSION -> Math.min(-epsilon, gaussianRandomNumber(mean, sd));
+            case OVEREXPRESSION -> nextGaussianRandomNumber(mean, sd, epsilon);
+            case UNDEREXPRESSION -> nextGaussianRandomNumber(mean, sd, -epsilon);
             default -> 0.0;
         };
     }
@@ -98,7 +103,7 @@ public class RandomExpressionGenerator {
     ) {
 
         @Contract("_, _ -> new")
-        public static @NotNull ExpressionConstraint of(String nodeId, ExpressionConstraint c) {
+        public static @NotNull ExpressionConstraint of(String nodeId, @NotNull ExpressionConstraint c) {
             return new ExpressionConstraint(nodeId, c.direction, c.distribution, c.baseLog2FoldChange);
         }
 

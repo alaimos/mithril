@@ -1,8 +1,9 @@
-package com.alaimos.MITHrIL.app.Data.Readers;
+package com.alaimos.MITHrIL.app.Data.Readers.MITHrIL;
 
 import com.alaimos.MITHrIL.api.Data.Reader.AbstractDataReader;
 import com.alaimos.MITHrIL.app.Data.Records.ExpressionInput;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -19,7 +20,8 @@ public class ExpressionMapReader extends AbstractDataReader<ExpressionInput> {
         isGzipped = false;
     }
 
-    public ExpressionMapReader setFile(File f) {
+    @Override
+    public ExpressionMapReader file(@NotNull File f) {
         file      = f;
         isGzipped = f.getName().endsWith(".gz");
         return this;

@@ -12,9 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 class ContextualisedMatrixBuilderTest {
 
@@ -77,7 +75,7 @@ class ContextualisedMatrixBuilderTest {
         var factory = new DefaultMatrixFactory();
         var repositoryMatrix = generateTestRepositoryMatrix(repository, factory);
         var builder = new ContextualisedMatrixBuilder(
-                repository, repositoryMatrix, factory, List.of("b"), 0.001);
+                repository, repositoryMatrix, factory, new String[]{"b"}, 0.001);
         builder.run();
         var mtx = builder.get();
         var vec = new double[]{2.0, 0.0, 0.0, 0.0, 0.0, 0.0};

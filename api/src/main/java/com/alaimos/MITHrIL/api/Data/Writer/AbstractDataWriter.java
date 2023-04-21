@@ -60,6 +60,18 @@ public abstract class AbstractDataWriter<T> implements DataWriterInterface<T> {
     }
 
     /**
+     * Joins an array of strings in a single string separated by a character separator
+     *
+     * @param array     the array of strings
+     * @param separator the separator
+     * @return joined output
+     */
+    protected String concatArray(int[] array, String separator) {
+        if (array == null || array.length == 0) return "";
+        return Arrays.stream(array).mapToObj(Integer::toString).collect(Collectors.joining(separator));
+    }
+
+    /**
      * Join a list of objects in a single string
      *
      * @param array     a list of objects
