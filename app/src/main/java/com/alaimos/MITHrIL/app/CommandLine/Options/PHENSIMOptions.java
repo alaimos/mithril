@@ -8,7 +8,7 @@ public class PHENSIMOptions extends MetapathwayOptions {
 
     @Option(name = "-number-of-iterations", usage = "number of iterations for the bootstrapping procedure.")
     public int iterations = 1000;
-    @Option(name = "-number-of-iterations-simulation", usage = "number of repetitions for the simulation procedure.")
+    @Option(name = "-number-of-simulations", usage = "number of repetitions for the simulation procedure.")
     public int simulations = 1000;
     @Option(name = "-epsilon", usage = "limit of the interval around zero that is used to identify perturbation " +
             "alterations of little importance.\nValues between -epsilon and epsilon will be considered equal to zero.")

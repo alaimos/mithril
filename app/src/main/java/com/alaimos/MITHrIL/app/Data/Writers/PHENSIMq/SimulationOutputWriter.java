@@ -1,8 +1,8 @@
-package com.alaimos.MITHrIL.app.Data.Writers.PHENSIM;
+package com.alaimos.MITHrIL.app.Data.Writers.PHENSIMq;
 
 import com.alaimos.MITHrIL.api.Data.Pathways.Graph.Repository;
 import com.alaimos.MITHrIL.api.Data.Writer.AbstractDataWriter;
-import com.alaimos.MITHrIL.app.Algorithms.PHENSIM.SimulationOutput;
+import com.alaimos.MITHrIL.app.Algorithms.PHENSIMq.SimulationOutput;
 import com.alaimos.MITHrIL.app.Data.Generators.RandomExpressionGenerator.ExpressionConstraint;
 import com.alaimos.MITHrIL.app.Data.Records.RepositoryMatrix;
 import org.jetbrains.annotations.Contract;
@@ -59,15 +59,19 @@ public class SimulationOutputWriter extends AbstractDataWriter<SimulationOutput>
             var nodeId2Idx = rm.pathwayMatrix().id2Index();
             var endpointSet = new HashSet<>(graph.endpoints());
             var pathwayActivityScores = data.pathwayActivityScores();
+            var pathwayPExpected = data.pathwayPExpected();
             var pathwayPValues = data.pathwayPValues();
             var pathwayAdjustedPValues = data.pathwayPValuesAdjusted();
-            var pathwayPerturbations = data.pathwayPerturbationsAverage();
-            var pathwayCounters = data.pathwayCounters();
+            var pathwayPerturbationsAvg = data.pathwayPerturbationsAverage();
+            var pathwayPerturbationsSD = data.pathwayPerturbationsStdDev();
             var nodeActivityScores = data.nodeActivityScores();
+            var pathwayDistances = data.pathwayDistances();
+            var nodePExpected = data.nodePExpected();
             var nodePValues = data.nodePValues();
             var nodeAdjustedPValues = data.nodePValuesAdjusted();
-            var nodeCounters = data.nodeCounters();
-            var nodePerturbations = data.nodePerturbationsAverage();
+            var nodePerturbationsAvg = data.nodePerturbationsAverage();
+            var nodePerturbationsSD = data.nodePerturbationsStdDev();
+            var nodeDistances = data.nodeDistances();
             ps.println(concatArray(new String[]{
                     "# Pathway Id",
                     "Pathway Name",
@@ -75,18 +79,22 @@ public class SimulationOutputWriter extends AbstractDataWriter<SimulationOutput>
                     "Node Name",
                     "Is Endpoint",
                     "Is Direct Target",
-                    "Activity Score",
-                    "P-Value",
-                    "Adjusted P-Value",
-                    "Counters (Activation, Inhibition, Others)",
+                    "Node Activity Score",
+                    "Expected Node Perturbation",
+                    "Node Perturbation Std. Dev.",
+                    "Node P-Value",
+                    "Node Adjusted P-Value",
                     "Pathway Activity Score",
+                    "Expected Pathway Perturbation",
+                    "Pathway Perturbation Std. Dev.",
                     "Pathway p-value",
                     "Pathway Adjusted p-value",
-                    "Pathway Counters (Activation, Inhibition, Others)",
                     "Direct Targets",
-                    "Average Node Perturbation",
-                    "Average Pathway Perturbation"
-            }, "\t"));
+                    "Node Distance",
+                    "Pathway Distance",
+                    "Expected Node Difference",
+                    "Expected Pathway Difference",
+                    }, "\t"));
             for (var p : r.virtualPathways()) {
                 var pathwayId = p.id();
                 var pathwayIdx = pathwayId2Idx.getInt(pathwayId);
@@ -97,6 +105,8 @@ public class SimulationOutputWriter extends AbstractDataWriter<SimulationOutput>
                     var nodeIdx = nodeId2Idx.getInt(nodeId);
                     var isEndpoint = endpointSet.contains(nodeId);
                     var isDirectTarget = directTargets.containsKey(nodeId);
+                    var nDist = nodeDistances[nodeIdx] == Integer.MAX_VALUE ? -1 : nodeDistances[nodeIdx];
+                    var pDist = pathwayDistances[pathwayIdx] == Integer.MAX_VALUE ? -1 : pathwayDistances[pathwayIdx];
                     writeArray(ps, new String[]{
                             pathwayId,
                             pathwayName,
@@ -105,17 +115,21 @@ public class SimulationOutputWriter extends AbstractDataWriter<SimulationOutput>
                             isEndpoint ? "Yes" : "No",
                             isDirectTarget ? "Yes" : "No",
                             Double.toString(nodeActivityScores[nodeIdx]),
+                            Double.toString(nodePerturbationsAvg[nodeIdx]),
+                            Double.toString(nodePerturbationsSD[nodeIdx]),
                             Double.toString(nodePValues[nodeIdx]),
                             Double.toString(nodeAdjustedPValues[nodeIdx]),
-                            concatArray(nodeCounters[nodeIdx], ","),
                             Double.toString(pathwayActivityScores[pathwayIdx]),
+                            Double.toString(pathwayPerturbationsAvg[pathwayIdx]),
+                            Double.toString(pathwayPerturbationsSD[pathwayIdx]),
                             Double.toString(pathwayPValues[pathwayIdx]),
                             Double.toString(pathwayAdjustedPValues[pathwayIdx]),
-                            concatArray(pathwayCounters[pathwayIdx], ","),
                             concatCollection(directTargets.get(nodeId), ","),
-                            Double.toString(nodePerturbations[nodeIdx]),
-                            Double.toString(pathwayPerturbations[pathwayIdx])
-                    });
+                            Integer.toString(nDist),
+                            Integer.toString(pDist),
+                            Double.toString(nodePExpected[nodeIdx]),
+                            Double.toString(pathwayPExpected[pathwayIdx]),
+                            }, "\t");
                     ps.println();
                 }
             }

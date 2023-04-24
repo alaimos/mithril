@@ -9,7 +9,7 @@ import java.util.Random;
 
 public class RandomExpressionGenerator {
 
-    public static final double BASE_LOG_FC_STD_DEV = 4.0;
+    public static final double BASE_LOG_FC_STD_DEV = 2.0;
     public static final double BASE_LOG_FC_MEAN = 0.0;
     public static final double UP_LOG_FC_MEAN = 5.0;
     public static final double DOWN_LOG_FC_MEAN = -5.0;

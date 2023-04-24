@@ -4,13 +4,16 @@ import com.alaimos.MITHrIL.api.Data.Pathways.Graph.Repository;
 import com.alaimos.MITHrIL.api.Math.MatrixFactoryInterface;
 import com.alaimos.MITHrIL.api.Math.MatrixInterface;
 import com.alaimos.MITHrIL.api.Math.PValue.Adjusters.AdjusterInterface;
+import com.alaimos.MITHrIL.api.Math.PValue.Combiners.Fisher;
 import com.alaimos.MITHrIL.app.Algorithms.Metapathway.ContextualisedMatrixBuilder;
+import com.alaimos.MITHrIL.app.Algorithms.Metapathway.DistanceComputation;
 import com.alaimos.MITHrIL.app.Data.Generators.RandomExpressionGenerator;
 import com.alaimos.MITHrIL.app.Data.Generators.RandomExpressionGenerator.ExpressionConstraint;
 import com.alaimos.MITHrIL.app.Data.Generators.RandomSubsetGenerator;
 import com.alaimos.MITHrIL.app.Data.Records.RepositoryMatrix;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.logging.ProgressLogger;
+import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.util.FastMath;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -27,10 +30,10 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
-public class PHENSIM implements Runnable, Closeable {
+public class PHENSIMq implements Runnable, Closeable {
 
     //region Constants
-    private static final Logger log = LoggerFactory.getLogger(PHENSIM.class);
+    private static final Logger log = LoggerFactory.getLogger(PHENSIMq.class);
     //endregion
     //region Input Parameters
     private Random random;
@@ -54,79 +57,85 @@ public class PHENSIM implements Runnable, Closeable {
     private RandomSubsetGenerator subsetGenerator;
     private RandomExpressionGenerator expressionGenerator;
     private int currentSimulationNumber = -1;
+    private double[] nodePExpected;
     private double[] nodePValues;
     private double[] nodePValuesAdjusted;
+    private double[] pathwayPExpected;
     private double[] pathwayPValues;
     private double[] pathwayPValuesAdjusted;
+    private int[] nodeDistances;
+    private int[] pathwayDistances;
+    private double[] nodeCorrectionFactors;
+    private double[] pathwayCorrectionFactors;
 
     //endregion
     //region Constructors and setters
-    public PHENSIM() {
+    public PHENSIMq() {
     }
 
-    public PHENSIM random(Random random) {
+    public PHENSIMq random(Random random) {
         this.random = random;
         return this;
     }
 
-    public PHENSIM constraints(ExpressionConstraint[] constraints) {
+    public PHENSIMq constraints(ExpressionConstraint[] constraints) {
         this.constraints = constraints;
         return this;
     }
 
-    public PHENSIM nonExpressedNodes(String[] nonExpressedNodes) {
+    public PHENSIMq nonExpressedNodes(String[] nonExpressedNodes) {
         this.nonExpressedNodes = nonExpressedNodes;
         return this;
     }
 
-    public PHENSIM repository(Repository repository) {
+    public PHENSIMq repository(Repository repository) {
         this.repository = repository;
         return this;
     }
 
-    public PHENSIM repositoryMatrix(RepositoryMatrix repositoryMatrix) {
+    public PHENSIMq repositoryMatrix(RepositoryMatrix repositoryMatrix) {
         this.repositoryMatrix = repositoryMatrix;
         return this;
     }
 
-    public PHENSIM numberOfRepetitions(int numberOfRepetitions) {
+    public PHENSIMq numberOfRepetitions(int numberOfRepetitions) {
         this.numberOfRepetitions = numberOfRepetitions;
         return this;
     }
 
-    public PHENSIM numberOfSimulations(int numberOfSimulations) {
+    public PHENSIMq numberOfSimulations(int numberOfSimulations) {
         this.numberOfSimulations = numberOfSimulations;
         return this;
     }
 
-    public PHENSIM batchSize(int batchSize) {
+    public PHENSIMq batchSize(int batchSize) {
         this.batchSize = batchSize;
         return this;
     }
 
-    public PHENSIM epsilon(double epsilon) {
+    public PHENSIMq epsilon(double epsilon) {
         this.epsilon = epsilon;
         return this;
     }
 
-    public PHENSIM pValueAdjuster(AdjusterInterface pValueAdjuster) {
+    public PHENSIMq pValueAdjuster(AdjusterInterface pValueAdjuster) {
         this.pValueAdjuster = pValueAdjuster;
         return this;
     }
 
-    public PHENSIM matrixFactory(MatrixFactoryInterface<?> matrixFactory) {
+    public PHENSIMq matrixFactory(MatrixFactoryInterface<?> matrixFactory) {
         this.matrixFactory = matrixFactory;
         return this;
     }
 
-    public PHENSIM threads(int threads) {
+    public PHENSIMq threads(int threads) {
         this.threads = threads;
         return this;
     }
     //endregion
 
     /**
-     * Run the MITHrIL algorithm
+     * Run the PHENSIMq algorithm
      */
     @Override
     public void run() {
@@ -174,8 +183,10 @@ public class PHENSIM implements Runnable, Closeable {
             }
         } while (lastBatchElement < totalBatchElements);
         pl.done();
-        log.info("Computing activity scores");
-        computeActivityScores();
+        log.info("Finalizing computation of standard deviations");
+        finalizeComputation();
+        log.info("Applying correction factors");
+        applyCorrectionFactors();
         log.info("Computing p-values");
         computeNodePValues();
         computePathwayPValues();
@@ -191,7 +202,8 @@ public class PHENSIM implements Runnable, Closeable {
     public SimulationOutput output(boolean appendAllRuns) {
         return new SimulationOutput(
                 appendAllRuns ? runPartialOutputs : new PartialSimulationOutput[]{runPartialOutputs[0]},
-                nodePValues, nodePValuesAdjusted, pathwayPValues, pathwayPValuesAdjusted
+                nodePExpected, nodePValues, nodePValuesAdjusted, pathwayPExpected, pathwayPValues,
+                pathwayPValuesAdjusted, nodeDistances, pathwayDistances
         );
     }
 
@@ -207,7 +219,7 @@ public class PHENSIM implements Runnable, Closeable {
         if (runPartialOutputs == null) {
             runPartialOutputs = new PartialSimulationOutput[numberOfSimulations + 1];
             for (var i = 0; i < runPartialOutputs.length; i++) {
-                runPartialOutputs[i] = new PartialSimulationOutput(epsilon);
+                runPartialOutputs[i] = new PartialSimulationOutput();
             }
         }
         var numberOfNodes = repositoryMatrix.pathwayMatrix().id2Index().size();
@@ -219,6 +231,27 @@ public class PHENSIM implements Runnable, Closeable {
         log.info("Building contextualized metapathway matrix");
         contextualizedMatrix = ContextualisedMatrixBuilder.build(
                 repository, repositoryMatrix, matrixFactory, nonExpressedNodes, epsilon);
+        log.info("Computing distance correction factors");
+        var sources = Arrays.stream(constraints).map(ExpressionConstraint::nodeId).toArray(String[]::new);
+        var distances = DistanceComputation.of(sources, repository, repositoryMatrix);
+        nodeDistances         = distances.left();
+        pathwayDistances      = distances.right();
+        nodeCorrectionFactors = new double[nodeDistances.length];
+        for (var i = 0; i < nodeDistances.length; i++) {
+            if (nodeDistances[i] == Integer.MAX_VALUE) {
+                nodeCorrectionFactors[i] = 0;
+            } else {
+                nodeCorrectionFactors[i] = FastMath.pow(10d, nodeDistances[i]);
+            }
+        }
+        pathwayCorrectionFactors = new double[pathwayDistances.length];
+        for (var i = 0; i < pathwayDistances.length; i++) {
+            if (pathwayDistances[i] == Integer.MAX_VALUE) {
+                pathwayCorrectionFactors[i] = 0;
+            } else {
+                pathwayCorrectionFactors[i] = FastMath.pow(10d, pathwayDistances[i]);
+            }
+        }
     }
 
     /**
@@ -376,9 +409,9 @@ public class PHENSIM implements Runnable, Closeable {
     }
 
     /**
-     *
+     * Finalize the computation of the runs.
      */
-    private void computeActivityScores() {
+    private void finalizeComputation() {
         for (var run : runPartialOutputs) {
             run.finalizeComputation();
         }
@@ -388,23 +421,38 @@ public class PHENSIM implements Runnable, Closeable {
      * This method computes the p-values of the nodes in the network.
      */
     private void computeNodePValues() {
-        var reference = runPartialOutputs[0].nodeResultsContainer.activityScores;
-        nodePValues = new double[reference.length];
-        int counter;
-        double val, ref;
-        for (var node = 0; node < reference.length; node++) {
-            counter = 0;
-            ref     = reference[node];
-            for (var run = 1; run < runPartialOutputs.length; run++) {
-                val = runPartialOutputs[run].nodeResultsContainer.activityScores[node];
-                if (Double.isNaN(ref) ||
-                        (ref < 0 && val <= ref) ||
-                        (ref > 0 && val >= ref) ||
-                        (ref == 0 && val == 0)) {
-                    counter++;
+        var referenceActivity = runPartialOutputs[0].nodeResultsContainer.activityScores;
+        var referenceAvg = runPartialOutputs[0].nodeResultsContainer.perturbationAvg;
+        var referenceSD = runPartialOutputs[0].nodeResultsContainer.perturbationSD;
+        var runs = runPartialOutputs.length;
+        var n = referenceAvg.length;
+        nodePExpected = new double[n];
+        nodePValues   = new double[n];
+        var fisherCombiner = new Fisher();
+        var distribution = new NormalDistribution();
+        var partialProbabilities = new double[runs];
+        for (var node = 0; node < n; node++) {
+            // X <- Reference normal distribution
+            var refActivity = referenceActivity[node];
+            var refAvg = referenceAvg[node];
+            var refVar = referenceSD[node] * referenceSD[node];
+            for (var run = 1; run < runs; run++) {
+                // Y <- Random normal distribution
+                var randVar = runPartialOutputs[run].nodeResultsContainer.perturbationSD[node] * runPartialOutputs[run].nodeResultsContainer.perturbationSD[node];
+                // D <- Y - X
+                var diffAvg = runPartialOutputs[run].nodeResultsContainer.perturbationAvg[node] - refAvg; // E[Z] = E[Y] - E[X]
+                var diffSD = FastMath.sqrt(randVar + refVar); // Var[Z] = Var[Y] + Var[X]
+                // If E[X] < 0 then P_i = P(D < 0) = 1 - P(Z < (0 - E[Z])/SD[Z])
+                partialProbabilities[run] = distribution.cumulativeProbability(-diffAvg / diffSD);
+                // If E[X] > 0 then P_i = P(D > 0) = P(Z > (0 - E[Z])/SD[Z]) = 1 - P(Z < (0 - E[Z])/SD[Z])
+                if (refActivity > 0) {
+                    partialProbabilities[run] = 1 - partialProbabilities[run];
+                } else if (refActivity == 0) {
+                    partialProbabilities[run] = 1;
                 }
+                nodePExpected[node] += diffAvg;
             }
-            nodePValues[node] = ((double) counter) / numberOfSimulations;
+            nodePValues[node] = fisherCombiner.combine(partialProbabilities);
         }
         nodePValuesAdjusted = pValueAdjuster.adjust(nodePValues);
     }
@@ -413,25 +461,61 @@ public class PHENSIM implements Runnable, Closeable {
      * This method computes the p-values of the pathways.
      */
     private void computePathwayPValues() {
-        var reference = runPartialOutputs[0].pathwayResultsContainer.activityScores;
-        pathwayPValues = new double[reference.length];
-        int counter;
-        double val, ref;
-        for (var pathway = 0; pathway < reference.length; pathway++) {
-            counter = 0;
-            ref     = reference[pathway];
-            for (var run = 1; run < runPartialOutputs.length; run++) {
-                val = runPartialOutputs[run].pathwayResultsContainer.activityScores[pathway];
-                if (Double.isNaN(ref) ||
-                        (ref < 0 && val <= ref) ||
-                        (ref > 0 && val >= ref) ||
-                        (ref == 0 && val == 0)) {
-                    counter++;
+        var referenceAvg = runPartialOutputs[0].pathwayResultsContainer.perturbationAvg;
+        var referenceSD = runPartialOutputs[0].pathwayResultsContainer.perturbationSD;
+        var runs = runPartialOutputs.length;
+        var n = referenceAvg.length;
+        pathwayPExpected = new double[n];
+        pathwayPValues   = new double[n];
+        var fisherCombiner = new Fisher();
+        var distribution = new NormalDistribution();
+        var partialProbabilities = new double[runs];
+        for (var pathway = 0; pathway < n; pathway++) {
+            // X <- Reference normal distribution
+            var refAvg = referenceAvg[pathway];
+            var refVar = referenceSD[pathway] * referenceSD[pathway];
+            for (var run = 1; run < runs; run++) {
+                // Y <- Random normal distribution
+                var randVar = runPartialOutputs[run].pathwayResultsContainer.perturbationSD[pathway] * runPartialOutputs[run].pathwayResultsContainer.perturbationSD[pathway];
+                // D <- Y - X
+                var diffAvg = runPartialOutputs[run].pathwayResultsContainer.perturbationAvg[pathway] - refAvg; // E[Z] = E[Y] - E[X]
+                var diffSD = FastMath.sqrt(randVar + refVar); // Var[Z] = Var[Y] + Var[X]
+                // If E[X] < 0 then P_i = P(D < 0) = 1 - P(Z < (0 - E[Z])/SD[Z])
+                partialProbabilities[run] = distribution.cumulativeProbability(-diffAvg / diffSD);
+                // If E[X] > 0 then P_i = P(D > 0) = P(Z > (0 - E[Z])/SD[Z]) = 1 - P(Z < (0 - E[Z])/SD[Z])
+                if (refAvg > 0) {
+                    partialProbabilities[run] = 1 - partialProbabilities[run];
                 }
+                pathwayPExpected[pathway] += diffAvg;
             }
-            pathwayPValues[pathway] = ((double) counter) / numberOfSimulations;
+            pathwayPValues[pathway] = fisherCombiner.combine(partialProbabilities);
         }
         pathwayPValuesAdjusted = pValueAdjuster.adjust(pathwayPValues);
+    }
+
+    private void applyCorrectionFactors() {
+        for (var i = 0; i < nodeCorrectionFactors.length; i++) {
+            for (PartialSimulationOutput runPartialOutput : runPartialOutputs) {
+                if (nodeCorrectionFactors[i] == 0) {
+                    runPartialOutput.nodeResultsContainer.activityScores[i]  = 0;
+                    runPartialOutput.nodeResultsContainer.perturbationAvg[i] = 0;
+                    runPartialOutput.nodeResultsContainer.perturbationSD[i]  = 0;
+                }
+//                runPartialOutput.nodeResultsContainer.perturbationAvg[i] *= nodeCorrectionFactors[i];
+//                runPartialOutput.nodeResultsContainer.perturbationSD[i] *= nodeCorrectionFactors[i];
+            }
+        }
+        for (var i = 0; i < pathwayCorrectionFactors.length; i++) {
+            for (PartialSimulationOutput runPartialOutput : runPartialOutputs) {
+                if (pathwayCorrectionFactors[i] == 0) {
+                    runPartialOutput.pathwayResultsContainer.activityScores[i]  = 0;
+                    runPartialOutput.pathwayResultsContainer.perturbationAvg[i] = 0;
+                    runPartialOutput.pathwayResultsContainer.perturbationSD[i]  = 0;
+                }
+//                runPartialOutput.pathwayResultsContainer.perturbationAvg[i] *= pathwayCorrectionFactors[i];
+//                runPartialOutput.pathwayResultsContainer.perturbationSD[i] *= pathwayCorrectionFactors[i];
+            }
+        }
     }
 
     /**
@@ -456,9 +540,9 @@ public class PHENSIM implements Runnable, Closeable {
         private final PartialResultContainer nodeResultsContainer;
         private final PartialResultContainer pathwayResultsContainer;
 
-        public PartialSimulationOutput(double epsilon) {
-            nodeResultsContainer    = new PartialResultContainer(epsilon);
-            pathwayResultsContainer = new PartialResultContainer(epsilon);
+        protected PartialSimulationOutput() {
+            nodeResultsContainer    = new PartialResultContainer();
+            pathwayResultsContainer = new PartialResultContainer();
         }
 
         public void init(int numberOfNodes, int numberOfPathways) {
@@ -505,22 +589,17 @@ public class PHENSIM implements Runnable, Closeable {
         }
 
         static class PartialResultContainer {
-            public static final double LOG_0_5 = -0.6931471805599453;
             private double[] perturbationAvg = null;
             private double[] perturbationSD = null;
-            private int[][] counters = null;
             private double[] activityScores = null;
             private int numberOfRepetitions = 0;
-            private final double epsilon;
 
-            public PartialResultContainer(double epsilon) {
-                this.epsilon = epsilon;
+            public PartialResultContainer() {
             }
 
             public void init(int size) {
                 perturbationAvg     = new double[size];
                 perturbationSD      = new double[size];
-                counters            = new int[size][3];
                 activityScores      = null;
                 numberOfRepetitions = 0;
             }
@@ -534,54 +613,34 @@ public class PHENSIM implements Runnable, Closeable {
                     perturbationAvg[i] += delta / numberOfRepetitions;
                     delta2   = newValue - perturbationAvg[i];
                     perturbationSD[i] += delta * delta2;
-                    if (newValue > epsilon) {
-                        counters[i][0]++;
-                    } else if (newValue < -epsilon) {
-                        counters[i][1]++;
-                    } else {
-                        counters[i][2]++;
-                    }
                 }
             }
 
             public double[] perturbationAverage() {
-                if (activityScores == null) {
-                    finalizeComputation();
-                }
                 return perturbationAvg;
             }
 
             public double[] perturbationStdDev() {
-                if (activityScores == null) {
-                    finalizeComputation();
-                }
                 return perturbationSD;
             }
 
             public double[] activityScores() {
-                if (activityScores == null) {
-                    finalizeComputation();
-                }
                 return activityScores;
             }
 
             private void finalizeComputation() {
-                activityScores = new double[perturbationSD.length];
-                double probActivation, probInhibition, probNoChange;
+                activityScores = new double[perturbationAvg.length];
                 var nm1 = numberOfRepetitions - 1;
-                var prior = 1d / (numberOfRepetitions * 1000d);
-                var countTotal = Math.log(numberOfRepetitions + 3 * prior);
+                var dist = new NormalDistribution();
                 for (var i = 0; i < perturbationSD.length; i++) {
                     perturbationSD[i] = Math.sqrt(perturbationSD[i] / nm1);
-                    probActivation    = Math.log(counters[i][0] + prior) - countTotal;
-                    probInhibition    = Math.log(counters[i][1] + prior) - countTotal;
-                    probNoChange      = Math.log(counters[i][2] + prior) - countTotal;
-                    if (probActivation > LOG_0_5) {
-                        activityScores[i] = probActivation - Math.log1p(-1 - Math.expm1(probActivation));
-                    } else if (probInhibition > LOG_0_5) {
-                        activityScores[i] = Math.log1p(-1 - Math.expm1(probInhibition)) - probInhibition;
-                    } else if (probNoChange > LOG_0_5) {
-                        activityScores[i] = 0;
+                    // p = P(X <= 0) = P(Z <= (0 - E[Z])/SD[Z])
+                    var p = dist.cumulativeProbability(-perturbationAvg[i] / perturbationSD[i]);
+                    var m1p = 1 - p;
+                    if (p > m1p) {
+                        activityScores[i] = -(FastMath.log(p) - FastMath.log(m1p));
+                    } else if (p < m1p) {
+                        activityScores[i] = FastMath.log(m1p) - FastMath.log(p);
                     } else {
                         activityScores[i] = Double.NaN;
                     }
@@ -592,10 +651,14 @@ public class PHENSIM implements Runnable, Closeable {
 
     public record SimulationOutput(
             PartialSimulationOutput[] runs,
+            double[] nodePExpected,
             double[] nodePValues,
             double[] nodePValuesAdjusted,
+            double[] pathwayPExpected,
             double[] pathwayPValues,
-            double[] pathwayPValuesAdjusted
+            double[] pathwayPValuesAdjusted,
+            int[] nodeDistances,
+            int[] pathwayDistances
     ) {
 
         public double[] nodePerturbationsAverage() {
@@ -622,13 +685,6 @@ public class PHENSIM implements Runnable, Closeable {
             return runs[0].pathwayActivityScores();
         }
 
-        public int[][] nodeCounters() {
-            return runs[0].nodeResultsContainer.counters;
-        }
-
-        public int[][] pathwayCounters() {
-            return runs[0].pathwayResultsContainer.counters;
-        }
     }
     //endregion
 }

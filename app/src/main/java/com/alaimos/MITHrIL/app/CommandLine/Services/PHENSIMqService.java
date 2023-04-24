@@ -10,6 +10,7 @@ import com.alaimos.MITHrIL.api.Math.PValue.Adjusters.AdjusterInterface;
 import com.alaimos.MITHrIL.app.Algorithms.Metapathway.MatrixBuilderFromMetapathway;
 import com.alaimos.MITHrIL.app.Algorithms.Metapathway.MetapathwayBuilderFromOptions;
 import com.alaimos.MITHrIL.app.Algorithms.PHENSIM;
+import com.alaimos.MITHrIL.app.Algorithms.PHENSIMq;
 import com.alaimos.MITHrIL.app.CommandLine.Options.PHENSIMOptions;
 import com.alaimos.MITHrIL.app.Data.Generators.RandomExpressionGenerator.ExpressionConstraint;
 import com.alaimos.MITHrIL.app.Data.Readers.PHENSIM.PHENSIMInputReader;
@@ -20,7 +21,7 @@ import com.alaimos.MITHrIL.app.Data.Readers.PHENSIM.PathwayExtension.PathwayExte
 import com.alaimos.MITHrIL.app.Data.Writers.PHENSIM.ActivityScoreMatrixWriter;
 import com.alaimos.MITHrIL.app.Data.Writers.PHENSIM.ExtendedSIFWriter;
 import com.alaimos.MITHrIL.app.Data.Writers.PHENSIM.SBMLWriter;
-import com.alaimos.MITHrIL.app.Data.Writers.PHENSIM.SimulationOutputWriter;
+import com.alaimos.MITHrIL.app.Data.Writers.PHENSIMq.SimulationOutputWriter;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.jetbrains.annotations.NotNull;
@@ -32,20 +33,20 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
-public class PHENSIMService implements ServiceInterface {
+public class PHENSIMqService implements ServiceInterface {
 
-    private static final Logger log = LoggerFactory.getLogger(PHENSIMService.class);
+    private static final Logger log = LoggerFactory.getLogger(PHENSIMqService.class);
 
     protected PHENSIMOptions options = new PHENSIMOptions();
 
     @Override
     public String getShortName() {
-        return "phensim";
+        return "phensimq";
     }
 
     @Override
     public String getDescription() {
-        return "runs the PHENSIM algorithm";
+        return "runs the PHENSIM-quantum algorithm";
     }
 
     @Override
@@ -78,8 +79,8 @@ public class PHENSIMService implements ServiceInterface {
             var multiplicationMatrixFactory = matrixFactory(options.multiplicationFactory);
             log.info("Reading input file");
             var input = readInputFile();
-            log.info("Running PHENSIM");
-            try (var phensim = new PHENSIM()) {
+            log.info("Running PHENSIM-quantum");
+            try (var phensim = new PHENSIMq()) {
                 phensim.constraints(input)
                        .nonExpressedNodes(readNonExpressedNodes())
                        .repository(metapathwayRepository)
@@ -95,23 +96,24 @@ public class PHENSIMService implements ServiceInterface {
                        .run();
                 var output = phensim.output(appendAllRunsToOutput());
                 log.info("Writing output file");
-                new SimulationOutputWriter(metapathwayRepository, metapathwayMatrix, input).write(options.output, output);
-                if (options.outputPathwayMatrix != null) {
-                    log.info("Writing pathway activity scores matrix");
-                    new ActivityScoreMatrixWriter(metapathwayMatrix, true).write(options.outputPathwayMatrix, output);
-                }
-                if (options.outputNodesMatrix != null) {
-                    log.info("Writing node activity scores matrix");
-                    new ActivityScoreMatrixWriter(metapathwayMatrix, false).write(options.outputNodesMatrix, output);
-                }
-                if (options.outputSBML != null) {
-                    log.info("Writing SBML output");
-                    new SBMLWriter(metapathwayRepository, metapathwayMatrix).write(options.outputSBML, output);
-                }
-                if (options.outputSIF != null) {
-                    log.info("Writing Extended SIF output");
-                    new ExtendedSIFWriter(metapathwayRepository, metapathwayMatrix).write(options.outputSIF, output);
-                }
+                new SimulationOutputWriter(metapathwayRepository, metapathwayMatrix, input).write(
+                        options.output, output);
+//                if (options.outputPathwayMatrix != null) {
+//                    log.info("Writing pathway activity scores matrix");
+//                    new ActivityScoreMatrixWriter(metapathwayMatrix, true).write(options.outputPathwayMatrix, output);
+//                }
+//                if (options.outputNodesMatrix != null) {
+//                    log.info("Writing node activity scores matrix");
+//                    new ActivityScoreMatrixWriter(metapathwayMatrix, false).write(options.outputNodesMatrix, output);
+//                }
+//                if (options.outputSBML != null) {
+//                    log.info("Writing SBML output");
+//                    new SBMLWriter(metapathwayRepository, metapathwayMatrix).write(options.outputSBML, output);
+//                }
+//                if (options.outputSIF != null) {
+//                    log.info("Writing Extended SIF output");
+//                    new ExtendedSIFWriter(metapathwayRepository, metapathwayMatrix).write(options.outputSIF, output);
+//                }
             }
             log.info("Done");
         } catch (IllegalArgumentException e) {
@@ -151,7 +153,7 @@ public class PHENSIMService implements ServiceInterface {
     }
 
     private ExpressionConstraint[] readInputFile() throws IOException {
-        return new PHENSIMInputReader(false).read(options.input);
+        return new PHENSIMInputReader().read(options.input);
     }
 
     private String @NotNull [] readNonExpressedNodes() throws IOException {

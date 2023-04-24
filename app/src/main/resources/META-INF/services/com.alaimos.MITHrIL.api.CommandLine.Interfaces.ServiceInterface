@@ -5,3 +5,4 @@ com.alaimos.MITHrIL.app.CommandLine.Services.DisplayCategoriesService
 com.alaimos.MITHrIL.app.CommandLine.Services.MITHrILService
 com.alaimos.MITHrIL.app.CommandLine.Services.MITHrILBatchService
 com.alaimos.MITHrIL.app.CommandLine.Services.PHENSIMService
+com.alaimos.MITHrIL.app.CommandLine.Services.PHENSIMqService
