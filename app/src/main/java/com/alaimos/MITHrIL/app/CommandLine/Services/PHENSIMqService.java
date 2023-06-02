@@ -4,12 +4,11 @@ import com.alaimos.MITHrIL.api.CommandLine.Extensions.ExtensionManager;
 import com.alaimos.MITHrIL.api.CommandLine.Interfaces.OptionsInterface;
 import com.alaimos.MITHrIL.api.CommandLine.Interfaces.ServiceInterface;
 import com.alaimos.MITHrIL.api.Data.Pathways.Graph.Graph;
-import com.alaimos.MITHrIL.api.Data.Reader.TextFileReader;
+import com.alaimos.MITHrIL.api.Data.Reader.DynamicTextFileReader;
 import com.alaimos.MITHrIL.api.Math.MatrixFactoryInterface;
 import com.alaimos.MITHrIL.api.Math.PValue.Adjusters.AdjusterInterface;
 import com.alaimos.MITHrIL.app.Algorithms.Metapathway.MatrixBuilderFromMetapathway;
 import com.alaimos.MITHrIL.app.Algorithms.Metapathway.MetapathwayBuilderFromOptions;
-import com.alaimos.MITHrIL.app.Algorithms.PHENSIM;
 import com.alaimos.MITHrIL.app.Algorithms.PHENSIMq;
 import com.alaimos.MITHrIL.app.CommandLine.Options.PHENSIMOptions;
 import com.alaimos.MITHrIL.app.Data.Generators.RandomExpressionGenerator.ExpressionConstraint;
@@ -18,9 +17,6 @@ import com.alaimos.MITHrIL.app.Data.Readers.PHENSIM.PathwayExtension.EdgeSubtype
 import com.alaimos.MITHrIL.app.Data.Readers.PHENSIM.PathwayExtension.EdgeTypeReader;
 import com.alaimos.MITHrIL.app.Data.Readers.PHENSIM.PathwayExtension.NodeTypeReader;
 import com.alaimos.MITHrIL.app.Data.Readers.PHENSIM.PathwayExtension.PathwayExtensionReader;
-import com.alaimos.MITHrIL.app.Data.Writers.PHENSIM.ActivityScoreMatrixWriter;
-import com.alaimos.MITHrIL.app.Data.Writers.PHENSIM.ExtendedSIFWriter;
-import com.alaimos.MITHrIL.app.Data.Writers.PHENSIM.SBMLWriter;
 import com.alaimos.MITHrIL.app.Data.Writers.PHENSIMq.SimulationOutputWriter;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
@@ -158,13 +154,13 @@ public class PHENSIMqService implements ServiceInterface {
 
     private String @NotNull [] readNonExpressedNodes() throws IOException {
         if (options.nonExpressedFile == null) return new String[0];
-        var nodesList = new TextFileReader().read(options.nonExpressedFile);
+        var nodesList = new DynamicTextFileReader().read(options.nonExpressedFile);
         return nodesList.toArray(new String[0]);
     }
 
     private String @NotNull [] readNodesToRemove() throws IOException {
         if (options.removeNodesFile == null) return new String[0];
-        var nodesList = new TextFileReader().read(options.removeNodesFile);
+        var nodesList = new DynamicTextFileReader().read(options.removeNodesFile);
         return nodesList.toArray(new String[0]);
     }
 

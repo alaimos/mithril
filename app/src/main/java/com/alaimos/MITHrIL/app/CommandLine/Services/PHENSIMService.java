@@ -4,7 +4,7 @@ import com.alaimos.MITHrIL.api.CommandLine.Extensions.ExtensionManager;
 import com.alaimos.MITHrIL.api.CommandLine.Interfaces.OptionsInterface;
 import com.alaimos.MITHrIL.api.CommandLine.Interfaces.ServiceInterface;
 import com.alaimos.MITHrIL.api.Data.Pathways.Graph.Graph;
-import com.alaimos.MITHrIL.api.Data.Reader.TextFileReader;
+import com.alaimos.MITHrIL.api.Data.Reader.DynamicTextFileReader;
 import com.alaimos.MITHrIL.api.Math.MatrixFactoryInterface;
 import com.alaimos.MITHrIL.api.Math.PValue.Adjusters.AdjusterInterface;
 import com.alaimos.MITHrIL.app.Algorithms.Metapathway.MatrixBuilderFromMetapathway;
@@ -95,7 +95,8 @@ public class PHENSIMService implements ServiceInterface {
                        .run();
                 var output = phensim.output(appendAllRunsToOutput());
                 log.info("Writing output file");
-                new SimulationOutputWriter(metapathwayRepository, metapathwayMatrix, input).write(options.output, output);
+                new SimulationOutputWriter(metapathwayRepository, metapathwayMatrix, input).write(
+                        options.output, output);
                 if (options.outputPathwayMatrix != null) {
                     log.info("Writing pathway activity scores matrix");
                     new ActivityScoreMatrixWriter(metapathwayMatrix, true).write(options.outputPathwayMatrix, output);
@@ -156,13 +157,13 @@ public class PHENSIMService implements ServiceInterface {
 
     private String @NotNull [] readNonExpressedNodes() throws IOException {
         if (options.nonExpressedFile == null) return new String[0];
-        var nodesList = new TextFileReader().read(options.nonExpressedFile);
+        var nodesList = new DynamicTextFileReader().read(options.nonExpressedFile);
         return nodesList.toArray(new String[0]);
     }
 
     private String @NotNull [] readNodesToRemove() throws IOException {
         if (options.removeNodesFile == null) return new String[0];
-        var nodesList = new TextFileReader().read(options.removeNodesFile);
+        var nodesList = new DynamicTextFileReader().read(options.removeNodesFile);
         return nodesList.toArray(new String[0]);
     }
 

@@ -1,27 +1,30 @@
 package com.alaimos.MITHrIL.api.Data.Reader;
 
-import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Read a text file into a list of strings
  */
-public class TextFileReader extends AbstractDataReader<List<String>> {
+public class DynamicTextFileReader extends TextFileReader {
+
+    /**
+     * Set the file where data are stored
+     *
+     * @param f the file object (absolute path)
+     * @return this object
+     */
+    @Override
+    public DynamicTextFileReader file(File f) {
+        super.file(f);
+        isGzipped = file.getName().endsWith(".gz");
+        return this;
+    }
 
     @Override
     protected List<String> realReader() throws IOException {
-        var result = new ArrayList<String>();
-        try (BufferedReader r = new BufferedReader(new InputStreamReader(getInputStream()))) {
-            String line;
-            while ((line = r.readLine()) != null) {
-                if (!line.isEmpty() && !line.startsWith("#")) {
-                    result.add(line);
-                }
-            }
-        }
-        return result;
+        isGzipped = file.getName().endsWith(".gz");
+        return super.realReader();
     }
 }
