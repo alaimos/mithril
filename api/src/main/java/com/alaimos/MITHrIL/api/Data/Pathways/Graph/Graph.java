@@ -760,6 +760,29 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
     }
 
     /**
+     * Invert the graph, i.e., swap source and target nodes of all edges. This operation is performed in-place.
+     */
+    public void invert() {
+        hashCode = null;
+        diameter = -1;
+        var edges = edgesStream().toList();
+        outgoingEdges.clear();
+        incomingEdges.clear();
+        for (var e : edges) {
+            // swap source and target
+            var source = e.target();
+            var target = e.source();
+            var sourceId = source.id();
+            var targetId = target.id();
+            // create new edge
+            var newEdge = new Edge(source, target, e.details());
+            // add edge to outgoing and incoming edges
+            outgoingEdges.get(sourceId).put(targetId, newEdge);
+            incomingEdges.get(targetId).put(sourceId, newEdge);
+        }
+    }
+
+    /**
      * The result of a traversal action, either continue, prune or stop. Continue means that the traversal will continue
      * to the adjacent nodes. Prune means that the traversal will not continue to the adjacent nodes. Stop means that
      * the traversal will stop.

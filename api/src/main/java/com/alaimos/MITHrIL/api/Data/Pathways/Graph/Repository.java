@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,6 +33,15 @@ public class Repository implements Collection<Pathway>, Iterable<Pathway>, Clone
     public Repository(@NotNull Repository r) {
         r.forEach(p -> this.add((Pathway) p.clone()));
         defaultPathway = r.defaultPathway;
+        for (var virtualPathway : r.virtualPathways.values()) {
+            var id = virtualPathway.id();
+            var source = get(virtualPathway.source.id());
+            var edges = new ArrayList<Pair<String, String>>();
+            for (var edge : virtualPathway.edges) {
+                edges.add(Pair.of(edge.first(), edge.second()));
+            }
+            this.virtualPathways.put(id, new VirtualPathway(id, virtualPathway.name, edges, source));
+        }
     }
 
     /**
@@ -226,28 +236,24 @@ public class Repository implements Collection<Pathway>, Iterable<Pathway>, Clone
      * Remove a node from all pathways and virtual pathways in the repository
      *
      * @param id node id
-     * @return true if the node was removed from all pathways
      */
-    public boolean removeNode(String id) {
-        boolean res = true;
+    public void removeNode(String id) {
         for (var p : this) {
             var g = p.graph();
             if (g.hasNode(id)) {
-                res = res && g.removeNode(id);
+                g.removeNode(id);
             }
         }
         this.virtualPathways.values().forEach(v -> v.removeNode(id));
-        return res;
     }
 
     /**
      * Remove a node from all pathways and virtual pathways in the repository
      *
      * @param n node object
-     * @return true if the node was removed from all pathways
      */
-    public boolean removeNode(@NotNull Node n) {
-        return remove(n.id());
+    public void removeNode(@NotNull Node n) {
+        removeNode(n.id());
     }
 
     /**
@@ -537,6 +543,25 @@ public class Repository implements Collection<Pathway>, Iterable<Pathway>, Clone
         return metapathwayRepository;
     }
 
+    /**
+     * Build a repository where all the pathways and virtual pathways are inverted. An inverted pathway is a pathway
+     * where all the edge directions are inverted (A->B becomes B->A).
+     *
+     * @return the inverted repository
+     */
+    public Repository inverted() {
+        var clonedRepository = (Repository) this.clone();
+        for (var pathway : clonedRepository) {
+            pathway.graph().invert();
+        }
+        clonedRepository.virtualPathways.clear();
+        for (var virtualPathway : virtualPathways.values()) {
+            var invertedVirtualPathway = virtualPathway.invert();
+            clonedRepository.virtualPathways.put(invertedVirtualPathway.id, invertedVirtualPathway);
+        }
+        return clonedRepository;
+    }
+
     @Override
     public String toString() {
         return "Repository{" +
@@ -583,6 +608,15 @@ public class Repository implements Collection<Pathway>, Iterable<Pathway>, Clone
 
         public void removeNode(String id) {
             edges.removeIf(e -> e.left().equals(id) || e.right().equals(id));
+        }
+
+        @Contract(" -> new")
+        public @NotNull VirtualPathway invert() {
+            var invertedEdges = new ArrayList<Pair<String, String>>();
+            for (var edge : edges) {
+                invertedEdges.add(Pair.of(edge.right(), edge.left()));
+            }
+            return new VirtualPathway(id, name, invertedEdges, source);
         }
     }
 }
