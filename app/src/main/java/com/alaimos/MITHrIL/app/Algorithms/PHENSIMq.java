@@ -528,7 +528,7 @@ public class PHENSIMq implements Runnable, Closeable {
         if (repositoryMatrixTransposed != null) {
             repositoryMatrixTransposed.close();
         }
-        if (contextualizedMatrix != null) {
+        if (contextualizedMatrix != null && contextualizedMatrix != repositoryMatrix.pathwayMatrix().matrix()) {
             contextualizedMatrix.close();
         }
     }

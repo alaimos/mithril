@@ -9,6 +9,7 @@ import com.alaimos.MITHrIL.api.Data.Reader.DynamicTextFileReader;
 import com.alaimos.MITHrIL.api.Math.MatrixFactoryInterface;
 import com.alaimos.MITHrIL.app.Algorithms.Metapathway.MatrixBuilderFromMetapathway;
 import com.alaimos.MITHrIL.app.Algorithms.Metapathway.MetapathwayBuilderFromOptions;
+import com.alaimos.MITHrIL.app.Algorithms.ReversePhensim.CoverRanking;
 import com.alaimos.MITHrIL.app.Algorithms.ReversePhensim.FastPHENSIM;
 import com.alaimos.MITHrIL.app.Algorithms.ReversePhensim.SetBuilder;
 import com.alaimos.MITHrIL.app.Algorithms.ReversePhensim.SetCoveringAlgorithm;
@@ -106,34 +107,57 @@ public class ReversePHENSIMService implements ServiceInterface {
                        .threads(options.threads)
                        .epsilon(options.epsilon)
                        .run();
-                var output = phensim.output();
+                var reversePhensimOutput = phensim.output();
                 log.info("Filtering target nodes");
-                targetNodes = filterTargetNodes(targetNodes, invertedMetapathwayMatrix, output);
+                targetNodes = filterTargetNodes(targetNodes, invertedMetapathwayMatrix, reversePhensimOutput);
                 log.debug("Target nodes: {}", targetNodes.length);
                 log.info("Computing coverages");
                 var builder = new SetBuilder();
                 builder.inputConstraints(input)
                        .nonExpressedNodes(nonExpressedNodes)
                        .repository(metapathwayRepository)
-                       .repositoryMatrix(metapathwayMatrix)
+                       .forwardRepositoryMatrix(metapathwayMatrix)
                        .reverseRepositoryMatrix(invertedMetapathwayMatrix)
                        .random(random)
                        .batchSize(options.batchSize)
-                       .reverseOutput(output)
+                       .reverseOutput(reversePhensimOutput)
                        .targetNodes(targetNodes)
                        .threads(options.threads)
                        .epsilon(options.epsilon)
+                       .matrixFactory(multiplicationMatrixFactory)
                        .run();
+                log.info("Computing set covering");
                 var subsets = builder.output();
                 var id2Index = metapathwayMatrix.pathwayMatrix().id2Index();
                 var universe = new IntOpenHashSet(Arrays.stream(input)
-                                                        .map(ExpressionConstraint::nodeId)
-                                                        .mapToInt(id2Index::getInt)
+                                                        .mapToInt(constraint -> {
+                                                            var nodeIdx = id2Index.getInt(constraint.nodeId());
+                                                            var direction = constraint.direction();
+                                                            return direction == RandomExpressionGenerator.ExpressionDirection.OVEREXPRESSION
+                                                                    ? nodeIdx
+                                                                    : -nodeIdx;
+                                                        })
                                                         .toArray());
                 var solutions = SetCoveringAlgorithm.of(universe, subsets).run();
+                log.info("Ranking solutions");
                 var constraintsSet = convertCoveringSetsToExpressionConstraints(
-                        solutions, metapathwayMatrix, invertedMetapathwayMatrix, output);
-                System.out.println(solutions);
+                        solutions, metapathwayMatrix, invertedMetapathwayMatrix, reversePhensimOutput);
+                var rankingAlgorithm = new CoverRanking();
+                rankingAlgorithm.reverseConstraints(input)
+                                .nonExpressedNodes(nonExpressedNodes)
+                                .repository(metapathwayRepository)
+                                .forwardRepositoryMatrix(metapathwayMatrix)
+                                .random(random)
+                                .batchSize(options.batchSize)
+                                .threads(options.threads)
+                                .epsilon(options.epsilon)
+                                .coveringSets(constraintsSet)
+                                .matrixFactory(multiplicationMatrixFactory)
+                                .run();
+                var ranking = rankingAlgorithm.output();
+                for (var r : ranking) {
+                    log.info("Nodes: {} - Coverage: {}", Arrays.toString(r.covering()), r.coverage());
+                }
 
 
 //                log.info("Writing output file");
@@ -252,15 +276,14 @@ public class ReversePHENSIMService implements ServiceInterface {
         var result = new HashSet<ExpressionConstraint[]>(coveringSets.size());
         for (var coveringSet : coveringSets) {
             var constraints = new ArrayList<ExpressionConstraint>(coveringSet.size());
-            for (var targetNodeId : coveringSet) {
+            var coveringSetIterator = coveringSet.intIterator();
+            while (coveringSetIterator.hasNext()) {
+                var targetNodeId = coveringSetIterator.nextInt();
                 var nodeId = index2Id.get(targetNodeId);
                 var activity = reverseActivityScores[reverseId2Index.getInt(nodeId)];
                 if (activity == 0.0) continue;
-                constraints.add(new ExpressionConstraint(
-                        nodeId,
-                        (activity > 0) ? RandomExpressionGenerator.ExpressionDirection.OVEREXPRESSION : RandomExpressionGenerator.ExpressionDirection.UNDEREXPRESSION,
-                        null, Double.NaN
-                ));
+                var direction = (activity > 0) ? RandomExpressionGenerator.ExpressionDirection.OVEREXPRESSION : RandomExpressionGenerator.ExpressionDirection.UNDEREXPRESSION;
+                constraints.add(ExpressionConstraint.of(nodeId, direction));
             }
             result.add(constraints.toArray(new ExpressionConstraint[0]));
         }

@@ -107,6 +107,10 @@ public class RandomExpressionGenerator {
             return new ExpressionConstraint(nodeId, c.direction, c.distribution, c.baseLog2FoldChange);
         }
 
+        public static @NotNull ExpressionConstraint of(String nodeId, @NotNull ExpressionDirection direction) {
+            return new ExpressionConstraint(nodeId, direction, null, Double.NaN);
+        }
+
     }
 
     public record ExpressionDistribution(double mean, double stdDev) {

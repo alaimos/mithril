@@ -2,28 +2,17 @@ package com.alaimos.MITHrIL.app.Algorithms.ReversePhensim;
 
 import com.alaimos.MITHrIL.api.Data.Pathways.Graph.Repository;
 import com.alaimos.MITHrIL.api.Math.MatrixFactoryInterface;
-import com.alaimos.MITHrIL.api.Math.MatrixInterface;
-import com.alaimos.MITHrIL.app.Algorithms.Metapathway.ContextualisedMatrixBuilder;
 import com.alaimos.MITHrIL.app.Data.Generators.RandomExpressionGenerator;
 import com.alaimos.MITHrIL.app.Data.Generators.RandomExpressionGenerator.ExpressionConstraint;
-import com.alaimos.MITHrIL.app.Data.Generators.RandomSubsetGenerator;
 import com.alaimos.MITHrIL.app.Data.Records.RepositoryMatrix;
-import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import it.unimi.dsi.logging.ProgressLogger;
-import org.apache.commons.math3.util.FastMath;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.IntStream;
 
 public class SetBuilder implements Runnable {
 
@@ -35,7 +24,7 @@ public class SetBuilder implements Runnable {
     private ExpressionConstraint[] inputConstraints;
     private String[] nonExpressedNodes;
     private Repository repository;
-    private RepositoryMatrix repositoryMatrix;
+    private RepositoryMatrix forwardRepositoryMatrix;
     private RepositoryMatrix reverseRepositoryMatrix;
     private int batchSize = 1000;
     private int threads = 0;
@@ -73,8 +62,8 @@ public class SetBuilder implements Runnable {
         return this;
     }
 
-    public SetBuilder repositoryMatrix(RepositoryMatrix repositoryMatrix) {
-        this.repositoryMatrix = repositoryMatrix;
+    public SetBuilder forwardRepositoryMatrix(RepositoryMatrix repositoryMatrix) {
+        this.forwardRepositoryMatrix = repositoryMatrix;
         return this;
     }
 
@@ -160,7 +149,7 @@ public class SetBuilder implements Runnable {
             phensim.constraints(constraints)
                    .nonExpressedNodes(nonExpressedNodes)
                    .repository(repository)
-                   .repositoryMatrix(repositoryMatrix)
+                   .repositoryMatrix(forwardRepositoryMatrix)
                    .matrixFactory(matrixFactory)
                    .random(random)
                    .batchSize(batchSize)
@@ -175,7 +164,7 @@ public class SetBuilder implements Runnable {
     }
 
     private @NotNull IntSet collectCoveredNodes(FastPHENSIM.@NotNull SimulationOutput fastPhensimOutput) {
-        var id2Index = repositoryMatrix.pathwayMatrix().id2Index();
+        var id2Index = forwardRepositoryMatrix.pathwayMatrix().id2Index();
         var activities = fastPhensimOutput.nodeActivityScores();
         IntSet coveredNodes = new IntOpenHashSet();
         for (var constraint : inputConstraints) {

@@ -388,7 +388,7 @@ public class FastPHENSIM implements Runnable, Closeable {
      */
     @Override
     public void close() throws IOException {
-        if (contextualizedMatrix != null) {
+        if (contextualizedMatrix != null && contextualizedMatrix != repositoryMatrix.pathwayMatrix().matrix()) {
             contextualizedMatrix.close();
         }
     }

@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -210,7 +211,8 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      * @return the in-degree of the node
      */
     public int inDegree(@NotNull Node n) {
-        return Optional.of(incomingEdges.get(n.id())).map(Map::size).orElse(-1);
+        if (incomingEdges.get(n.id()) == null) return 0;
+        return incomingEdges.get(n.id()).size();
     }
 
     /**
@@ -220,7 +222,8 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      * @return the out-degree of the node
      */
     public int outDegree(@NotNull Node n) {
-        return Optional.of(outgoingEdges.get(n.id())).map(Map::size).orElse(-1);
+        if (outgoingEdges.get(n.id()) == null) return -0;
+        return outgoingEdges.get(n.id()).size();
     }
 
     /**
@@ -777,8 +780,8 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
             // create new edge
             var newEdge = new Edge(source, target, e.details());
             // add edge to outgoing and incoming edges
-            outgoingEdges.get(sourceId).put(targetId, newEdge);
-            incomingEdges.get(targetId).put(sourceId, newEdge);
+            outgoingEdges.computeIfAbsent(sourceId, k -> new Object2ObjectOpenHashMap<>()).put(targetId, newEdge);
+            incomingEdges.computeIfAbsent(targetId, k -> new Object2ObjectOpenHashMap<>()).put(sourceId, newEdge);
         }
     }
 
