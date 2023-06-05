@@ -7,14 +7,13 @@ import com.alaimos.MITHrIL.api.Data.Pathways.Graph.Graph;
 import com.alaimos.MITHrIL.api.Data.Pathways.Graph.Repository;
 import com.alaimos.MITHrIL.api.Data.Reader.DynamicTextFileReader;
 import com.alaimos.MITHrIL.api.Math.MatrixFactoryInterface;
-import com.alaimos.MITHrIL.api.Math.PValue.Adjusters.AdjusterInterface;
 import com.alaimos.MITHrIL.app.Algorithms.Metapathway.MatrixBuilderFromMetapathway;
 import com.alaimos.MITHrIL.app.Algorithms.Metapathway.MetapathwayBuilderFromOptions;
-import com.alaimos.MITHrIL.app.Algorithms.PHENSIM;
 import com.alaimos.MITHrIL.app.Algorithms.ReversePhensim.FastPHENSIM;
 import com.alaimos.MITHrIL.app.Algorithms.ReversePhensim.SetBuilder;
 import com.alaimos.MITHrIL.app.Algorithms.ReversePhensim.SetCoveringAlgorithm;
 import com.alaimos.MITHrIL.app.CommandLine.Options.ReversePHENSIMOptions;
+import com.alaimos.MITHrIL.app.Data.Generators.RandomExpressionGenerator;
 import com.alaimos.MITHrIL.app.Data.Generators.RandomExpressionGenerator.ExpressionConstraint;
 import com.alaimos.MITHrIL.app.Data.Readers.PHENSIM.PHENSIMInputReader;
 import com.alaimos.MITHrIL.app.Data.Readers.PHENSIM.PathwayExtension.EdgeSubtypeReader;
@@ -22,13 +21,9 @@ import com.alaimos.MITHrIL.app.Data.Readers.PHENSIM.PathwayExtension.EdgeTypeRea
 import com.alaimos.MITHrIL.app.Data.Readers.PHENSIM.PathwayExtension.NodeTypeReader;
 import com.alaimos.MITHrIL.app.Data.Readers.PHENSIM.PathwayExtension.PathwayExtensionReader;
 import com.alaimos.MITHrIL.app.Data.Records.RepositoryMatrix;
-import com.alaimos.MITHrIL.app.Data.Writers.PHENSIM.ActivityScoreMatrixWriter;
-import com.alaimos.MITHrIL.app.Data.Writers.PHENSIM.ExtendedSIFWriter;
-import com.alaimos.MITHrIL.app.Data.Writers.PHENSIM.SBMLWriter;
-import com.alaimos.MITHrIL.app.Data.Writers.PHENSIM.SimulationOutputWriter;
-import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.jetbrains.annotations.NotNull;
@@ -136,6 +131,8 @@ public class ReversePHENSIMService implements ServiceInterface {
                                                         .mapToInt(id2Index::getInt)
                                                         .toArray());
                 var solutions = SetCoveringAlgorithm.of(universe, subsets).run();
+                var constraintsSet = convertCoveringSetsToExpressionConstraints(
+                        solutions, metapathwayMatrix, invertedMetapathwayMatrix, output);
                 System.out.println(solutions);
 
 
@@ -242,6 +239,32 @@ public class ReversePHENSIMService implements ServiceInterface {
             }
         }
         return filtered.toArray(new String[0]);
+    }
+
+    private @NotNull Collection<ExpressionConstraint[]> convertCoveringSetsToExpressionConstraints(
+            @NotNull Collection<IntSet> coveringSets, @NotNull RepositoryMatrix forwardRepositoryMatrix,
+            @NotNull RepositoryMatrix reverseRepositoryMatrix,
+            FastPHENSIM.@NotNull SimulationOutput reversePhensimOutput
+    ) {
+        var index2Id = forwardRepositoryMatrix.pathwayMatrix().index2Id();
+        var reverseId2Index = reverseRepositoryMatrix.pathwayMatrix().id2Index();
+        var reverseActivityScores = reversePhensimOutput.nodeActivityScores();
+        var result = new HashSet<ExpressionConstraint[]>(coveringSets.size());
+        for (var coveringSet : coveringSets) {
+            var constraints = new ArrayList<ExpressionConstraint>(coveringSet.size());
+            for (var targetNodeId : coveringSet) {
+                var nodeId = index2Id.get(targetNodeId);
+                var activity = reverseActivityScores[reverseId2Index.getInt(nodeId)];
+                if (activity == 0.0) continue;
+                constraints.add(new ExpressionConstraint(
+                        nodeId,
+                        (activity > 0) ? RandomExpressionGenerator.ExpressionDirection.OVEREXPRESSION : RandomExpressionGenerator.ExpressionDirection.UNDEREXPRESSION,
+                        null, Double.NaN
+                ));
+            }
+            result.add(constraints.toArray(new ExpressionConstraint[0]));
+        }
+        return result;
     }
 
     private String @Nullable [] readTargetNodes() throws IOException {
