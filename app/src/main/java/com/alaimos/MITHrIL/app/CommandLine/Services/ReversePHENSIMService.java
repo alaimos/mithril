@@ -113,9 +113,9 @@ public class ReversePHENSIMService implements ServiceInterface {
                 log.debug("Target nodes: {}", targetNodes.length);
                 log.info("Computing coverages");
                 var builder = new SetBuilder();
-                builder.inputConstraints(input)
+                builder.nodesToCover(input)
                        .nonExpressedNodes(nonExpressedNodes)
-                       .repository(metapathwayRepository)
+                       .forwardRepository(metapathwayRepository)
                        .forwardRepositoryMatrix(metapathwayMatrix)
                        .reverseRepositoryMatrix(invertedMetapathwayMatrix)
                        .random(random)
@@ -139,6 +139,7 @@ public class ReversePHENSIMService implements ServiceInterface {
                                                         })
                                                         .toArray());
                 var solutions = SetCoveringAlgorithm.of(universe, subsets).run();
+                System.out.println(solutions);
                 log.info("Ranking solutions");
                 var constraintsSet = convertCoveringSetsToExpressionConstraints(
                         solutions, metapathwayMatrix, invertedMetapathwayMatrix, reversePhensimOutput);

@@ -62,7 +62,6 @@ public class SetCoveringAlgorithm {
             }
         }
         log.info("Iteration: {} - Stack size: {}", x, 0);
-        System.out.println();
         return solutionTree.solutions;
     }
 

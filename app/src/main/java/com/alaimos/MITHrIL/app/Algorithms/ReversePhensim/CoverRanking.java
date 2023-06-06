@@ -142,6 +142,7 @@ public class CoverRanking implements Runnable {
                    .threads(threads)
                    .epsilon(epsilon)
                    .enablePValues(false)
+                   .silent(true)
                    .run();
             return phensim.output();
         }

@@ -44,6 +44,7 @@ public class FastPHENSIM implements Runnable, Closeable {
     private double epsilon;
     private MatrixFactoryInterface<?> matrixFactory;
     private boolean enablePValues = true;
+    private boolean verbose = true;
 
     //endregion
     //region Internal state variables
@@ -121,6 +122,11 @@ public class FastPHENSIM implements Runnable, Closeable {
         }
         return this;
     }
+
+    public FastPHENSIM silent(boolean silent) {
+        this.verbose = !silent;
+        return this;
+    }
     //endregion
 
     /**
@@ -132,7 +138,7 @@ public class FastPHENSIM implements Runnable, Closeable {
         var lastBatchElement = 0;
         var totalBatchElements = (numberOfSimulations + 1) * numberOfRepetitions;
         var pl = new ProgressLogger(log, 1, TimeUnit.MINUTES, "iterations");
-        pl.start("Starting iterations");
+        if (verbose) pl.start("Starting iterations");
         do {
             var batchPair = prepareBatch(lastBatchElement, totalBatchElements);
             var columnToSimulationMap = batchPair.right();
@@ -162,16 +168,16 @@ public class FastPHENSIM implements Runnable, Closeable {
                     });
                 }
                 lastBatchElement += columnToSimulationMap.length;
-                pl.update(columnToSimulationMap.length);
+                if (verbose) pl.update(columnToSimulationMap.length);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         } while (lastBatchElement < totalBatchElements);
-        pl.done();
-        log.info("Computing activity scores");
+        if (verbose) pl.done();
+        if (verbose) log.info("Computing activity scores");
         computeActivityScores();
         if (enablePValues) {
-            log.info("Computing p-values");
+            if (verbose) log.info("Computing p-values");
             computeNodePValues();
         }
     }
@@ -202,9 +208,9 @@ public class FastPHENSIM implements Runnable, Closeable {
             runPartialOutput.init(numberOfNodes);
         }
         initializeGenerators();
-        log.info("Building contextualized metapathway matrix");
+        if (verbose) log.info("Building contextualized metapathway matrix");
         contextualizedMatrix = ContextualisedMatrixBuilder.build(
-                repository, repositoryMatrix, matrixFactory, nonExpressedNodes, epsilon
+                repository, repositoryMatrix, matrixFactory, nonExpressedNodes, epsilon, verbose
         );
     }
 

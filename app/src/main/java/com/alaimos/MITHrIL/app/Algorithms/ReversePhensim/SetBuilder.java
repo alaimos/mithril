@@ -5,6 +5,7 @@ import com.alaimos.MITHrIL.api.Math.MatrixFactoryInterface;
 import com.alaimos.MITHrIL.app.Data.Generators.RandomExpressionGenerator;
 import com.alaimos.MITHrIL.app.Data.Generators.RandomExpressionGenerator.ExpressionConstraint;
 import com.alaimos.MITHrIL.app.Data.Records.RepositoryMatrix;
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.NotNull;
@@ -21,20 +22,21 @@ public class SetBuilder implements Runnable {
     //endregion
     //region Input Parameters
     private Random random;
-    private ExpressionConstraint[] inputConstraints;
+    private ExpressionConstraint[] nodesToCover;
     private String[] nonExpressedNodes;
-    private Repository repository;
+    private Repository forwardRepository;
     private RepositoryMatrix forwardRepositoryMatrix;
     private RepositoryMatrix reverseRepositoryMatrix;
+    private FastPHENSIM.SimulationOutput reverseOutput;
+    private String[] targetNodes;
     private int batchSize = 1000;
     private int threads = 0;
     private double epsilon;
     private MatrixFactoryInterface<?> matrixFactory;
-    private FastPHENSIM.SimulationOutput reverseOutput;
-    private String[] targetNodes;
     //endregion
 
     //region Internal variables
+    private List<String> indexToTargetNode;
     private List<IntSet> output;
     //endregion
 
@@ -47,8 +49,8 @@ public class SetBuilder implements Runnable {
         return this;
     }
 
-    public SetBuilder inputConstraints(ExpressionConstraint[] constraints) {
-        this.inputConstraints = constraints;
+    public SetBuilder nodesToCover(ExpressionConstraint[] constraints) {
+        this.nodesToCover = constraints;
         return this;
     }
 
@@ -57,8 +59,8 @@ public class SetBuilder implements Runnable {
         return this;
     }
 
-    public SetBuilder repository(Repository repository) {
-        this.repository = repository;
+    public SetBuilder forwardRepository(Repository repository) {
+        this.forwardRepository = repository;
         return this;
     }
 
@@ -108,18 +110,21 @@ public class SetBuilder implements Runnable {
      */
     @Override
     public void run() {
-        output = new ArrayList<>();
-        var id2Index = reverseRepositoryMatrix.pathwayMatrix().id2Index();
-        var activities = reverseOutput.nodeActivityScores();
+        indexToTargetNode = new ArrayList<>();
+        output            = new ArrayList<>();
+        var reverseId2Index = reverseRepositoryMatrix.pathwayMatrix().id2Index();
+        var reverseActivities = reverseOutput.nodeActivityScores();
         for (var target : targetNodes) {
             log.info("Computing coverage from {}", target);
-            var targetIndex = id2Index.getInt(target);
-            var targetActivity = activities[targetIndex];
+            var targetReverseIndex = reverseId2Index.getInt(target);
+            var targetReverseActivity = reverseActivities[targetReverseIndex];
+            if (targetReverseActivity == 0.0) continue;
             try {
-                var simulationOutput = runFastPhensim(target, targetActivity);
-                var set = collectCoveredNodes(simulationOutput);
-                if (set.size() > 0) {
-                    output.add(set);
+                var simulationOutput = runFastPhensim(target, targetReverseActivity);
+                var coveredNodes = collectCoveredNodes(simulationOutput);
+                if (coveredNodes.size() > 0) {
+                    indexToTargetNode.add(target);
+                    output.add(coveredNodes);
                 }
             } catch (IOException e) {
                 log.error("Error while running FastPhensim", e);
@@ -132,23 +137,22 @@ public class SetBuilder implements Runnable {
      *
      * @return the output of the algorithm.
      */
-    public List<IntSet> output() {
-        return output;
+    public Pair<List<String>, List<IntSet>> output() {
+        return Pair.of(indexToTargetNode, output);
     }
 
     //region Utility methods
     private FastPHENSIM.SimulationOutput runFastPhensim(String node, double activityScore) throws IOException {
         var constraints = new ExpressionConstraint[]{
-                new ExpressionConstraint(
+                ExpressionConstraint.of(
                         node,
-                        activityScore > 0 ? RandomExpressionGenerator.ExpressionDirection.OVEREXPRESSION : RandomExpressionGenerator.ExpressionDirection.UNDEREXPRESSION,
-                        null, Double.NaN
+                        activityScore > 0 ? RandomExpressionGenerator.ExpressionDirection.OVEREXPRESSION : RandomExpressionGenerator.ExpressionDirection.UNDEREXPRESSION
                 )
         };
         try (var phensim = new FastPHENSIM()) {
             phensim.constraints(constraints)
                    .nonExpressedNodes(nonExpressedNodes)
-                   .repository(repository)
+                   .repository(forwardRepository)
                    .repositoryMatrix(forwardRepositoryMatrix)
                    .matrixFactory(matrixFactory)
                    .random(random)
@@ -158,18 +162,19 @@ public class SetBuilder implements Runnable {
                    .threads(threads)
                    .epsilon(epsilon)
                    .enablePValues(false)
+                   .silent(true)
                    .run();
             return phensim.output();
         }
     }
 
     private @NotNull IntSet collectCoveredNodes(FastPHENSIM.@NotNull SimulationOutput fastPhensimOutput) {
-        var id2Index = forwardRepositoryMatrix.pathwayMatrix().id2Index();
-        var activities = fastPhensimOutput.nodeActivityScores();
+        var forwardId2Index = forwardRepositoryMatrix.pathwayMatrix().id2Index();
+        var forwardActivities = fastPhensimOutput.nodeActivityScores();
         IntSet coveredNodes = new IntOpenHashSet();
-        for (var constraint : inputConstraints) {
-            var nodeIndex = id2Index.getInt(constraint.nodeId());
-            var activity = activities[nodeIndex];
+        for (var nodeToCover : nodesToCover) {
+            var nodeIndex = forwardId2Index.getInt(nodeToCover.nodeId());
+            var activity = forwardActivities[nodeIndex];
             if (activity > 0) {
                 coveredNodes.add(nodeIndex);
             } else if (activity < 0) {

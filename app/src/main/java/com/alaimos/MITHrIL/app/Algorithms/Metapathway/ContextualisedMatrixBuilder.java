@@ -31,6 +31,7 @@ public class ContextualisedMatrixBuilder implements Runnable {
     private final Int2DoubleMap absoluteWeights = new Int2DoubleOpenHashMap();
     private final Long2DoubleMap weights = new Long2DoubleOpenHashMap();
     private double[] attenuationMatrix = null;
+    private boolean verbose = true;
 
     public ContextualisedMatrixBuilder(
             Repository repository, RepositoryMatrix matrix, MatrixFactoryInterface<?> matrixFactory,
@@ -46,6 +47,11 @@ public class ContextualisedMatrixBuilder implements Runnable {
         this.minWeight         = Math.pow(10, -Math.ceil(-Math.log10(epsilon)) - 1);
     }
 
+    public ContextualisedMatrixBuilder verbose(boolean verbose) {
+        this.verbose = verbose;
+        return this;
+    }
+
     /**
      * Build the matrix representation of a repository
      *
@@ -59,8 +65,24 @@ public class ContextualisedMatrixBuilder implements Runnable {
             Repository repository, RepositoryMatrix matrix, MatrixFactoryInterface<?> matrixFactory,
             String[] nonExpressedNodes, double epsilon
     ) {
+        return build(repository, matrix, matrixFactory, nonExpressedNodes, epsilon, true);
+    }
+
+    /**
+     * Build the matrix representation of a repository
+     *
+     * @param repository    repository
+     * @param matrix        repository matrix
+     * @param matrixFactory matrix factory
+     * @param epsilon       epsilon
+     * @return the matrix representation
+     */
+    public static MatrixInterface<?> build(
+            Repository repository, RepositoryMatrix matrix, MatrixFactoryInterface<?> matrixFactory,
+            String[] nonExpressedNodes, double epsilon, boolean verbose
+    ) {
         var builder = new ContextualisedMatrixBuilder(repository, matrix, matrixFactory, nonExpressedNodes, epsilon);
-        builder.run();
+        builder.verbose(verbose).run();
         return builder.get();
     }
 
@@ -208,14 +230,14 @@ public class ContextualisedMatrixBuilder implements Runnable {
     public void run() {
         try {
             if (nonExpressedNodes.length > 0) {
-                log.info("Computing attenuation matrix");
+                if (verbose) log.info("Computing attenuation matrix");
                 fillAttenuationMatrix();
                 sumIdentityMatrix();
-                log.info("Computing contextualized matrix");
+                if (verbose) log.info("Computing contextualized matrix");
                 computeContextualizedMatrix();
-                log.info("Contextualized matrix ready");
+                if (verbose) log.info("Contextualized matrix ready");
             } else {
-                log.info("Skipping contextualization: no non-expressed nodes");
+                if (verbose) log.info("Skipping contextualization: no non-expressed nodes");
                 contextualisedMatrix = originalMatrix.pathwayMatrix().matrix();
             }
         } catch (Throwable e) {
