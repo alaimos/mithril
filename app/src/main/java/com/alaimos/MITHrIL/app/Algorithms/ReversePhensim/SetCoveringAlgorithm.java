@@ -38,7 +38,7 @@ public class SetCoveringAlgorithm {
         stack.push(solutionTree.root);
         while (!stack.empty()) {
             var currentNode = stack.pop();
-            if ((x++ % 100) == 0) log.info("Iteration: {} - Stack size: {}", x, stack.size());
+            if ((x++ % 100) == 0) log.debug("Iteration: {} - Stack size: {}", x, stack.size());
             var covered = currentNode.getCovered();
             if (covered != null && covered.equals(universe)) {
                 solutionTree.addSolution(currentNode);
@@ -61,7 +61,7 @@ public class SetCoveringAlgorithm {
 
             }
         }
-        log.info("Iteration: {} - Stack size: {}", x, 0);
+        log.debug("Iteration: {} - Stack size: {}", x, 0);
         return solutionTree.solutions;
     }
 

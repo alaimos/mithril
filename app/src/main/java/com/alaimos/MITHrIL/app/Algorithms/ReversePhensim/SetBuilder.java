@@ -118,7 +118,7 @@ public class SetBuilder implements Runnable {
         var reverseId2Index = reverseRepositoryMatrix.pathwayMatrix().id2Index();
         var reverseActivities = reverseOutput.nodeActivityScores();
         for (var target : targetNodes) {
-            log.info("Computing coverage from {}", target);
+            log.debug("Computing coverage for {}", target);
             var targetReverseIndex = reverseId2Index.getInt(target);
             var targetReverseActivity = reverseActivities[targetReverseIndex];
             if (targetReverseActivity == 0.0) continue;

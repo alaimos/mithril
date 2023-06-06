@@ -101,8 +101,8 @@ public class CoverRanking implements Runnable {
         output = new ArrayList<>();
         var reverseConstraintsSet = convertReverseConstraintsToSet();
         for (var coveringSet : coveringSets) {
-            log.info(
-                    "Computing coverage from {}",
+            log.debug(
+                    "Computing coverage for {}",
                     Arrays.stream(coveringSet).map(ExpressionConstraint::nodeId).toArray()
             );
             try {

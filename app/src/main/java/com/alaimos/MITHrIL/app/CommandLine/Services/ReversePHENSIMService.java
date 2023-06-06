@@ -22,6 +22,7 @@ import com.alaimos.MITHrIL.app.Data.Readers.PHENSIM.PathwayExtension.EdgeTypeRea
 import com.alaimos.MITHrIL.app.Data.Readers.PHENSIM.PathwayExtension.NodeTypeReader;
 import com.alaimos.MITHrIL.app.Data.Readers.PHENSIM.PathwayExtension.PathwayExtensionReader;
 import com.alaimos.MITHrIL.app.Data.Records.RepositoryMatrix;
+import com.alaimos.MITHrIL.app.Data.Writers.ReversePhensim.OutputWriter;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -67,7 +68,6 @@ public class ReversePHENSIMService implements ServiceInterface {
             }
             checkInputParameters();
             var random = random();
-            var extManager = ExtensionManager.INSTANCE;
             var metapathwayRepository = MetapathwayBuilderFromOptions.build(options, random);
             var extensionGraph = prepareExtensionGraph();
             if (extensionGraph != null) {
@@ -157,30 +157,8 @@ public class ReversePHENSIMService implements ServiceInterface {
                                 .matrixFactory(multiplicationMatrixFactory)
                                 .run();
                 var ranking = rankingAlgorithm.output();
-                for (var r : ranking) {
-                    log.info("Nodes: {} - Coverage: {}", Arrays.toString(r.covering()), r.coverage());
-                }
-
-
-//                log.info("Writing output file");
-//                new SimulationOutputWriter(metapathwayRepository, metapathwayMatrix, input).write(
-//                        options.output, output);
-//                if (options.outputPathwayMatrix != null) {
-//                    log.info("Writing pathway activity scores matrix");
-//                    new ActivityScoreMatrixWriter(metapathwayMatrix, true).write(options.outputPathwayMatrix, output);
-//                }
-//                if (options.outputNodesMatrix != null) {
-//                    log.info("Writing node activity scores matrix");
-//                    new ActivityScoreMatrixWriter(metapathwayMatrix, false).write(options.outputNodesMatrix, output);
-//                }
-//                if (options.outputSBML != null) {
-//                    log.info("Writing SBML output");
-//                    new SBMLWriter(metapathwayRepository, metapathwayMatrix).write(options.outputSBML, output);
-//                }
-//                if (options.outputSIF != null) {
-//                    log.info("Writing Extended SIF output");
-//                    new ExtendedSIFWriter(metapathwayRepository, metapathwayMatrix).write(options.outputSIF, output);
-//                }
+                log.info("Writing output file");
+                new OutputWriter(universe.size()).write(options.output, ranking);
             }
             log.info("Done");
         } catch (IllegalArgumentException e) {
@@ -225,11 +203,14 @@ public class ReversePHENSIMService implements ServiceInterface {
         var graph = repository.get().graph();
         var minLevel = options.minimumLevel;
         var maxLevel = options.maximumLevel;
+        var inputSet = new HashSet<String>();
         var targetSet = new HashSet<String>();
         for (var constraint : input) {
             var queue = new ArrayDeque<IntObjectPair<String>>();
             var visited = new HashSet<String>();
-            queue.add(IntObjectPair.of(0, constraint.nodeId()));
+            var nodeId = constraint.nodeId();
+            inputSet.add(nodeId);
+            queue.add(IntObjectPair.of(0, nodeId));
             while (!queue.isEmpty()) {
                 var pair = queue.remove();
                 var level = pair.firstInt();
@@ -246,6 +227,8 @@ public class ReversePHENSIMService implements ServiceInterface {
                 }
             }
         }
+        // In any case, input nodes should not be considered as target nodes
+        targetSet.removeAll(inputSet);
         return targetSet.toArray(new String[0]);
     }
 
