@@ -82,7 +82,7 @@ public class SetCoveringAlgorithm {
         for (var subset : subsets) {
             var newSubset = new IntOpenHashSet(subset);
             newSubset.retainAll(universe);
-            if (!newSubset.isEmpty()) newSubsets.add(newSubset);
+            newSubsets.add(newSubset);
         }
         return newSubsets;
     }

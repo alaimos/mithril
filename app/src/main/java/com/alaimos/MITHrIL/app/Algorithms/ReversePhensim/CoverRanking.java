@@ -7,7 +7,6 @@ import com.alaimos.MITHrIL.app.Data.Generators.RandomExpressionGenerator.Express
 import com.alaimos.MITHrIL.app.Data.Records.RepositoryMatrix;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import it.unimi.dsi.fastutil.objects.ObjectRBTreeSet;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -36,7 +35,7 @@ public class CoverRanking implements Runnable {
     //endregion
 
     //region Internal variables
-    private Collection<RankedSet> output;
+    private List<RankedSet> output;
     //endregion
 
     //region Constructors and setters
@@ -99,8 +98,8 @@ public class CoverRanking implements Runnable {
      */
     @Override
     public void run() {
-        output = new ObjectRBTreeSet<>();
-        var reverseCostraintsSet = convertReverseCostraintsToSet();
+        output = new ArrayList<>();
+        var reverseConstraintsSet = convertReverseConstraintsToSet();
         for (var coveringSet : coveringSets) {
             log.info(
                     "Computing coverage from {}",
@@ -109,13 +108,14 @@ public class CoverRanking implements Runnable {
             try {
                 var simulationOutput = runFastPhensim(coveringSet);
                 var coveredNodes = collectCoveredNodes(simulationOutput);
-                var coverage = coverage(coveredNodes, reverseCostraintsSet);
+                var coverage = coverage(coveredNodes, reverseConstraintsSet);
                 var coveredNodeConstraints = convertCoveredNodesToExpressionConstraint(coveredNodes);
                 output.add(new RankedSet(coveringSet, coveredNodeConstraints, coverage));
             } catch (IOException e) {
                 log.error("Error while running FastPhensim", e);
             }
         }
+        Collections.sort(output);
     }
 
     /**
@@ -123,7 +123,7 @@ public class CoverRanking implements Runnable {
      *
      * @return the output of the algorithm.
      */
-    public Collection<RankedSet> output() {
+    public List<RankedSet> output() {
         return output;
     }
 
@@ -148,7 +148,7 @@ public class CoverRanking implements Runnable {
         }
     }
 
-    private @NotNull IntSet convertReverseCostraintsToSet() {
+    private @NotNull IntSet convertReverseConstraintsToSet() {
         var id2Index = forwardRepositoryMatrix.pathwayMatrix().id2Index();
         IntSet set = new IntOpenHashSet();
         for (var constraint : reverseConstraints) {
@@ -209,7 +209,7 @@ public class CoverRanking implements Runnable {
         @Contract(pure = true)
         @Override
         public int compareTo(@NotNull RankedSet o) {
-            return Integer.compare(coverage, o.coverage);
+            return Integer.compare(o.coverage, coverage);
         }
     }
     //endregion

@@ -8,12 +8,15 @@ import com.alaimos.MITHrIL.app.Data.Records.RepositoryMatrix;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class SetBuilder implements Runnable {
 
@@ -36,7 +39,7 @@ public class SetBuilder implements Runnable {
     //endregion
 
     //region Internal variables
-    private List<String> indexToTargetNode;
+    private List<ExpressionConstraint[]> indexToTargetNode;
     private List<IntSet> output;
     //endregion
 
@@ -120,10 +123,11 @@ public class SetBuilder implements Runnable {
             var targetReverseActivity = reverseActivities[targetReverseIndex];
             if (targetReverseActivity == 0.0) continue;
             try {
-                var simulationOutput = runFastPhensim(target, targetReverseActivity);
+                var fastPhensimInput = buildFastPhensimInput(target, targetReverseActivity);
+                var simulationOutput = runFastPhensim(fastPhensimInput);
                 var coveredNodes = collectCoveredNodes(simulationOutput);
                 if (coveredNodes.size() > 0) {
-                    indexToTargetNode.add(target);
+                    indexToTargetNode.add(fastPhensimInput);
                     output.add(coveredNodes);
                 }
             } catch (IOException e) {
@@ -137,18 +141,23 @@ public class SetBuilder implements Runnable {
      *
      * @return the output of the algorithm.
      */
-    public Pair<List<String>, List<IntSet>> output() {
+    public Pair<List<ExpressionConstraint[]>, List<IntSet>> output() {
         return Pair.of(indexToTargetNode, output);
     }
 
     //region Utility methods
-    private FastPHENSIM.SimulationOutput runFastPhensim(String node, double activityScore) throws IOException {
-        var constraints = new ExpressionConstraint[]{
+
+    @Contract("_, _ -> new")
+    private ExpressionConstraint @NotNull [] buildFastPhensimInput(String node, double activityScore) {
+        return new ExpressionConstraint[]{
                 ExpressionConstraint.of(
                         node,
                         activityScore > 0 ? RandomExpressionGenerator.ExpressionDirection.OVEREXPRESSION : RandomExpressionGenerator.ExpressionDirection.UNDEREXPRESSION
                 )
         };
+    }
+
+    private FastPHENSIM.SimulationOutput runFastPhensim(ExpressionConstraint[] constraints) throws IOException {
         try (var phensim = new FastPHENSIM()) {
             phensim.constraints(constraints)
                    .nonExpressedNodes(nonExpressedNodes)

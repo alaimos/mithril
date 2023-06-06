@@ -127,8 +127,11 @@ public class ReversePHENSIMService implements ServiceInterface {
                        .matrixFactory(multiplicationMatrixFactory)
                        .run();
                 log.info("Computing set covering");
-                var subsets = builder.output();
+                var subsetsAndMap = builder.output();
+                var subsetMap = subsetsAndMap.left();
+                var subsets = subsetsAndMap.right();
                 var id2Index = metapathwayMatrix.pathwayMatrix().id2Index();
+                System.out.println(subsets.size() + " subsets");
                 var universe = new IntOpenHashSet(Arrays.stream(input)
                                                         .mapToInt(constraint -> {
                                                             var nodeIdx = id2Index.getInt(constraint.nodeId());
@@ -139,10 +142,8 @@ public class ReversePHENSIMService implements ServiceInterface {
                                                         })
                                                         .toArray());
                 var solutions = SetCoveringAlgorithm.of(universe, subsets).run();
-                System.out.println(solutions);
                 log.info("Ranking solutions");
-                var constraintsSet = convertCoveringSetsToExpressionConstraints(
-                        solutions, metapathwayMatrix, invertedMetapathwayMatrix, reversePhensimOutput);
+                var constraintsSet = convertCoveringSetsToExpressionConstraints(solutions, subsetMap);
                 var rankingAlgorithm = new CoverRanking();
                 rankingAlgorithm.reverseConstraints(input)
                                 .nonExpressedNodes(nonExpressedNodes)
@@ -267,24 +268,16 @@ public class ReversePHENSIMService implements ServiceInterface {
     }
 
     private @NotNull Collection<ExpressionConstraint[]> convertCoveringSetsToExpressionConstraints(
-            @NotNull Collection<IntSet> coveringSets, @NotNull RepositoryMatrix forwardRepositoryMatrix,
-            @NotNull RepositoryMatrix reverseRepositoryMatrix,
-            FastPHENSIM.@NotNull SimulationOutput reversePhensimOutput
+            @NotNull Collection<IntSet> coveringSets, List<ExpressionConstraint[]> subsetMap
     ) {
-        var index2Id = forwardRepositoryMatrix.pathwayMatrix().index2Id();
-        var reverseId2Index = reverseRepositoryMatrix.pathwayMatrix().id2Index();
-        var reverseActivityScores = reversePhensimOutput.nodeActivityScores();
         var result = new HashSet<ExpressionConstraint[]>(coveringSets.size());
         for (var coveringSet : coveringSets) {
             var constraints = new ArrayList<ExpressionConstraint>(coveringSet.size());
             var coveringSetIterator = coveringSet.intIterator();
             while (coveringSetIterator.hasNext()) {
-                var targetNodeId = coveringSetIterator.nextInt();
-                var nodeId = index2Id.get(targetNodeId);
-                var activity = reverseActivityScores[reverseId2Index.getInt(nodeId)];
-                if (activity == 0.0) continue;
-                var direction = (activity > 0) ? RandomExpressionGenerator.ExpressionDirection.OVEREXPRESSION : RandomExpressionGenerator.ExpressionDirection.UNDEREXPRESSION;
-                constraints.add(ExpressionConstraint.of(nodeId, direction));
+                var subsetIndex = coveringSetIterator.nextInt();
+                var subsetConstraints = subsetMap.get(subsetIndex);
+                Collections.addAll(constraints, subsetConstraints);
             }
             result.add(constraints.toArray(new ExpressionConstraint[0]));
         }
