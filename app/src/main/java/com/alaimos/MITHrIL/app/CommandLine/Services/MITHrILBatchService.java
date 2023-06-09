@@ -58,9 +58,9 @@ public class MITHrILBatchService implements ServiceInterface {
     public void run() {
         try {
             if (options.verbose) {
-                Configurator.setLevel(Logger.ROOT_LOGGER_NAME, Level.INFO);
+                Configurator.setRootLevel(Level.INFO);
             } else {
-                Configurator.setLevel(Logger.ROOT_LOGGER_NAME, Level.WARN);
+                Configurator.setRootLevel(Level.WARN);
             }
             checkInputParameters();
             var random = random();

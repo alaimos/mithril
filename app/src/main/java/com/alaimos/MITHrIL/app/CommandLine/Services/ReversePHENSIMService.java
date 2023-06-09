@@ -61,13 +61,12 @@ public class ReversePHENSIMService implements ServiceInterface {
     public void run() {
         try {
             if (options.verbose) {
-                Configurator.setLevel(Logger.ROOT_LOGGER_NAME, Level.INFO);
+                Configurator.setRootLevel(Level.INFO);
             } else {
-                Configurator.setLevel(Logger.ROOT_LOGGER_NAME, Level.WARN);
+                Configurator.setRootLevel(Level.WARN);
             }
             checkInputParameters();
             var random = random();
-            var extManager = ExtensionManager.INSTANCE;
             var metapathwayRepository = MetapathwayBuilderFromOptions.build(options, random);
             var extensionGraph = prepareExtensionGraph();
             if (extensionGraph != null) {
@@ -160,27 +159,6 @@ public class ReversePHENSIMService implements ServiceInterface {
                 for (var r : ranking) {
                     log.info("Nodes: {} - Coverage: {}", Arrays.toString(r.covering()), r.coverage());
                 }
-
-
-//                log.info("Writing output file");
-//                new SimulationOutputWriter(metapathwayRepository, metapathwayMatrix, input).write(
-//                        options.output, output);
-//                if (options.outputPathwayMatrix != null) {
-//                    log.info("Writing pathway activity scores matrix");
-//                    new ActivityScoreMatrixWriter(metapathwayMatrix, true).write(options.outputPathwayMatrix, output);
-//                }
-//                if (options.outputNodesMatrix != null) {
-//                    log.info("Writing node activity scores matrix");
-//                    new ActivityScoreMatrixWriter(metapathwayMatrix, false).write(options.outputNodesMatrix, output);
-//                }
-//                if (options.outputSBML != null) {
-//                    log.info("Writing SBML output");
-//                    new SBMLWriter(metapathwayRepository, metapathwayMatrix).write(options.outputSBML, output);
-//                }
-//                if (options.outputSIF != null) {
-//                    log.info("Writing Extended SIF output");
-//                    new ExtendedSIFWriter(metapathwayRepository, metapathwayMatrix).write(options.outputSIF, output);
-//                }
             }
             log.info("Done");
         } catch (IllegalArgumentException e) {

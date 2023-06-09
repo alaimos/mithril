@@ -30,7 +30,7 @@ public class ReversePHENSIMOptions extends MetapathwayOptions {
     @Option(name = "-target-max-level", usage = "maximum level of the target nodes (if list is not specified).", forbids = "-non-expressed-nodes")
     public int maximumLevel = Integer.MAX_VALUE;
     @Option(name = "-target-max-p", usage = "maximum p-value of the target nodes (if list is not specified).", forbids = "-non-expressed-nodes")
-    public int maxPFilter = 1;
+    public double maxPFilter = 1;
     @Option(name = "-o", aliases = "-out", usage = "output file.", required = true)
     public File output = null;
     @Option(name = "-t", aliases = "-threads", usage = "number of threads used for matrix operations (negative to disable limit; not supported by all matrix math libraries).")
