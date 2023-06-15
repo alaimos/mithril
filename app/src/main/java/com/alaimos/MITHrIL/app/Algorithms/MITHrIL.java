@@ -402,7 +402,11 @@ public class MITHrIL implements Runnable, Closeable {
             var pathway = repositoryMatrix.index2Id().get(i);
             var deGenesPathway = intersect(input.expressions().keySet(), pathway);
             var deGenesPathwayCount = deGenesPathway.size();
-            var meanDE = deGenesPathway.stream().mapToDouble(input.expressions()::getDouble).average().orElse(0.0);
+            var meanDE = deGenesPathway.stream()
+                                       .mapToDouble(input.expressions()::getDouble)
+                                       .map(Math::abs)
+                                       .average()
+                                       .orElse(0.0);
             if (meanDE * deGenesPathwayCount == 0) {
                 pathwayImpactFactors[i] = 0.0;
             } else {
