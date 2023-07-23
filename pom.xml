@@ -11,6 +11,19 @@
     <name>MITHrIL</name>
 
     <build>
+        <!--
+        Uncomment the following lines to build on a platform that does not support fast math plugins
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M9</version>
+                <configuration>
+                    <skipTests>true</skipTests>
+                </configuration>
+            </plugin>
+        </plugins>
+        -->
         <resources>
             <resource>
                 <filtering>false</filtering>
