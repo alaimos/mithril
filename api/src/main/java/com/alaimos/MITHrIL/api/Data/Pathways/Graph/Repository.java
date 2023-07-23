@@ -497,6 +497,7 @@ public class Repository implements Collection<Pathway>, Iterable<Pathway>, Clone
      */
     public void extendWith(@NotNull Graph other) {
         pathways.forEach((s, p) -> p.graph().extendWith(other));
+        virtualPathways.forEach((s, p) -> p.extendWith(other));
     }
 
     /**
@@ -617,6 +618,52 @@ public class Repository implements Collection<Pathway>, Iterable<Pathway>, Clone
                 invertedEdges.add(Pair.of(edge.right(), edge.left()));
             }
             return new VirtualPathway(id, name, invertedEdges, source);
+        }
+
+        private @NotNull Map<String, Set<String>> getEdgesMap() {
+            var edgesMap = new HashMap<String, Set<String>>();
+            for (var e : edges) {
+                var source = e.left();
+                var target = e.right();
+                if (!edgesMap.containsKey(source)) {
+                    edgesMap.put(source, new HashSet<>());
+                }
+                edgesMap.get(source).add(target);
+            }
+            return edgesMap;
+        }
+
+        public void extendWith(@NotNull Graph other) {
+            var previousCountEdges = -1;
+            var currentCountEdges = edges.size();
+            var edgesMap = getEdgesMap();
+            var nodes = nodes().stream().map(Node::id).collect(Collectors.toSet());
+            var remainingEdges = other.edgesStream().collect(Collectors.toSet());
+            while (previousCountEdges != currentCountEdges && !remainingEdges.isEmpty()) {
+                previousCountEdges = currentCountEdges;
+                var newRemainingEdges = new HashSet<Edge>();
+                for (var e : remainingEdges) {
+                    var source = e.source();
+                    var target = e.target();
+                    var sourceId = source.id();
+                    var targetId = target.id();
+                    if (edgesMap.containsKey(sourceId) && edgesMap.get(sourceId).contains(targetId)) {
+                        continue;
+                    }
+                    if (nodes.contains(targetId)) {
+                        if (!edgesMap.containsKey(sourceId)) {
+                            edgesMap.put(sourceId, new HashSet<>());
+                        }
+                        edges.add(Pair.of(sourceId, targetId));
+                        edgesMap.get(sourceId).add(targetId);
+                        nodes.add(targetId);
+                        currentCountEdges++;
+                    } else {
+                        newRemainingEdges.add(e);
+                    }
+                }
+                remainingEdges = newRemainingEdges;
+            }
         }
     }
 }
