@@ -70,7 +70,7 @@ public class ExpressionBatchReader extends AbstractDataReader<Map<String, Expres
                         }
                         if (Double.isNaN(value)) value = 0.0;
                     }
-                    expressions.get(map.get(i)).put(node, value);
+                    if (value != 0.0) expressions.get(map.get(i)).put(node, value);
                 }
             }
         }
