@@ -11,6 +11,7 @@ import com.alaimos.MITHrIL.api.Math.PValue.Adjusters.BenjaminiHochberg;
 import com.alaimos.MITHrIL.app.Algorithms.Metapathway.MatrixBuilderFromMetapathway;
 import com.alaimos.MITHrIL.app.Algorithms.Metapathway.MetapathwayBuilderFromOptions;
 import com.alaimos.MITHrIL.app.Algorithms.PHENSIM;
+import com.alaimos.MITHrIL.app.Algorithms.ReversePhensim.FastPHENSIM;
 import com.alaimos.MITHrIL.app.CommandLine.Options.MetapathwayOptions;
 import com.alaimos.MITHrIL.app.CommandLine.Options.ReversePHENSIMOptions;
 import com.alaimos.MITHrIL.app.Data.Generators.RandomExpressionGenerator.ExpressionConstraint;
@@ -60,8 +61,7 @@ public class TestReversePHENSIMService implements ServiceInterface {
     public void run() {
         try {
             Configurator.setRootLevel(Level.INFO);
-            var outDir = options.output;
-            if (outDir == null) outDir = new File("./");
+            var outDir = options.output == null ? new File("./") : options.output;
             outDir.mkdirs();
             var random = new Random(1234);
             var metapathwayRepository = MetapathwayBuilderFromOptions.build(new MetapathwayOptions(), random);
@@ -104,7 +104,6 @@ public class TestReversePHENSIMService implements ServiceInterface {
                 }
             }
             log.info("Running Reverse PHENSIM");
-            var finalOutDir = outDir;
             try (var pool = new ForkJoinPool(options.concurrentRuns)) {
                 pool.submit(() -> {
                     IntStream.range(0, randomStartingNodes.size())
@@ -115,17 +114,18 @@ public class TestReversePHENSIMService implements ServiceInterface {
                              .forEach(pair -> {
                                  var i = pair.leftInt();
                                  var j = pair.rightInt();
+                                 log.info("Running Reverse PHENSIM test {} {}", i, j);
                                  var rf = new ReversePHENSIMService();
                                  var opt = (ReversePHENSIMOptions) rf.getOptions();
-                                 opt.threads = options.threads;
-                                 opt.input   = new File(finalOutDir, "random_" + i + "/input_" + j + ".txt");
-                                 opt.output  = new File(finalOutDir, "random_" + i + "/output_" + j + ".txt");
-                                 opt.epsilon = 0.00001;
-                                 opt.inversionFactory = options.inversionFactory;
+                                 opt.threads               = options.threads;
+                                 opt.input                 = new File(outDir, "random_" + i + "/input_" + j + ".txt");
+                                 opt.output                = new File(outDir, "random_" + i + "/output_" + j + ".txt");
+                                 opt.epsilon               = 0.00001;
+                                 opt.inversionFactory      = options.inversionFactory;
                                  opt.multiplicationFactory = options.multiplicationFactory;
-                                 opt.verbose = false;
-                                 opt.iterations = 100;
-                                 opt.simulations = 100;
+                                 opt.verbose               = false;
+                                 opt.iterations            = 100;
+                                 opt.simulations           = 100;
                                  rf.run();
                              });
                 }).get();
@@ -141,8 +141,13 @@ public class TestReversePHENSIMService implements ServiceInterface {
         var graph = metapathway.get().graph();
         var endpoints = new HashSet<>(graph.endpoints());
         var nodes = graph.nodesStream()
+                         .filter(n -> graph.outDegree(n) > 0)
+                         .filter(n -> {
+                             var i = graph.inDegree(n);
+                             return i == 0 || i > 1;
+                         })
                          .map(Node::id)
-                         .filter(Predicate.not(endpoints::contains))
+                         .filter(n -> !endpoints.contains(n))
                          .toArray(String[]::new);
         var numberOfNodes = nodes.length;
         var selections = new ArrayList<ExpressionConstraint[]>();
@@ -151,7 +156,7 @@ public class TestReversePHENSIMService implements ServiceInterface {
                 ExpressionDirection.OVEREXPRESSION, ExpressionDirection.UNDEREXPRESSION
         };
         for (var i = 0; i < maxSelection; i++) {
-            var size = random.nextInt(10) + 1;
+            var size = 1; //random.nextInt(10) + 1;
             var selectedNodes = new HashSet<String>(size);
             while (selectedNodes.size() < size) {
                 var node = nodes[random.nextInt(numberOfNodes)];
@@ -179,7 +184,7 @@ public class TestReversePHENSIMService implements ServiceInterface {
             log.info("Running simulation {}/{}", i + 1, constraints.size());
             var input = constraints.get(i);
             Configurator.setRootLevel(Level.WARN);
-            try (var phensim = new PHENSIM()) {
+            try (var phensim = new FastPHENSIM()) {
                 phensim.constraints(input)
                        .nonExpressedNodes(new String[0])
                        .repository(metapathway)
@@ -187,13 +192,13 @@ public class TestReversePHENSIMService implements ServiceInterface {
                        .matrixFactory(multiplicationMatrixFactory)
                        .random(random)
                        .batchSize(options.batchSize)
-                       .numberOfRepetitions(100)
+                       .numberOfRepetitions(1)
                        .numberOfSimulations(1000)
                        .threads(options.threads)
-                       .pValueAdjuster(new BenjaminiHochberg())
                        .epsilon(0.00001)
+                       .enablePValues(false)
                        .run();
-                output.add(phensim.output(false).nodeActivityScores());
+                output.add(phensim.output().nodeActivityScores());
             }
             Configurator.setRootLevel(Level.INFO);
         }
@@ -202,18 +207,12 @@ public class TestReversePHENSIMService implements ServiceInterface {
 
     private @NotNull ArrayList<double[]> buildParameterList() {
         var params = new ArrayList<double[]>();
-        var i = 0d;
-        var d = 0d;
-        var s = 0d;
-        while (i <= 1.0) {
-            while (d <= 1.0) {
-                while (s <= 1.0) {
-                    params.add(new double[]{i, d, s});
-                    s += 0.1;
+        for (var i = 0; i < 10; i++) {
+            for (var d = 0; d < 5; d++) {
+                for (var s = 0; s < 5; s++) {
+                    params.add(new double[]{(double) i / 10, (double) d / 10, (double) s / 10});
                 }
-                d += 0.1;
             }
-            i += 0.1;
         }
         return params;
     }
@@ -241,33 +240,39 @@ public class TestReversePHENSIMService implements ServiceInterface {
             var exp = forwardOutput[id2Index.getInt(e)];
             if (exp != 0.0) reverseInput.put(e, activityToConstraint(exp));
         }
-        var sizeAfterDeletions = (int) Math.round(reverseInput.size() * (1.0 - deletions));
-        if (sizeAfterDeletions > 0) {
-            while (reverseInput.size() > sizeAfterDeletions) {
-                var nodeToDelete = endpoints.get(random.nextInt(endpoints.size()));
-                reverseInput.remove(nodeToDelete);
+        if (deletions > 0) {
+            var sizeAfterDeletions = (int) Math.round(reverseInput.size() * (1.0 - deletions));
+            if (sizeAfterDeletions > 0) {
+                while (reverseInput.size() > sizeAfterDeletions) {
+                    var nodeToDelete = endpoints.get(random.nextInt(endpoints.size()));
+                    reverseInput.remove(nodeToDelete);
+                }
             }
         }
-        var sizeAfterInsertions = (int) Math.round(reverseInput.size() * (1.0 + insertions));
-        if (sizeAfterInsertions > reverseInput.size()) {
-            while (reverseInput.size() < sizeAfterInsertions) {
-                var nodeToInsert = otherNodes[random.nextInt(otherNodes.length)];
-                var exp = forwardOutput[id2Index.getInt(nodeToInsert)];
-                if (exp != 0.0) reverseInput.put(nodeToInsert, activityToConstraint(exp));
+        if (insertions > 0) {
+            var sizeAfterInsertions = (int) Math.round(reverseInput.size() * (1.0 + insertions));
+            if (sizeAfterInsertions > reverseInput.size()) {
+                while (reverseInput.size() < sizeAfterInsertions) {
+                    var nodeToInsert = otherNodes[random.nextInt(otherNodes.length)];
+                    var exp = forwardOutput[id2Index.getInt(nodeToInsert)];
+                    if (exp != 0.0) reverseInput.put(nodeToInsert, activityToConstraint(exp));
+                }
             }
         }
-        var numberOfSubstitutions = (int) Math.round(reverseInput.size() * substitutions);
-        if (numberOfSubstitutions > 0) {
-            var keys = new ArrayList<>(reverseInput.keySet());
-            for (var i = 0; i < numberOfSubstitutions; i++) {
-                var nodeToSubstitute = keys.get(random.nextInt(keys.size()));
-                var activityOfNodeToSubstitute = reverseInput.get(nodeToSubstitute);
-                var nodeToInsert = otherNodes[random.nextInt(otherNodes.length)];
-                var exp = forwardOutput[id2Index.getInt(nodeToInsert)];
-                if (exp != 0.0) {
-                    var activityOfNodeToInsert = activityToConstraint(exp);
-                    if (activityOfNodeToInsert != activityOfNodeToSubstitute) reverseInput.put(
-                            nodeToSubstitute, activityOfNodeToInsert);
+        if (substitutions > 0) {
+            var numberOfSubstitutions = (int) Math.round(reverseInput.size() * substitutions);
+            if (numberOfSubstitutions > 0) {
+                var keys = new ArrayList<>(reverseInput.keySet());
+                var i = 0;
+                while (i < numberOfSubstitutions) {
+                    var nodeToSubstitute = keys.get(random.nextInt(keys.size()));
+                    var activityOfNodeToSubstitute = reverseInput.get(nodeToSubstitute);
+                    if (activityOfNodeToSubstitute == ExpressionDirection.OVEREXPRESSION) {
+                        reverseInput.put(nodeToSubstitute, ExpressionDirection.UNDEREXPRESSION);
+                    } else {
+                        reverseInput.put(nodeToSubstitute, ExpressionDirection.OVEREXPRESSION);
+                    }
+                    i++;
                 }
             }
         }

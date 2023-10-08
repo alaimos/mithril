@@ -14,9 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
 
 public class SetBuilder implements Runnable {
 
@@ -117,22 +117,38 @@ public class SetBuilder implements Runnable {
         output            = new ArrayList<>();
         var reverseId2Index = reverseRepositoryMatrix.pathwayMatrix().id2Index();
         var reverseActivities = reverseOutput.nodeActivityScores();
-        for (var target : targetNodes) {
-            log.debug("Computing coverage for {}", target);
-            var targetReverseIndex = reverseId2Index.getInt(target);
-            var targetReverseActivity = reverseActivities[targetReverseIndex];
-            if (targetReverseActivity == 0.0) continue;
-            try {
-                var fastPhensimInput = buildFastPhensimInput(target, targetReverseActivity);
-                var simulationOutput = runFastPhensim(fastPhensimInput);
-                var coveredNodes = collectCoveredNodes(simulationOutput);
-                if (coveredNodes.size() > 0) {
-                    indexToTargetNode.add(fastPhensimInput);
-                    output.add(coveredNodes);
-                }
-            } catch (IOException e) {
+        Runnable task = () -> {
+            var pairs = Arrays.stream(targetNodes).parallel().map(
+                    target -> {
+                        log.debug("Computing coverage for {}", target);
+                        var targetReverseIndex = reverseId2Index.getInt(target);
+                        var targetReverseActivity = reverseActivities[targetReverseIndex];
+                        if (targetReverseActivity == 0.0) return null;
+                        try {
+                            var fastPhensimInput = buildFastPhensimInput(target, targetReverseActivity);
+                            var simulationOutput = runFastPhensim(fastPhensimInput);
+                            var coveredNodes = collectCoveredNodes(simulationOutput);
+                            if (coveredNodes.size() > 0) {
+                                return Pair.of(fastPhensimInput, coveredNodes);
+                            }
+                        } catch (IOException e) {
+                            log.error("Error while running FastPhensim", e);
+                        }
+                        return null;
+                    }).filter(Objects::nonNull).toList();
+            for (var pair : pairs) {
+                indexToTargetNode.add(pair.left());
+                output.add(pair.right());
+            }
+        };
+        if (threads > 0) {
+            try (var pool = new ForkJoinPool(threads)) {
+                pool.submit(task).get();
+            } catch (ExecutionException | InterruptedException e) {
                 log.error("Error while running FastPhensim", e);
             }
+        } else {
+            task.run();
         }
     }
 
@@ -159,6 +175,7 @@ public class SetBuilder implements Runnable {
 
     private FastPHENSIM.SimulationOutput runFastPhensim(ExpressionConstraint[] constraints) throws IOException {
         try (var phensim = new FastPHENSIM()) {
+            matrixFactory.setMaxThreads(1);
             phensim.constraints(constraints)
                    .nonExpressedNodes(nonExpressedNodes)
                    .repository(forwardRepository)
@@ -168,11 +185,12 @@ public class SetBuilder implements Runnable {
                    .batchSize(batchSize)
                    .numberOfRepetitions(1)
                    .numberOfSimulations(1)
-                   .threads(threads)
+                   .threads(1)
                    .epsilon(epsilon)
                    .enablePValues(false)
                    .silent(true)
                    .run();
+            matrixFactory.setMaxThreads(threads);
             return phensim.output();
         }
     }

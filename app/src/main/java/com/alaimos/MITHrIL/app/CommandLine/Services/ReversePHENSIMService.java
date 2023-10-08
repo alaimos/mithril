@@ -131,7 +131,6 @@ public class ReversePHENSIMService implements ServiceInterface {
                 var subsetMap = subsetsAndMap.left();
                 var subsets = subsetsAndMap.right();
                 var id2Index = metapathwayMatrix.pathwayMatrix().id2Index();
-                System.out.println(subsets.size() + " subsets");
                 var universe = new IntOpenHashSet(Arrays.stream(input)
                                                         .mapToInt(constraint -> {
                                                             var nodeIdx = id2Index.getInt(constraint.nodeId());

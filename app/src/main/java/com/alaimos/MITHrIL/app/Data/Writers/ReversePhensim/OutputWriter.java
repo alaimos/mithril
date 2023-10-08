@@ -34,15 +34,17 @@ public class OutputWriter extends AbstractDataWriter<List<CoverRanking.RankedSet
             ps.println(concatArray(new String[]{
                     "# Set",
                     "Coverage",
-                    "Percentage",
-                    "Covered Nodes"
+                    "Percentage"
+//                    ,
+//                    "Covered Nodes"
             }, "\t"));
             for (var rankedSet : data) {
                 writeArray(ps, new String[]{
                         expressionConstraintsToString(rankedSet.covering()),
                         Integer.toString(rankedSet.coverage()),
-                        Double.toString((double) rankedSet.coverage() / universeSize),
-                        expressionConstraintsToString(rankedSet.coveredNodes())
+                        Double.toString((double) rankedSet.coverage() / universeSize)
+//                        ,
+//                        expressionConstraintsToString(rankedSet.coveredNodes())
                 });
                 ps.println();
             }

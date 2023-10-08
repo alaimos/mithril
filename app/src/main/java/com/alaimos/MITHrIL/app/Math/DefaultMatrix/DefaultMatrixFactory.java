@@ -29,6 +29,9 @@ public class DefaultMatrixFactory implements MatrixFactoryInterface<DefaultMatri
      */
     @Override
     public void setMaxThreads(int maxThreads) {
+        if (maxThreads <= 0) {
+            maxThreads = Runtime.getRuntime().availableProcessors();
+        }
         OjAlgoUtils.limitThreadsTo(maxThreads);
     }
 

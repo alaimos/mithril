@@ -30,6 +30,9 @@ public class GPUMatrixFactory implements MatrixFactoryInterface<GPUMatrix> {
      */
     @Override
     public void setMaxThreads(int maxThreads) {
+        if (maxThreads <= 0) {
+            maxThreads = Runtime.getRuntime().availableProcessors();
+        }
         org.bytedeco.pytorch.global.torch.set_num_threads(maxThreads);
     }
 

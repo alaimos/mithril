@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
 
 public class CoverRanking implements Runnable {
 
@@ -94,13 +96,13 @@ public class CoverRanking implements Runnable {
     //endregion
 
     /**
-     * Run the MITHrIL algorithm
+     * Run the ranking algorithm
      */
     @Override
     public void run() {
         output = new ArrayList<>();
         var reverseConstraintsSet = convertReverseConstraintsToSet();
-        for (var coveringSet : coveringSets) {
+        Runnable task = () -> coveringSets.parallelStream().forEachOrdered(coveringSet -> {
             log.debug(
                     "Computing coverage for {}",
                     Arrays.stream(coveringSet).map(ExpressionConstraint::nodeId).toArray()
@@ -114,6 +116,15 @@ public class CoverRanking implements Runnable {
             } catch (IOException e) {
                 log.error("Error while running FastPhensim", e);
             }
+        });
+        if (threads > 0) {
+            try (var pool = new ForkJoinPool(threads)) {
+                pool.submit(task).get();
+            } catch (ExecutionException | InterruptedException e) {
+                log.error("Error while running FastPhensim", e);
+            }
+        } else {
+            task.run();
         }
         Collections.sort(output);
     }
@@ -130,6 +141,7 @@ public class CoverRanking implements Runnable {
     //region Utility methods
     private FastPHENSIM.SimulationOutput runFastPhensim(ExpressionConstraint[] constraints) throws IOException {
         try (var phensim = new FastPHENSIM()) {
+            matrixFactory.setMaxThreads(1);
             phensim.constraints(constraints)
                    .nonExpressedNodes(nonExpressedNodes)
                    .repository(repository)
@@ -139,11 +151,12 @@ public class CoverRanking implements Runnable {
                    .batchSize(batchSize)
                    .numberOfRepetitions(1)
                    .numberOfSimulations(1)
-                   .threads(threads)
+                   .threads(1)
                    .epsilon(epsilon)
                    .enablePValues(false)
                    .silent(true)
                    .run();
+            matrixFactory.setMaxThreads(threads);
             return phensim.output();
         }
     }
