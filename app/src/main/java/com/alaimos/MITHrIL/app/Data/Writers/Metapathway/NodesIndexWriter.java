@@ -24,7 +24,7 @@ public class NodesIndexWriter extends AbstractDataWriter<Pathway> {
             for (var n : data.graph().nodes().values()) {
                 writeDelimited(
                         ps, "\t",
-                        n.id(), n.name(), n.type(), concatCollection(n.aliases(), ",")
+                        n.id(), n.name(), n.type().name(), concatCollection(n.aliases(), ",")
                 );
                 ps.println();
             }

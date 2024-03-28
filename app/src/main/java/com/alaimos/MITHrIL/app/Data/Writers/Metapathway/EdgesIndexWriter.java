@@ -27,7 +27,7 @@ public class EdgesIndexWriter extends AbstractDataWriter<Pathway> {
                     for (var ed : e.details()) {
                         writeDelimited(
                                 ps, "\t",
-                                e.source().id(), e.target().id(), ed.type(), ed.subtype(), e.weight()
+                                e.source().id(), e.target().id(), ed.type().name(), ed.subtype().name(), e.weight()
                         );
                         ps.println();
                     }
