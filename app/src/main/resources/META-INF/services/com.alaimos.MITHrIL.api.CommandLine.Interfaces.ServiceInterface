@@ -8,3 +8,4 @@ com.alaimos.MITHrIL.app.CommandLine.Services.PHENSIMService
 com.alaimos.MITHrIL.app.CommandLine.Services.PHENSIMqService
 com.alaimos.MITHrIL.app.CommandLine.Services.ReversePHENSIMService
 com.alaimos.MITHrIL.app.CommandLine.Services.TestReversePHENSIMService
+com.alaimos.MITHrIL.app.CommandLine.Services.ExportMetapathwayService
