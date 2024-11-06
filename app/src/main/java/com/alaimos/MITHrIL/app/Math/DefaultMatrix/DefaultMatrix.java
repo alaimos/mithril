@@ -2,7 +2,7 @@ package com.alaimos.MITHrIL.app.Math.DefaultMatrix;
 
 import com.alaimos.MITHrIL.api.Math.MatrixInterface;
 import org.jetbrains.annotations.NotNull;
-import org.ojalgo.matrix.Primitive64Matrix;
+import org.ojalgo.matrix.MatrixR064;
 import org.ojalgo.matrix.decomposition.QR;
 import org.ojalgo.matrix.decomposition.SingularValue;
 
@@ -19,9 +19,9 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
     @Serial
     private static final long serialVersionUID = -8761988017888622755L;
 
-    private transient Primitive64Matrix internalMatrix;
+    private transient MatrixR064 internalMatrix;
 
-    private DefaultMatrix(Primitive64Matrix matrix) {
+    private DefaultMatrix(MatrixR064 matrix) {
         internalMatrix = matrix;
     }
 
@@ -31,8 +31,8 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
 
     public DefaultMatrix(double[][] matrix, @NotNull MatrixInterface.Direction direction) {
         internalMatrix = switch (direction) {
-            case ROW -> Primitive64Matrix.FACTORY.rows(matrix);
-            case COLUMN -> Primitive64Matrix.FACTORY.columns(matrix);
+            case ROW -> MatrixR064.FACTORY.rows(matrix);
+            case COLUMN -> MatrixR064.FACTORY.columns(matrix);
         };
     }
 
@@ -41,14 +41,14 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
         for (int i = 0; i < rows; i++) {
             System.arraycopy(matrix, i * columns, tmpMatrix[i], 0, columns);
         }
-        internalMatrix = Primitive64Matrix.FACTORY.rows(tmpMatrix);
+        internalMatrix = MatrixR064.FACTORY.rows(tmpMatrix);
     }
 
     public DefaultMatrix(@NotNull MatrixInterface<?> matrix) {
         if (matrix instanceof DefaultMatrix dm) {
             internalMatrix = dm.internalMatrix;
         } else {
-            internalMatrix = Primitive64Matrix.FACTORY.rows(matrix.raw2D());
+            internalMatrix = MatrixR064.FACTORY.rows(matrix.raw2D());
         }
     }
 
@@ -70,15 +70,15 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
         internalMatrix = internalMatrix.transpose();
     }
 
-    private Primitive64Matrix invertInternal() {
-        Primitive64Matrix inverted;
+    private MatrixR064 invertInternal() {
+        MatrixR064 inverted;
         try {
             var qr = QR.PRIMITIVE.make(internalMatrix);
-            inverted = Primitive64Matrix.FACTORY.makeWrapper(qr.invert(internalMatrix));
+            inverted = MatrixR064.FACTORY.makeWrapper(qr.invert(internalMatrix));
         } catch (Exception ignored) {
             var svd = SingularValue.PRIMITIVE.make(internalMatrix);
             try {
-                inverted = Primitive64Matrix.FACTORY.makeWrapper(svd.invert(internalMatrix));
+                inverted = MatrixR064.FACTORY.makeWrapper(svd.invert(internalMatrix));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -127,7 +127,7 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
      */
     @Override
     public double[] preMultiply(double[] vector) {
-        return Primitive64Matrix.FACTORY.row(vector).multiply(internalMatrix).toRawCopy1D();
+        return MatrixR064.FACTORY.row(vector).multiply(internalMatrix).toRawCopy1D();
     }
 
     /**
@@ -153,7 +153,7 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
      */
     @Override
     public double[] postMultiply(double[] vector) {
-        return internalMatrix.multiply(Primitive64Matrix.FACTORY.column(vector)).toRawCopy1D();
+        return internalMatrix.multiply(MatrixR064.FACTORY.column(vector)).toRawCopy1D();
     }
 
     /**
@@ -183,11 +183,9 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
     public DefaultMatrix subtract(double[] vector, Direction direction) {
         var size = direction == Direction.ROW ? rows() : columns();
         double[][] tmp = new double[size][];
-        for (int i = 0; i < size; i++) {
-            tmp[i] = vector;
-        }
-        var tmpMatrix = direction == Direction.ROW ? Primitive64Matrix.FACTORY.rows(
-                tmp) : Primitive64Matrix.FACTORY.columns(tmp);
+        Arrays.fill(tmp, vector);
+        var tmpMatrix = direction == Direction.ROW ? MatrixR064.FACTORY.rows(
+                tmp) : MatrixR064.FACTORY.columns(tmp);
         return new DefaultMatrix(internalMatrix.subtract(tmpMatrix));
     }
 
@@ -338,7 +336,7 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
     private void readObject(@NotNull ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         double[][] raw = (double[][]) ois.readObject();
-        internalMatrix = Primitive64Matrix.FACTORY.rows(raw);
+        internalMatrix = MatrixR064.FACTORY.rows(raw);
     }
 
 }
