@@ -49,7 +49,7 @@
         <deploy.disabled>true</deploy.disabled>
         <source.disabled>true</source.disabled>
         <pf4j.version>3.12.1</pf4j.version>
-        <slf4j.version>1.7.30</slf4j.version>
+        <slf4j.version>2.0.16</slf4j.version>
         <log4j.version>2.24.1</log4j.version>
         <org.jetbrains.annotations.version>26.0.1</org.jetbrains.annotations.version>
         <commons.lang3.version>3.17.0</commons.lang3.version>

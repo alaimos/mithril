@@ -6,6 +6,7 @@ import com.alaimos.MITHrIL.api.Commons.Utils;
 import com.alaimos.MITHrIL.app.CommandLine.ServiceRunner;
 import com.alaimos.MITHrIL.app.Plugins.PluginManager;
 import org.apache.commons.lang3.StringUtils;
+import org.pf4j.DefaultPluginManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

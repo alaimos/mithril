@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.ojalgo.matrix.MatrixR064;
 import org.ojalgo.matrix.decomposition.QR;
 import org.ojalgo.matrix.decomposition.SingularValue;
+import org.ojalgo.matrix.store.RawStore;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -21,6 +22,14 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
 
     private transient MatrixR064 internalMatrix;
 
+    private static MatrixR064 rowMatrix(double[][] data) {
+        return MatrixR064.FACTORY.makeWrapper(RawStore.wrap(data));
+    }
+
+    private static MatrixR064 columnMatrix(double[][] data) {
+        return MatrixR064.FACTORY.makeWrapper(RawStore.wrap(data).transpose());
+    }
+
     private DefaultMatrix(MatrixR064 matrix) {
         internalMatrix = matrix;
     }
@@ -31,8 +40,8 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
 
     public DefaultMatrix(double[][] matrix, @NotNull MatrixInterface.Direction direction) {
         internalMatrix = switch (direction) {
-            case ROW -> MatrixR064.FACTORY.rows(matrix);
-            case COLUMN -> MatrixR064.FACTORY.columns(matrix);
+            case ROW -> rowMatrix(matrix);
+            case COLUMN -> columnMatrix(matrix);
         };
     }
 
@@ -41,14 +50,14 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
         for (int i = 0; i < rows; i++) {
             System.arraycopy(matrix, i * columns, tmpMatrix[i], 0, columns);
         }
-        internalMatrix = MatrixR064.FACTORY.rows(tmpMatrix);
+        internalMatrix = rowMatrix(tmpMatrix);
     }
 
     public DefaultMatrix(@NotNull MatrixInterface<?> matrix) {
         if (matrix instanceof DefaultMatrix dm) {
             internalMatrix = dm.internalMatrix;
         } else {
-            internalMatrix = MatrixR064.FACTORY.rows(matrix.raw2D());
+            internalMatrix = rowMatrix(matrix.raw2D());
         }
     }
 
@@ -73,10 +82,10 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
     private MatrixR064 invertInternal() {
         MatrixR064 inverted;
         try {
-            var qr = QR.PRIMITIVE.make(internalMatrix);
+            var qr = QR.R064.make(internalMatrix);
             inverted = MatrixR064.FACTORY.makeWrapper(qr.invert(internalMatrix));
         } catch (Exception ignored) {
-            var svd = SingularValue.PRIMITIVE.make(internalMatrix);
+            var svd = SingularValue.R064.make(internalMatrix);
             try {
                 inverted = MatrixR064.FACTORY.makeWrapper(svd.invert(internalMatrix));
             } catch (Exception e) {
@@ -184,8 +193,10 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
         var size = direction == Direction.ROW ? rows() : columns();
         double[][] tmp = new double[size][];
         Arrays.fill(tmp, vector);
-        var tmpMatrix = direction == Direction.ROW ? MatrixR064.FACTORY.rows(
-                tmp) : MatrixR064.FACTORY.columns(tmp);
+        var tmpMatrix = switch (direction) {
+            case ROW -> rowMatrix(tmp);
+            case COLUMN -> columnMatrix(tmp);
+        };
         return new DefaultMatrix(internalMatrix.subtract(tmpMatrix));
     }
 
@@ -336,7 +347,7 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
     private void readObject(@NotNull ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         double[][] raw = (double[][]) ois.readObject();
-        internalMatrix = MatrixR064.FACTORY.rows(raw);
+        internalMatrix = rowMatrix(raw);
     }
 
 }

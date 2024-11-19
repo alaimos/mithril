@@ -5,10 +5,14 @@ import org.jetbrains.annotations.NotNull;
 import org.pf4j.DefaultPluginFactory;
 import org.pf4j.Plugin;
 import org.pf4j.PluginWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 
 public class PluginFactory extends DefaultPluginFactory {
+
+    private static final Logger log = LoggerFactory.getLogger(PluginFactory.class);
 
     @Override
     protected Plugin createInstance(Class<?> pluginClass, @NotNull PluginWrapper pluginWrapper) {
