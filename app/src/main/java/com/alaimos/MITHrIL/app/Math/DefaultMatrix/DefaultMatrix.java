@@ -22,12 +22,12 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
 
     private transient MatrixR064 internalMatrix;
 
-    private static MatrixR064 rowMatrix(double[][] data) {
-        return MatrixR064.FACTORY.makeWrapper(RawStore.wrap(data));
+    private static MatrixR064 byRowMatrix(double[][] matrix) {
+        return MatrixR064.FACTORY.makeWrapper(RawStore.wrap(matrix));
     }
 
-    private static MatrixR064 columnMatrix(double[][] data) {
-        return MatrixR064.FACTORY.makeWrapper(RawStore.wrap(data).transpose());
+    private static MatrixR064 byColumnMatrix(double[][] matrix) {
+        return MatrixR064.FACTORY.makeWrapper(RawStore.wrap(matrix).transpose());
     }
 
     private DefaultMatrix(MatrixR064 matrix) {
@@ -40,8 +40,8 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
 
     public DefaultMatrix(double[][] matrix, @NotNull MatrixInterface.Direction direction) {
         internalMatrix = switch (direction) {
-            case ROW -> rowMatrix(matrix);
-            case COLUMN -> columnMatrix(matrix);
+            case ROW -> byRowMatrix(matrix);
+            case COLUMN -> byColumnMatrix(matrix);
         };
     }
 
@@ -50,14 +50,14 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
         for (int i = 0; i < rows; i++) {
             System.arraycopy(matrix, i * columns, tmpMatrix[i], 0, columns);
         }
-        internalMatrix = rowMatrix(tmpMatrix);
+        internalMatrix = byRowMatrix(tmpMatrix);
     }
 
     public DefaultMatrix(@NotNull MatrixInterface<?> matrix) {
         if (matrix instanceof DefaultMatrix dm) {
             internalMatrix = dm.internalMatrix;
         } else {
-            internalMatrix = rowMatrix(matrix.raw2D());
+            internalMatrix = byRowMatrix(matrix.raw2D());
         }
     }
 
@@ -194,8 +194,8 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
         double[][] tmp = new double[size][];
         Arrays.fill(tmp, vector);
         var tmpMatrix = switch (direction) {
-            case ROW -> rowMatrix(tmp);
-            case COLUMN -> columnMatrix(tmp);
+            case ROW -> byRowMatrix(tmp);
+            case COLUMN -> byColumnMatrix(tmp);
         };
         return new DefaultMatrix(internalMatrix.subtract(tmpMatrix));
     }
@@ -347,7 +347,7 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
     private void readObject(@NotNull ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         double[][] raw = (double[][]) ois.readObject();
-        internalMatrix = rowMatrix(raw);
+        internalMatrix = byRowMatrix(raw);
     }
 
 }

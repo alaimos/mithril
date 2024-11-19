@@ -83,7 +83,6 @@
 
     <modules>
         <module>FastCPUMath</module>
-        <module>FastGPUMath</module>
     </modules>
 
     <dependencies>
