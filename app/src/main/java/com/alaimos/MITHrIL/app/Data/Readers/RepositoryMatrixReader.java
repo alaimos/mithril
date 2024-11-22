@@ -16,8 +16,14 @@ public class RepositoryMatrixReader implements DataReaderInterface<RepositoryMat
     private final BinaryReader<RepositoryMatrix> reader = new BinaryReader<>(RepositoryMatrix.class);
     private final MatrixFactoryInterface<?> matrixFactory;
 
-    public RepositoryMatrixReader(@NotNull Repository r, @NotNull MatrixFactoryInterface<?> matrixFactory) {
-        reader.file(IOUtils.sanitizeFilename("repository-matrix-" + r.hashCode() + ".bin"));
+    public RepositoryMatrixReader(
+            @NotNull Repository r,
+            @NotNull MatrixFactoryInterface<?> matrixFactory,
+            boolean useCustomizedMatrix,
+            int customizationHash
+    ) {
+        var filename = "repository-matrix-" + r.hashCode() + (useCustomizedMatrix ? "-" + customizationHash : "") + ".bin";
+        reader.file(IOUtils.sanitizeFilename(filename));
         this.matrixFactory = matrixFactory;
     }
 

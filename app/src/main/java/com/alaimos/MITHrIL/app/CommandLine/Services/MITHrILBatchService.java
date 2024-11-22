@@ -20,6 +20,8 @@ import com.alaimos.MITHrIL.app.Data.Records.MITHrILOutput;
 import com.alaimos.MITHrIL.app.Data.Records.RepositoryMatrix;
 import com.alaimos.MITHrIL.app.Data.Writers.MITHrIL.MITHrILPathwayOutputWriter;
 import com.alaimos.MITHrIL.app.Data.Writers.MITHrIL.MITHrILPerturbationDetailedOutputWriter;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.jetbrains.annotations.NotNull;
@@ -28,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
@@ -74,12 +77,21 @@ public class MITHrILBatchService implements ServiceInterface {
             var medianAlgorithmFactory = extManager.getExtensionSupplier(
                     StreamMedianComputationInterface.class, options.medianAlgorithm
             );
-            var metapathwayRepository = MetapathwayBuilderFromOptions.build(options, random);
-            var inversionMatrixFactory = matrixFactory(options.inversionFactory);
-            var metapathwayMatrix = MatrixBuilderFromMetapathway.build(metapathwayRepository, inversionMatrixFactory);
-            var multiplicationMatrixFactory = matrixFactory(options.multiplicationFactory);
             log.info("Reading input file");
             var input = readInputFile();
+            var metapathwayRepository = MetapathwayBuilderFromOptions.build(options, random);
+            var inversionMatrixFactory = matrixFactory(options.inversionFactory);
+            RepositoryMatrix metapathwayMatrix;
+            if (options.customizePathwayMatrix) {
+                metapathwayMatrix = MatrixBuilderFromMetapathway.build(
+                        metapathwayRepository,
+                        inversionMatrixFactory,
+                        extractCustomizationNodesFromInput(input, metapathwayRepository)
+                );
+            } else {
+                metapathwayMatrix = MatrixBuilderFromMetapathway.build(metapathwayRepository, inversionMatrixFactory);
+            }
+            var multiplicationMatrixFactory = matrixFactory(options.multiplicationFactory);
             log.info("Starting MITHrIL on {} samples (Thread pool size: {})", input.size(), options.batchThreads);
             try (var pool = new ForkJoinPool(options.batchThreads)) {
                 pool.submit(() -> {
@@ -108,7 +120,7 @@ public class MITHrILBatchService implements ServiceInterface {
                             saveOutput(experimentName, mithril.output(), metapathwayRepository, metapathwayMatrix);
                             threadLogger.info("Completed MITHrIL on {}", experimentName);
                         } catch (IOException e) {
-                            threadLogger.error("An error occurred on " + experimentName, e);
+                            threadLogger.error("An error occurred on {}", experimentName, e);
                         }
                     });
                 }).get();
@@ -190,5 +202,29 @@ public class MITHrILBatchService implements ServiceInterface {
             factory.setMaxThreads(options.threads);
         }
         return factory;
+    }
+
+    private @NotNull List<String> extractCustomizationNodesFromInput(
+            @NotNull Map<String, ExpressionInput> input,
+            @NotNull Repository repository
+    ) {
+        var tmp = new ObjectArraySet<String>();
+        var metapathway = repository.get().graph();
+        for (var singleInputSet : input.values()) {
+            for (var entry : singleInputSet.expressions().object2DoubleEntrySet()) {
+                var value = entry.getDoubleValue();
+                if (value == 0.0) continue;
+                var key = entry.getKey();
+                if (!metapathway.hasNode(key)) continue;
+                tmp.add(entry.getKey());
+            }
+        }
+        var output = new ObjectArrayList<>(tmp);
+        output.sort((o1, o2) -> {
+            var n1Degree = metapathway.outDegree(metapathway.node(o1));
+            var n2Degree = metapathway.outDegree(metapathway.node(o2));
+            return Integer.compare(n2Degree, n1Degree);
+        });
+        return output;
     }
 }

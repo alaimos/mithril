@@ -35,6 +35,27 @@ public interface MatrixInterface<E extends MatrixInterface<?>> extends Closeable
     void invertInPlace();
 
     /**
+     * Get the rank of the matrix
+     *
+     * @return the rank
+     */
+    int rank();
+
+    /**
+     * Get the determinant of the matrix
+     *
+     * @return the determinant
+     */
+    double determinant();
+
+    /**
+     * Check if the matrix is invertible
+     *
+     * @return true if the matrix is invertible
+     */
+    boolean invertible();
+
+    /**
      * Pre-multiply this matrix by another matrix. That is, the operation is performed as matrix * this.
      *
      * @param matrix the other matrix

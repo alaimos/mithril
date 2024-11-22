@@ -4,6 +4,7 @@ import com.alaimos.MITHrIL.api.CommandLine.Extensions.ExtensionManager;
 import com.alaimos.MITHrIL.api.CommandLine.Interfaces.OptionsInterface;
 import com.alaimos.MITHrIL.api.CommandLine.Interfaces.ServiceInterface;
 import com.alaimos.MITHrIL.api.Data.Pathways.Graph.Graph;
+import com.alaimos.MITHrIL.api.Data.Pathways.Graph.Repository;
 import com.alaimos.MITHrIL.api.Data.Reader.DynamicTextFileReader;
 import com.alaimos.MITHrIL.api.Math.MatrixFactoryInterface;
 import com.alaimos.MITHrIL.api.Math.PValue.Adjusters.AdjusterInterface;
@@ -17,10 +18,12 @@ import com.alaimos.MITHrIL.app.Data.Readers.PHENSIM.PathwayExtension.EdgeSubtype
 import com.alaimos.MITHrIL.app.Data.Readers.PHENSIM.PathwayExtension.EdgeTypeReader;
 import com.alaimos.MITHrIL.app.Data.Readers.PHENSIM.PathwayExtension.NodeTypeReader;
 import com.alaimos.MITHrIL.app.Data.Readers.PHENSIM.PathwayExtension.PathwayExtensionReader;
+import com.alaimos.MITHrIL.app.Data.Records.RepositoryMatrix;
 import com.alaimos.MITHrIL.app.Data.Writers.PHENSIM.ActivityScoreMatrixWriter;
 import com.alaimos.MITHrIL.app.Data.Writers.PHENSIM.ExtendedSIFWriter;
 import com.alaimos.MITHrIL.app.Data.Writers.PHENSIM.SBMLWriter;
 import com.alaimos.MITHrIL.app.Data.Writers.PHENSIM.SimulationOutputWriter;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Random;
 
 public class PHENSIMService implements ServiceInterface {
@@ -64,6 +68,8 @@ public class PHENSIMService implements ServiceInterface {
             checkInputParameters();
             var random = random();
             var extManager = ExtensionManager.INSTANCE;
+            log.info("Reading input file");
+            var input = readInputFile();
             var metapathwayRepository = MetapathwayBuilderFromOptions.build(options, random);
             var extensionGraph = prepareExtensionGraph();
             if (extensionGraph != null) {
@@ -74,10 +80,17 @@ public class PHENSIMService implements ServiceInterface {
                 metapathwayRepository.removeNode(node);
             }
             var inversionMatrixFactory = matrixFactory(options.inversionFactory);
-            var metapathwayMatrix = MatrixBuilderFromMetapathway.build(metapathwayRepository, inversionMatrixFactory);
+            RepositoryMatrix metapathwayMatrix;
+            if (options.customizePathwayMatrix) {
+                metapathwayMatrix = MatrixBuilderFromMetapathway.build(
+                        metapathwayRepository,
+                        inversionMatrixFactory,
+                        extractCustomizationNodesFromInput(input, metapathwayRepository)
+                );
+            } else {
+                metapathwayMatrix = MatrixBuilderFromMetapathway.build(metapathwayRepository, inversionMatrixFactory);
+            }
             var multiplicationMatrixFactory = matrixFactory(options.multiplicationFactory);
-            log.info("Reading input file");
-            var input = readInputFile();
             log.info("Running PHENSIM");
             try (var phensim = new PHENSIM()) {
                 phensim.constraints(input)
@@ -200,5 +213,24 @@ public class PHENSIMService implements ServiceInterface {
             factory.setMaxThreads(options.threads);
         }
         return factory;
+    }
+
+    private @NotNull List<String> extractCustomizationNodesFromInput(
+            @NotNull ExpressionConstraint @NotNull [] input,
+            @NotNull Repository repository
+    ) {
+        var output = new ObjectArrayList<String>();
+        var metapathway = repository.get().graph();
+        for (var constraint : input) {
+            var nodeId = constraint.nodeId();
+            if (!metapathway.hasNode(nodeId)) continue;
+            output.add(nodeId);
+        }
+        output.sort((o1, o2) -> {
+            var n1Degree = metapathway.outDegree(metapathway.node(o1));
+            var n2Degree = metapathway.outDegree(metapathway.node(o2));
+            return Integer.compare(n2Degree, n1Degree);
+        });
+        return output;
     }
 }

@@ -114,6 +114,35 @@ public class DefaultMatrix implements MatrixInterface<DefaultMatrix> {
     }
 
     /**
+     * Get the rank of the matrix
+     *
+     * @return the rank
+     */
+    @Override
+    public int rank() {
+        return internalMatrix.getRank();
+    }
+
+    /**
+     * Get the determinant of the matrix
+     *
+     * @return the determinant
+     */
+    @Override
+    public double determinant() {
+        return internalMatrix.getDeterminant();
+    }
+
+    /**
+     * Check if the matrix is invertible
+     * @return true if the matrix is invertible
+     */
+    @Override
+    public boolean invertible() {
+        return rank() == Math.min(rows(), columns());
+    }
+
+    /**
      * Pre-multiply this matrix by another matrix. That is, the operation is performed as matrix * this.
      *
      * @param matrix the other matrix

@@ -222,7 +222,7 @@ public class Graph implements Serializable, Cloneable, Iterable<Node> {
      * @return the out-degree of the node
      */
     public int outDegree(@NotNull Node n) {
-        if (outgoingEdges.get(n.id()) == null) return -0;
+        if (outgoingEdges.get(n.id()) == null) return 0;
         return outgoingEdges.get(n.id()).size();
     }
 

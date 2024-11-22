@@ -14,8 +14,9 @@
     <name>Fast CPU Math Provider</name>
 
     <properties>
-        <maven.compiler.source>19</maven.compiler.source>
-        <maven.compiler.target>19</maven.compiler.target>
+        <maven.compiler.release>19</maven.compiler.release>
+<!--        <maven.compiler.source>19</maven.compiler.source>-->
+<!--        <maven.compiler.target>19</maven.compiler.target>-->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <plugin.id>fast-cpu-math</plugin.id>
         <plugin.class>com.alaimos.MITHrIL.FastCPUMath.FastCPUMathPlugin</plugin.class>

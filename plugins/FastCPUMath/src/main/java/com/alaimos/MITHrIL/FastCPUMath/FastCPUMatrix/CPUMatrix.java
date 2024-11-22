@@ -163,6 +163,30 @@ public class CPUMatrix implements MatrixInterface<CPUMatrix> {
         swapSize();
     }
 
+    @Override
+    public int rank() {
+        try (var rank = torch.linalg_matrix_rank(tensor)) {
+            return rank.item_int();
+        }
+    }
+
+    @Override
+    public double determinant() {
+        try (var determinant = tensor.det()) {
+            return determinant.item_double();
+        }
+    }
+
+    /**
+     * Check if the matrix is invertible
+     *
+     * @return true if the matrix is invertible
+     */
+    @Override
+    public boolean invertible() {
+        return Math.abs(determinant()) > 1e-12;
+    }
+
     /**
      * Pre-multiply this matrix by another matrix. That is, the operation is performed as matrix * this.
      *

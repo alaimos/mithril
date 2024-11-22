@@ -4,6 +4,7 @@ import com.alaimos.MITHrIL.api.CommandLine.Extensions.ExtensionManager;
 import com.alaimos.MITHrIL.api.CommandLine.Interfaces.OptionsInterface;
 import com.alaimos.MITHrIL.api.CommandLine.Interfaces.ServiceInterface;
 import com.alaimos.MITHrIL.api.Data.Pathways.Enrichment.EnrichmentProbabilityComputationInterface;
+import com.alaimos.MITHrIL.api.Data.Pathways.Graph.Repository;
 import com.alaimos.MITHrIL.api.Data.Writer.BinaryWriter;
 import com.alaimos.MITHrIL.api.Math.MatrixFactoryInterface;
 import com.alaimos.MITHrIL.api.Math.PValue.Adjusters.AdjusterInterface;
@@ -19,6 +20,7 @@ import com.alaimos.MITHrIL.app.Data.Records.MITHrILOutput;
 import com.alaimos.MITHrIL.app.Data.Records.RepositoryMatrix;
 import com.alaimos.MITHrIL.app.Data.Writers.MITHrIL.MITHrILPathwayOutputWriter;
 import com.alaimos.MITHrIL.app.Data.Writers.MITHrIL.MITHrILPerturbationDetailedOutputWriter;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.jetbrains.annotations.NotNull;
@@ -27,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Random;
 
 public class MITHrILService implements ServiceInterface {
@@ -61,12 +64,21 @@ public class MITHrILService implements ServiceInterface {
             checkInputParameters();
             var random = random();
             var extManager = ExtensionManager.INSTANCE;
-            var metapathwayRepository = MetapathwayBuilderFromOptions.build(options, random);
-            var inversionMatrixFactory = matrixFactory(options.inversionFactory);
-            var metapathwayMatrix = MatrixBuilderFromMetapathway.build(metapathwayRepository, inversionMatrixFactory);
-            var multiplicationMatrixFactory = matrixFactory(options.multiplicationFactory);
             log.info("Reading input file");
             var input = readInputFile();
+            var metapathwayRepository = MetapathwayBuilderFromOptions.build(options, random);
+            var inversionMatrixFactory = matrixFactory(options.inversionFactory);
+            RepositoryMatrix metapathwayMatrix;
+            if (options.customizePathwayMatrix) {
+                metapathwayMatrix = MatrixBuilderFromMetapathway.build(
+                        metapathwayRepository,
+                        inversionMatrixFactory,
+                        extractCustomizationNodesFromInput(input, metapathwayRepository)
+                );
+            } else {
+                metapathwayMatrix = MatrixBuilderFromMetapathway.build(metapathwayRepository, inversionMatrixFactory);
+            }
+            var multiplicationMatrixFactory = matrixFactory(options.multiplicationFactory);
             log.info("Running MITHrIL");
             try (var mithril = new MITHrIL()) {
                 mithril.input(input)
@@ -173,5 +185,26 @@ public class MITHrILService implements ServiceInterface {
         output.setNodeIndex2Id(repositoryMatrix.pathwayMatrix().index2Id());
         new BinaryWriter<MITHrILOutput>().write(options.binaryOutput, output);
         log.info("Binary output saved");
+    }
+
+    private @NotNull List<String> extractCustomizationNodesFromInput(
+            @NotNull ExpressionInput input,
+            @NotNull Repository repository
+    ) {
+        var output = new ObjectArrayList<String>();
+        var metapathway = repository.get().graph();
+        for (var entry : input.expressions().object2DoubleEntrySet()) {
+            var value = entry.getDoubleValue();
+            if (value == 0.0) continue;
+            var key = entry.getKey();
+            if (!metapathway.hasNode(key)) continue;
+            output.add(entry.getKey());
+        }
+        output.sort((o1, o2) -> {
+            var n1Degree = metapathway.outDegree(metapathway.node(o1));
+            var n2Degree = metapathway.outDegree(metapathway.node(o2));
+            return Integer.compare(n2Degree, n1Degree);
+        });
+        return output;
     }
 }

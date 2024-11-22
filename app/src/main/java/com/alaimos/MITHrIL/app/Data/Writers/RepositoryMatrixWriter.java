@@ -14,8 +14,13 @@ public class RepositoryMatrixWriter implements DataWriterInterface<RepositoryMat
 
     private final BinaryWriter<RepositoryMatrix> writer = new BinaryWriter<>();
 
-    public RepositoryMatrixWriter(@NotNull Repository r) {
-        writer.file(IOUtils.sanitizeFilename("repository-matrix-" + r.hashCode() + ".bin"));
+    public RepositoryMatrixWriter(
+            @NotNull Repository r,
+            boolean useCustomizedMatrix,
+            int customizationHash
+    ) {
+        var filename = "repository-matrix-" + r.hashCode() + (useCustomizedMatrix ? "-" + customizationHash : "") + ".bin";
+        writer.file(IOUtils.sanitizeFilename(filename));
     }
 
     /**

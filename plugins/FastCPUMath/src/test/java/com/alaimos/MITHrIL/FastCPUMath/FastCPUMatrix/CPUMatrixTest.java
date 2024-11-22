@@ -195,4 +195,24 @@ class CPUMatrixTest {
         }
         new File(Utils.getAppDir(), file).delete();
     }
+
+    @Test
+    void determinant() throws IOException {
+        try (var mtx = factory.of(new double[]{1, 3, 2, 4}, 2, 2)) {
+            assertEquals(-2, mtx.determinant(), DELTA);
+        }
+        try (var mtx = factory.of(new double[]{1, 1, 2, 1, 2, 0, 1, 3, 1}, 3, 3)) {
+            assertEquals(3, mtx.determinant(), DELTA);
+        }
+    }
+
+    @Test
+    void rank() throws IOException {
+        try (var mtx = factory.of(new double[]{1, 3, 2, 4}, 2, 2)) {
+            assertEquals(2, mtx.rank(), DELTA);
+        }
+        try (var mtx = factory.of(new double[]{1, 1, 2, 1, 2, 0, 1, 3, 1}, 3, 3)) {
+            assertEquals(3, mtx.rank(), DELTA);
+        }
+    }
 }

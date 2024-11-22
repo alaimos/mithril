@@ -32,4 +32,5 @@ public class MITHrILCommonOptions extends MetapathwayOptions {
     public String enrichmentProbability = "default";
     @Option(name = "-median-algorithm", usage = "the algorithm used to compute the median of a data stream (see the list of \"stream-median\" extensions for possible values).")
     public String medianAlgorithm = "exact";
+
 }

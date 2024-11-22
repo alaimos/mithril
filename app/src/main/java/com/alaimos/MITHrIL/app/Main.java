@@ -22,7 +22,7 @@ public class Main {
             pluginManager.startPlugins();
             Runtime.getRuntime().addShutdownHook(new Thread(pluginManager::stopPlugins));
             ExtensionManager.setDefaultPluginManager(pluginManager);
-            new ServiceRunner("MITHrIL2.jar", args).run();
+            new ServiceRunner("MITHrIL3.jar", args).run();
         } catch (Throwable e) {
             log.error(e.getMessage(), e);
             if (log.isDebugEnabled()) {

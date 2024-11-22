@@ -5,31 +5,26 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="79ae8278-3477-4d57-bfd3-2cbe0e3d5ea1" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/deployment.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/uiDesigner.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/api/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/src/main/java/com/alaimos/MITHrIL/api/Data/Pathways/Graph/Graph.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/com/alaimos/MITHrIL/api/Data/Pathways/Graph/Graph.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/src/main/java/com/alaimos/MITHrIL/api/Math/MatrixInterface.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/com/alaimos/MITHrIL/api/Math/MatrixInterface.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Algorithms/Metapathway/MatrixBuilderFromMetapathway.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Algorithms/Metapathway/MatrixBuilderFromMetapathway.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/CommandLine/Options/MITHrILCommonOptions.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/CommandLine/Options/MITHrILCommonOptions.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/CommandLine/Options/MetapathwayOptions.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/CommandLine/Options/MetapathwayOptions.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/CommandLine/Services/MITHrILBatchService.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/CommandLine/Services/MITHrILBatchService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/CommandLine/Services/MITHrILService.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/CommandLine/Services/MITHrILService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/CommandLine/Services/PHENSIMService.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/CommandLine/Services/PHENSIMService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Data/Pathways/PathwayMatrixBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Data/Pathways/PathwayMatrixBuilder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Data/Readers/RepositoryMatrixReader.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Data/Readers/RepositoryMatrixReader.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Data/Writers/RepositoryMatrixWriter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Data/Writers/RepositoryMatrixWriter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Math/DefaultMatrix/DefaultMatrix.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Math/DefaultMatrix/DefaultMatrix.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Plugins/PluginFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Plugins/PluginFactory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Plugins/PluginManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Plugins/PluginManager.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/plugins/FastCPUMath/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/plugins/FastCPUMath/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/plugins/FastGPUMath/plugin.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/plugins/FastGPUMath/pom.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/plugins/FastGPUMath/src/main/java/.gitkeep" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/plugins/FastGPUMath/src/main/java/com/alaimos/MITHrIL/FastGPUMath/FastGPUMathPlugin.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/plugins/FastGPUMath/src/main/java/com/alaimos/MITHrIL/FastGPUMath/FastGPUMatrix/GPUMatrix.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/plugins/FastGPUMath/src/main/java/com/alaimos/MITHrIL/FastGPUMath/FastGPUMatrix/GPUMatrixFactory.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/plugins/FastGPUMath/src/main/resources/.gitkeep" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/plugins/FastGPUMath/src/test/java/.gitkeep" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/plugins/FastGPUMath/src/test/java/com/alaimos/MITHrIL/FastGPUMath/FastGPUMatrix/GPUMatrixTest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/plugins/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/plugins/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/plugins/FastCPUMath/src/main/java/com/alaimos/MITHrIL/FastCPUMath/FastCPUMatrix/CPUMatrix.java" beforeDir="false" afterPath="$PROJECT_DIR$/plugins/FastCPUMath/src/main/java/com/alaimos/MITHrIL/FastCPUMath/FastCPUMatrix/CPUMatrix.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/plugins/FastCPUMath/src/test/java/com/alaimos/MITHrIL/FastCPUMath/FastCPUMatrix/CPUMatrixTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/plugins/FastCPUMath/src/test/java/com/alaimos/MITHrIL/FastCPUMath/FastCPUMatrix/CPUMatrixTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,33 +37,108 @@
   <component name="ProjectCodeStyleSettingsMigration">
     <option name="version" value="2" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 3
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 3
+}</component>
   <component name="ProjectId" id="2oseE8Qa1L69vtVbSj6fU18rY2r" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Maven.MITHrIL [clean].executor": "Run",
-    "Maven.MITHrIL [compile].executor": "Run",
-    "Maven.MITHrIL [test].executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "main",
-    "kotlin-language-version-configured": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.CPUMatrixTest.determinant.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.CPUMatrixTest.invert.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.CPUMatrixTest.rank.executor&quot;: &quot;Run&quot;,
+    &quot;Maven.MITHrIL [clean].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.MITHrIL [compile].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.MITHrIL [test].executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
+  <component name="RunManager" selected="Application.Main">
+    <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.alaimos.MITHrIL.app.Main" />
+      <module name="app" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.alaimos.MITHrIL.app.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="CPUMatrixTest.determinant" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="FastCPUMath" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.alaimos.MITHrIL.FastCPUMath.FastCPUMatrix.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.alaimos.MITHrIL.FastCPUMath.FastCPUMatrix" />
+      <option name="MAIN_CLASS_NAME" value="com.alaimos.MITHrIL.FastCPUMath.FastCPUMatrix.CPUMatrixTest" />
+      <option name="METHOD_NAME" value="determinant" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="CPUMatrixTest.invert" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="FastCPUMath" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.alaimos.MITHrIL.FastCPUMath.FastCPUMatrix.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.alaimos.MITHrIL.FastCPUMath.FastCPUMatrix" />
+      <option name="MAIN_CLASS_NAME" value="com.alaimos.MITHrIL.FastCPUMath.FastCPUMatrix.CPUMatrixTest" />
+      <option name="METHOD_NAME" value="invert" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="CPUMatrixTest.rank" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="FastCPUMath" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.alaimos.MITHrIL.FastCPUMath.FastCPUMatrix.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.alaimos.MITHrIL.FastCPUMath.FastCPUMatrix" />
+      <option name="MAIN_CLASS_NAME" value="com.alaimos.MITHrIL.FastCPUMath.FastCPUMatrix.CPUMatrixTest" />
+      <option name="METHOD_NAME" value="rank" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.Main" />
+        <item itemvalue="JUnit.CPUMatrixTest.rank" />
+        <item itemvalue="JUnit.CPUMatrixTest.determinant" />
+        <item itemvalue="JUnit.CPUMatrixTest.invert" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -86,6 +156,9 @@
       <option name="presentableId" value="Default" />
       <updated>1731662597183</updated>
       <workItem from="1731662599014" duration="6489000" />
+      <workItem from="1732003572157" duration="9790000" />
+      <workItem from="1732187003194" duration="10170000" />
+      <workItem from="1732266410400" duration="3328000" />
     </task>
     <servers />
   </component>

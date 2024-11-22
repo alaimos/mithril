@@ -36,6 +36,9 @@ public class MetapathwayOptions extends AbstractOptions {
     public File includePathways = null;
     @Option(name = "-exclude-pathways", usage = "a file containing a list of pathways excluded when building the metapathway")
     public File excludePathways = null;
+    @Option(name = "-customize-pathway-matrix", usage = "customize the matrix representation of the metapathway to the input data.")
+    public boolean customizePathwayMatrix = false;
+
     public String[] includeCategories = null;
     public String[] excludeCategories = new String[]{
             "Endocrine and metabolic disease", "Neurodegenerative disease", "Human Diseases", "Immune disease",
@@ -61,4 +64,5 @@ public class MetapathwayOptions extends AbstractOptions {
                                   .map(String::trim)
                                   .toArray(String[]::new);
     }
+
 }
