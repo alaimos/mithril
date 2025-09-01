@@ -6,25 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="79ae8278-3477-4d57-bfd3-2cbe0e3d5ea1" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/api/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/src/main/java/com/alaimos/MITHrIL/api/Data/Pathways/Graph/Graph.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/com/alaimos/MITHrIL/api/Data/Pathways/Graph/Graph.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/src/main/java/com/alaimos/MITHrIL/api/Math/MatrixInterface.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/com/alaimos/MITHrIL/api/Math/MatrixInterface.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Algorithms/Metapathway/MatrixBuilderFromMetapathway.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Algorithms/Metapathway/MatrixBuilderFromMetapathway.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/CommandLine/Options/MITHrILCommonOptions.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/CommandLine/Options/MITHrILCommonOptions.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/CommandLine/Options/MetapathwayOptions.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/CommandLine/Options/MetapathwayOptions.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/CommandLine/Services/MITHrILBatchService.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/CommandLine/Services/MITHrILBatchService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/CommandLine/Services/MITHrILService.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/CommandLine/Services/MITHrILService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/CommandLine/Services/PHENSIMService.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/CommandLine/Services/PHENSIMService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Data/Pathways/PathwayMatrixBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Data/Pathways/PathwayMatrixBuilder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Data/Readers/RepositoryMatrixReader.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Data/Readers/RepositoryMatrixReader.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Data/Writers/RepositoryMatrixWriter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Data/Writers/RepositoryMatrixWriter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Math/DefaultMatrix/DefaultMatrix.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Math/DefaultMatrix/DefaultMatrix.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Plugins/PluginManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Plugins/PluginManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/plugins/FastCPUMath/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/plugins/FastCPUMath/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/plugins/FastCPUMath/src/main/java/com/alaimos/MITHrIL/FastCPUMath/FastCPUMatrix/CPUMatrix.java" beforeDir="false" afterPath="$PROJECT_DIR$/plugins/FastCPUMath/src/main/java/com/alaimos/MITHrIL/FastCPUMath/FastCPUMatrix/CPUMatrix.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/plugins/FastCPUMath/src/test/java/com/alaimos/MITHrIL/FastCPUMath/FastCPUMatrix/CPUMatrixTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/plugins/FastCPUMath/src/test/java/com/alaimos/MITHrIL/FastCPUMath/FastCPUMatrix/CPUMatrixTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Data/Writers/MITHrIL/MITHrILPerturbationDetailedOutputWriter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Data/Writers/MITHrIL/MITHrILPerturbationDetailedOutputWriter.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,6 +36,7 @@
     &quot;JUnit.CPUMatrixTest.rank.executor&quot;: &quot;Run&quot;,
     &quot;Maven.MITHrIL [clean].executor&quot;: &quot;Run&quot;,
     &quot;Maven.MITHrIL [compile].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.MITHrIL [package].executor&quot;: &quot;Run&quot;,
     &quot;Maven.MITHrIL [test].executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
@@ -142,8 +125,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-fdfe4dae3a2d-intellij.indexing.shared.core-IU-243.21565.193" />
-        <option value="bundled-js-predefined-d6986cc7102b-e768b9ed790e-JavaScript-IU-243.21565.193" />
+        <option value="bundled-jdk-9823dce3aa75-a94e463ab2e7-intellij.indexing.shared.core-IU-243.25659.59" />
+        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-IU-243.25659.59" />
       </set>
     </attachedChunks>
   </component>
@@ -159,6 +142,20 @@
       <workItem from="1732003572157" duration="9790000" />
       <workItem from="1732187003194" duration="10170000" />
       <workItem from="1732266410400" duration="3328000" />
+      <workItem from="1732786025177" duration="79000" />
+      <workItem from="1733388742859" duration="130000" />
+      <workItem from="1734186841149" duration="820000" />
+      <workItem from="1736959404780" duration="636000" />
+      <workItem from="1736960086090" duration="65000" />
+      <workItem from="1736960155785" duration="3000" />
+      <workItem from="1737308567487" duration="2000" />
+      <workItem from="1738226785406" duration="60000" />
+      <workItem from="1738226901225" duration="868000" />
+      <workItem from="1738312414328" duration="105000" />
+      <workItem from="1741592909793" duration="65000" />
+      <workItem from="1741593024511" duration="91000" />
+      <workItem from="1742147601947" duration="525000" />
+      <workItem from="1742202611757" duration="91000" />
     </task>
     <servers />
   </component>

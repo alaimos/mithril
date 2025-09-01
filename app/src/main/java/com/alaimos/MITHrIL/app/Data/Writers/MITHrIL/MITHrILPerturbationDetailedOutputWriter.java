@@ -31,16 +31,18 @@ public class MITHrILPerturbationDetailedOutputWriter extends AbstractDataWriter<
             PrintStream ps, String pathwayId, String pathwayName, String nodeId, String nodeName,
             double perturbation, double accumulator, double p, double pAdjusted
     ) {
-        writeArray(ps, new String[]{
-                pathwayId,
-                pathwayName,
-                nodeId,
-                nodeName,
-                Double.toString(perturbation),
-                Double.toString(accumulator),
-                Double.toString(p),
-                Double.toString(pAdjusted)
-        });
+        writeArray(
+                ps, new String[]{
+                        pathwayId,
+                        pathwayName,
+                        nodeId,
+                        nodeName,
+                        Double.toString(perturbation),
+                        Double.toString(accumulator),
+                        Double.toString(p),
+                        Double.toString(pAdjusted)
+                }
+        );
         ps.println();
     }
 
@@ -59,7 +61,10 @@ public class MITHrILPerturbationDetailedOutputWriter extends AbstractDataWriter<
             var pValuesAdjusted = data.nodeAdjustedPValues();
             var nodeId2Index = matrix.pathwayMatrix().id2Index();
             var endpoints = new HashSet<>(repository.get().graph().endpoints());
-            ps.println("# Pathway Id\tPathway Name\tGene Id\tGene Name\tPerturbation\tAccumulator\tpValue");
+            ps.println(
+                    "# Pathway Id\tPathway Name\tGene Id\tGene Name\tPerturbation\t" +
+                            "Accumulator\tpValue\tAdjusted pValue"
+            );
             String pathwayId, pathwayName, nodeId;
             int nodeIdx;
             Collection<Node> nodes;
