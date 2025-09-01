@@ -5,8 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="79ae8278-3477-4d57-bfd3-2cbe0e3d5ea1" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Data/Writers/MITHrIL/MITHrILPerturbationDetailedOutputWriter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/alaimos/MITHrIL/app/Data/Writers/MITHrIL/MITHrILPerturbationDetailedOutputWriter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/src/main/resources/constants.properties" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/resources/constants.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/plugins/FastCPUMath/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/plugins/FastCPUMath/pom.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,6 +67,19 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.alaimos.MITHrIL.app.Main" />
+      <module name="app" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.alaimos.MITHrIL.app.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="CPUMatrixTest.determinant" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="FastCPUMath" />
       <extension name="coverage">
@@ -76,6 +91,38 @@
       <option name="PACKAGE_NAME" value="com.alaimos.MITHrIL.FastCPUMath.FastCPUMatrix" />
       <option name="MAIN_CLASS_NAME" value="com.alaimos.MITHrIL.FastCPUMath.FastCPUMatrix.CPUMatrixTest" />
       <option name="METHOD_NAME" value="determinant" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="CPUMatrixTest.determinant" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="FastCPUMath" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.alaimos.MITHrIL.FastCPUMath.FastCPUMatrix.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.alaimos.MITHrIL.FastCPUMath.FastCPUMatrix" />
+      <option name="MAIN_CLASS_NAME" value="com.alaimos.MITHrIL.FastCPUMath.FastCPUMatrix.CPUMatrixTest" />
+      <option name="METHOD_NAME" value="determinant" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="CPUMatrixTest.invert" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="FastCPUMath" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.alaimos.MITHrIL.FastCPUMath.FastCPUMatrix.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.alaimos.MITHrIL.FastCPUMath.FastCPUMatrix" />
+      <option name="MAIN_CLASS_NAME" value="com.alaimos.MITHrIL.FastCPUMath.FastCPUMatrix.CPUMatrixTest" />
+      <option name="METHOD_NAME" value="invert" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -113,6 +160,22 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="CPUMatrixTest.rank" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="FastCPUMath" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.alaimos.MITHrIL.FastCPUMath.FastCPUMatrix.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.alaimos.MITHrIL.FastCPUMath.FastCPUMatrix" />
+      <option name="MAIN_CLASS_NAME" value="com.alaimos.MITHrIL.FastCPUMath.FastCPUMatrix.CPUMatrixTest" />
+      <option name="METHOD_NAME" value="rank" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Application.Main" />
@@ -125,8 +188,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-a94e463ab2e7-intellij.indexing.shared.core-IU-243.25659.59" />
-        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-IU-243.25659.59" />
+        <option value="bundled-jdk-9823dce3aa75-fbdcb00ec9e3-intellij.indexing.shared.core-IU-251.25410.129" />
+        <option value="bundled-js-predefined-d6986cc7102b-6a121458b545-JavaScript-IU-251.25410.129" />
       </set>
     </attachedChunks>
   </component>
@@ -156,6 +219,8 @@
       <workItem from="1741593024511" duration="91000" />
       <workItem from="1742147601947" duration="525000" />
       <workItem from="1742202611757" duration="91000" />
+      <workItem from="1756746162820" duration="20000" />
+      <workItem from="1756747701633" duration="782000" />
     </task>
     <servers />
   </component>
