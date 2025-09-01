@@ -117,6 +117,7 @@ public class Repository implements Collection<Pathway>, Iterable<Pathway>, Clone
      * @param category category
      * @return a list of pathways
      */
+    @Nullable
     public List<Pathway> getPathwaysByCategory(String category) {
         List<String> l = pathwaysByCategory.get(category);
         if (l == null) return null;
@@ -131,7 +132,9 @@ public class Repository implements Collection<Pathway>, Iterable<Pathway>, Clone
      */
     public List<Pathway> getPathwaysByCategory(@NotNull List<String> category) {
         return category.stream()
-                       .flatMap(c -> getPathwaysByCategory(c).stream())
+                       .map(this::getPathwaysByCategory)
+                       .filter(Objects::nonNull)
+                       .flatMap(Collection::stream)
                        .distinct()
                        .collect(Collectors.toList());
     }
